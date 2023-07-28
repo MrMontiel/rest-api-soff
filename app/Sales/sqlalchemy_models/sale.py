@@ -1,42 +1,32 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float, Text
-from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
+from typing import List
 from datetime import datetime
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float
+from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import UUID
 
+uuidType = uuid.UUID
 
-from app.config.database import Base
+class Base(DeclarativeBase):
+  pass
 
 class Sale(Base):
   __tablename__ = 'sales'
   
-  id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-  sale_date = Column(DateTime, default=datetime.utcnow)
-  amount_order = Column(Integer, nullable=False, default=0)
-  pyment_method = Column(String, nullable=False)
-  type_sale = Column(String, nullable=False)
-  total = Column(Float, nullable=False, default=0.0) 
-  status = Column(Boolean, nullable=False, default=True)
+  id: Mapped[uuidType] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+  sale_date:Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+  amount_order:Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+  pyment_method:Mapped[str] = mapped_column(String, nullable=False)
+  type_sale:Mapped[str] = mapped_column(String, nullable=False)
+  total:Mapped[float] = mapped_column(Float, nullable=False, default=0.0) 
+  status:Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
   
-  orders = relationship("SalesOrders", back_populates="sale")
-
-class ProductFail(Base):
-  __tablename__ = 'products'
-  
-  id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-  name = Column(String, nullable=False)
-  price = Column(Float, nullable=False)
-  
-  orders = relationship("SalesOrders", back_populates="product")
+  orders:Mapped[List["SalesOrders"]] = relationship()
 
 class SalesOrders(Base):
   __tablename__ = 'sales_orders'
   
-  id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-  sale_id = Column(UUID(as_uuid=True), ForeignKey("sales.id"), nullable=False)
-  product_id = Column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
-  amount_product = Column(Integer, nullable=False)
-  total = Column(Float, nullable=False, default=0.0) 
-  
-  sale = relationship("Sale", back_populates="orders")
-  product = relationship("ProductFail", back_populates="orders")
+  id: Mapped[uuidType] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+  sale_id:Mapped[uuidType] = mapped_column(ForeignKey("sales.id"))
+  amount_product:Mapped[int] = Column(Integer, nullable=False)
+  total:Mapped[float] = Column(Float, nullable=False, default=0.0) 
