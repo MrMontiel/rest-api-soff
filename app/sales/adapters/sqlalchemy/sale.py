@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, Enum, Column, ForeignKey, Integer, String, DateTime, Float
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
+from app.infrastructure.database import Base
 
 class StatusSale(PyEnum):
   OPEN = "open"
@@ -13,8 +14,6 @@ class StatusSale(PyEnum):
   PENDING = "pending"
   REIMBURSED = "reimbursed"
 
-class Base(DeclarativeBase):
-  pass
 
 class Product(Base):
   __tablename__ = "products"

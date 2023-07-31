@@ -4,9 +4,7 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.dialects.postgresql import UUID
-
-class Base(DeclarativeBase):
-  pass
+from app.infrastructure.database import Base
 
 class Supplie(Base):
   __tablename__ = "supplies"

@@ -3,9 +3,7 @@ from sqlalchemy import String, Boolean, ForeignKey, Integer
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.supplies.adapters.sqlalchemy.supply import Supplie
-
-class Base(DeclarativeBase):
-    pass
+from app.infrastructure.database import Base
 
 class Product(Base):
     __tablename__ = "products"

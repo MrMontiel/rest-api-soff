@@ -5,9 +5,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
-
-class Base(DeclarativeBase):
-  pass
+from app.infrastructure.database import Base
 
 class Provider(Base):
   __tablename__ = "providers"

@@ -5,9 +5,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.supplies.adapters.sqlalchemy.supply import Supplie
 from app.providers.adapters.sqlachemy.provider import Provider
-
-class Base(DeclarativeBase):
-  pass
+from app.infrastructure.database import Base
 
 class Purchase(Base):
   __tablename__ = "purchases"
