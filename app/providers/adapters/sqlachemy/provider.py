@@ -9,7 +9,7 @@ from datetime import datetime
 class Base(DeclarativeBase):
   pass
 
-class provider(Base):
+class Provider(Base):
   __tablename__ = "providers"
   
   id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=False, default=uuid.uuid4())

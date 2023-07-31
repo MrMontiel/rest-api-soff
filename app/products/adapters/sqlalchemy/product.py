@@ -10,7 +10,7 @@ class Base(DeclarativeBase):
 class Product(Base):
     __tablename__ = "products"
 
-    id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=False)
+    id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=False,  default=uuid.uuid4())
     name: Mapped[str] = mapped_column(String(60), nullable=False)
     price: Mapped[float] = mapped_column(float, nullable=False)
     sale_price: Mapped[float] = mapped_column(float, nullable=False)
