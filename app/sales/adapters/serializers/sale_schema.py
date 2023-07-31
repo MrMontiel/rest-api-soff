@@ -1,4 +1,4 @@
-from app.sales.sqlalchemy_models.sale_sqlalchemy import Sale, Association, Client
+from app.sales.adapters.sqlalchemy.sale import Sale, Association, Client
 
 def saleSchema(sale: Sale) -> dict:
   return {

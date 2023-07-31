@@ -1,14 +1,13 @@
 from sqlalchemy import select
-from app.config.database import SessionLocal
+from app.infrastructure.database import SessionLocal
 from fastapi import APIRouter, HTTPException, status
-from app.sales.services.sale_services import CreateSale
+from app.sales.adapters.services.services import CreateSale
 
-from app.sales.sqlalchemy_models.sale_sqlalchemy import Sale, Association, Product, Client
-from app.sales.schemas_models.sale_schema import saleSchema, salesSchema, orderSchema, ordersSchema, clientsSchema, clientSchema
-from app.sales.schemas_models.product import productSchema, productsSchema
+from app.sales.adapters.sqlalchemy.sale import Sale, Association, Product, Client
+from app.sales.adapters.serializers.sale_schema import saleSchema, salesSchema, orderSchema, ordersSchema, clientsSchema, clientSchema
+from app.sales.adapters.serializers.product import productSchema, productsSchema
 
-
-from app.sales.pydantic_models.sale_pydantic import SaleCreate, SalesOrdersCreate, ClientCreate
+from app.sales.domain.pydantic.sale_pydantic import SaleCreate, SalesOrdersCreate, ClientCreate
 
 
 session = SessionLocal()

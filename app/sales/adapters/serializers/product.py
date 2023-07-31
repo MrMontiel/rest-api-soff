@@ -1,4 +1,4 @@
-from app.sales.sqlalchemy_models.sale_sqlalchemy import Product
+from app.sales.adapters.sqlalchemy.sale import Product
 
 def productSchema(product: Product) -> dict:
   return {

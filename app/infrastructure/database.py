@@ -1,9 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from dotenv import dotenv_values
 
+values = dotenv_values('.env')
 
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:letmain@localhost/soff_database"
+SQLALCHEMY_DATABASE_URL = f"postgresql://{values.get('USERNAME')}:{values.get('PASSWORD')}@{values.get('SERVER')}/soff_database"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 

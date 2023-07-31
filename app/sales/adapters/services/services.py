@@ -1,11 +1,17 @@
 import uuid
 from sqlalchemy import select
 from fastapi import status, HTTPException
-from app.config.database import SessionLocal
-from app.sales.pydantic_models.sale_pydantic import SaleCreate
-from app.sales.sqlalchemy_models.sale_sqlalchemy import Sale, Client
+from app.infrastructure.database import SessionLocal
+from app.sales.domain.pydantic.sale_pydantic import SaleCreate
+from app.sales.adapters.sqlalchemy.sale import Sale, Client
 
 session = SessionLocal()
+
+def GetAllSales(limit:int = 100):
+  sales = session.scalars(select(Sale)).all()
+  if not sales:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="sales not found")
+  return sales
 
 def CreateSale(sale: SaleCreate):
   if not sale:
@@ -23,3 +29,5 @@ def CreateSale(sale: SaleCreate):
     session.commit()
     session.refresh(new_sale)
   return new_sale
+
+  
