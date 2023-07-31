@@ -6,7 +6,7 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from app.infrastructure.database import Base
 
-class Supplie(Base):
+class Supply(Base):
   __tablename__ = "supplies"
   
   id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=False, default=uuid.uuid4())

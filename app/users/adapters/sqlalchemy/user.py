@@ -34,5 +34,5 @@ class Association(Base):
   __tablename__ ="permission_role"
   
   id_role : Mapped[str] = mapped_column(ForeignKey("roles.id"), primary_key=True)
-  id_permission: Mapped[str] = mapped_column(ForeignKey(ForeignKey("pemissions.id"), primary_key=True))
+  id_permission: Mapped[str] = mapped_column(ForeignKey("permissions.id"), primary_key=True)
   Permission: Mapped["Permission"] = relationship()

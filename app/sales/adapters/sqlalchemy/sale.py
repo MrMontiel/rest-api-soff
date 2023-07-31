@@ -6,6 +6,7 @@ from sqlalchemy import Boolean, Enum, Column, ForeignKey, Integer, String, DateT
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from app.infrastructure.database import Base
+from app.products.adapters.sqlalchemy.product import Product
 
 class StatusSale(PyEnum):
   OPEN = "open"
@@ -14,13 +15,6 @@ class StatusSale(PyEnum):
   PENDING = "pending"
   REIMBURSED = "reimbursed"
 
-
-class Product(Base):
-  __tablename__ = "products"
-  
-  id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-  name: Mapped[str] = mapped_column(String(60), nullable=False)
-  price: Mapped[str] = mapped_column(Float, nullable=False, default=0.0)
 
 class Sale(Base):
   __tablename__ = 'sales'
