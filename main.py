@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 # Routes
-from app.Sales.routes.sales_router import sales
+from app.sales.adapters.routes.routes import sales
 
 app = FastAPI()
 
