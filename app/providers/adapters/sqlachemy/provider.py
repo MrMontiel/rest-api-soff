@@ -1,0 +1,23 @@
+import uuid
+from sqlalchemy import String, Integer, Boolean, DateTime
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.dialects.postgresql import UUID
+from datetime import datetime
+
+class Base(DeclarativeBase):
+  pass
+
+class provider(Base):
+  __tablename__ = "providers"
+  
+  id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=False, default=uuid.uuid4())
+  name: Mapped[str] = mapped_column(String, nullable=False) 
+  company: Mapped[str] = mapped_column(String, nullable=False)
+  address: Mapped[str] = mapped_column(String, nullable=False)
+  date_registration: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow) 
+  email: Mapped[str] = mapped_column(String, nullable=False)
+  phone: Mapped[int] = mapped_column(Integer)
+  city: Mapped[str] = mapped_column(String, nullable=False)
+  status: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
