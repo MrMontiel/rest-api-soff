@@ -1,4 +1,4 @@
-from app.sales.adapters.sqlalchemy.sale import Sale, Association, Client
+from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders, Client
 
 def saleSchema(sale: Sale) -> dict:
   return {
@@ -15,7 +15,7 @@ def saleSchema(sale: Sale) -> dict:
 def salesSchema(sales: list[Sale]) -> list:
   return [saleSchema(sale) for sale in sales]
 
-def orderSchema(order: Association) -> dict:
+def orderSchema(order: SalesOrders) -> dict:
   return {
     "sale_id": order.sale_id,
     "product_id": order.product_id,
@@ -24,7 +24,7 @@ def orderSchema(order: Association) -> dict:
   }
 
 
-def ordersSchema(orders: list[Association]) -> list:
+def ordersSchema(orders: list[SalesOrders]) -> list:
   return [orderSchema(order) for order in orders]
 
 def clientSchema(client: Client) -> dict:

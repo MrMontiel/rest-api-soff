@@ -13,7 +13,6 @@ class StatusSale(PyEnum):
   PAID = "paid"
   CANCEL = "cancel"
   PENDING = "pending"
-  REIMBURSED = "reimbursed"
 
 
 class Sale(Base):
@@ -29,9 +28,9 @@ class Sale(Base):
   total:Mapped[float] = mapped_column(Float, nullable=False, default=0.0) 
   status:Mapped[str] = mapped_column(Enum(StatusSale), nullable=False, default=StatusSale.OPEN)
   
-  products: Mapped[List["Association"]] =  relationship()
+  products: Mapped[List["SalesOrders"]] =  relationship()
 
-class Association(Base):
+class SalesOrders(Base):
   __tablename__ = 'sales_orders'
   
   sale_id:Mapped[str] = mapped_column(ForeignKey("sales.id"), primary_key=True)

@@ -14,7 +14,7 @@ class Product(Base):
     sale_price: Mapped[float] = mapped_column(Float, nullable=False)
     status: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
-class Association(Base):
+class RecipeDetail(Base):
     __tablename__ = "recipe_detail"
 
     product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), primary_key=True)

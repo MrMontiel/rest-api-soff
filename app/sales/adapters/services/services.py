@@ -2,8 +2,8 @@ import uuid
 from sqlalchemy import select
 from fastapi import status, HTTPException
 from app.infrastructure.database import SessionLocal
-from app.sales.domain.pydantic.sale_pydantic import SaleCreate
-from app.sales.adapters.sqlalchemy.sale import Sale, Client
+from app.sales.domain.pydantic.sale_pydantic import SaleCreate, SalesOrdersCreate
+from app.sales.adapters.sqlalchemy.sale import Sale, Client, SalesOrders
 
 session = SessionLocal()
 
@@ -30,4 +30,14 @@ def CreateSale(sale: SaleCreate):
     session.refresh(new_sale)
   return new_sale
 
-  
+def AddOrder(id_sale: str, order: SalesOrdersCreate):
+  pass
+
+def ConfirmSale():
+  pass
+
+def AddClient():
+  pass
+
+def CambiarEstado():
+  pass

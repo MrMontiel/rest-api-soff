@@ -22,7 +22,7 @@ class Role(Base):
   id: Mapped[str] = mapped_column(UUID(as_uuid= True), primary_key=True, default=uuid.uuid4())
   name : Mapped[str]= mapped_column(String(60), nullable=False)
   status : Mapped[bool] = mapped_column(Boolean, nullable=False , default=True)
-  Permissions: Mapped[List["Association"]]= relationship()
+  Permissions: Mapped[List["PermissionsRoles"]]= relationship()
     
 class Permission(Base):
   __tablename__= "permissions"
@@ -30,7 +30,7 @@ class Permission(Base):
   id: Mapped[str] = mapped_column(UUID(as_uuid= True), primary_key=True, default=uuid.uuid4())
   name : Mapped[str]= mapped_column(String(60), nullable=False)
   
-class Association(Base):
+class PermissionsRoles(Base):
   __tablename__ ="permission_role"
   
   id_role : Mapped[str] = mapped_column(ForeignKey("roles.id"), primary_key=True)

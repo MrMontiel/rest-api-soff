@@ -18,7 +18,7 @@ class Purchase(Base):
   total: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
   status: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     
-class Association(Base):
+class PurchasesOrders(Base):
   __tablename__ = "purchases_orders"
   
   purchase_id: Mapped[str] = mapped_column(ForeignKey("purchases.id"), primary_key=True)

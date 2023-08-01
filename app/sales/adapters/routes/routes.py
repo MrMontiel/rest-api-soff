@@ -1,11 +1,11 @@
 from sqlalchemy import select
 from app.infrastructure.database import SessionLocal
 from fastapi import APIRouter, HTTPException, status
-from app.sales.adapters.services.services import CreateSale
+from app.sales.adapters.services.services import CreateSale, GetAllSales
 
-from app.sales.adapters.sqlalchemy.sale import Sale, Association, Product, Client
+from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders, Client
+from app.products.adapters.sqlalchemy.product import Product
 from app.sales.adapters.serializers.sale_schema import saleSchema, salesSchema, orderSchema, ordersSchema, clientsSchema, clientSchema
-from app.sales.adapters.serializers.product import productSchema, productsSchema
 
 from app.sales.domain.pydantic.sale_pydantic import SaleCreate, SalesOrdersCreate, ClientCreate
 
@@ -19,10 +19,10 @@ sales = APIRouter(
 
 @sales.get('/')
 async def get_all_sales(limit: int = 100):
-  statement = select(Sale).limit(limit)
-  sales = session.scalars(statement).all()
+  sales = GetAllSales()
   return {
     "count": len(sales),
+    "diego": "Diego",
     "sales": salesSchema(sales)
   }
 
@@ -34,15 +34,6 @@ async def create_client(client: ClientCreate):
   session.refresh(new_client)
   return {
     "client": clientSchema(new_client)
-  }
-
-@sales.get('/products')
-async def get_all_products(limit: int = 100):
-  statement = select(Product).limit(limit)
-  products = session.scalars(statement).all()
-  return {
-    "count": len(products),
-    "products": productsSchema(products)
   }
 
 @sales.post('/')
@@ -60,7 +51,7 @@ async def asociated_order(id_sale: str, order: SalesOrdersCreate):
   if not product:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
   price_total:float = product.price * order.amount_product
-  new_order = Association(sale_id=id_sale, product_id=order.product_id, amount_product=order.amount_product, total=price_total)
+  new_order = SalesOrders(sale_id=id_sale, product_id=order.product_id, amount_product=order.amount_product, total=price_total)
   session.add(new_order)
   session.commit()
   return {
@@ -69,7 +60,7 @@ async def asociated_order(id_sale: str, order: SalesOrdersCreate):
 
 @sales.put('/{id_sale}/confirm-sale')
 async def confirm_sale(id_sale: str, saleCreate: SaleCreate):
-  statement = select(Association).where(Association.sale_id == id_sale)
+  statement = select(SalesOrders).where(SalesOrders.sale_id == id_sale)
   orders = ordersSchema(session.scalars(statement).all())
   total:float = 0.0
   for order in orders:
