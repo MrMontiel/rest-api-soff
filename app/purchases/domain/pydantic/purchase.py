@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 class PurchaseBase(BaseModel):
-    id_provider: str
+    provider_id: str
 
 class Purchase(PurchaseBase):
     id: Optional[str]
@@ -19,10 +19,10 @@ class PurchaseCreate(PurchaseBase):
     pass
 
 class OrderPurchaseBase(BaseModel):
-    id_supplies: str
+    supply_id: str
     amount_supplies: int
     price_supplies: float
-    id_purchase: str
+    purchase_id: str
     
 class OrderPurchase(OrderPurchaseBase):
     id: Optional[str]
