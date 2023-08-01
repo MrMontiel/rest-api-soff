@@ -2,24 +2,23 @@ from enum import Enum
 from pydantic import BaseModel
 from typing import Optional
 
-class SatusSale(str, Enum):
+class StatusSale(str, Enum):
   OPEN = "open"
   PAID = "paid"
   CANCEL = "cancel"
   PENDING = "pending"
-  REIMBURSED = "reimbursed"
 
 class SaleBase(BaseModel):
   id_client: str
   payment_method: str
   type_sale: str
-  status: Optional[str] = SatusSale.OPEN
   
 class Sale(SaleBase):
   id: Optional[str]
   sale_date: Optional[str]
   amount_orders: int = 0
   total: float = 0.0
+  status: Optional[str] = StatusSale.OPEN
   
   class Config:
     from_attributes = True
