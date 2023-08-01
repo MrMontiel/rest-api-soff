@@ -33,7 +33,7 @@ class Role(RoleBase):
     class Config:
         from_attributes = True
 
-class RoleCreate(UserBase):
+class RoleCreate(RoleBase):
     pass
 
 
@@ -46,7 +46,7 @@ class Permission(PermissionBase):
     class Config:
         from_attributes = True
 
-class PermissionCreate(UserBase):
+class PermissionCreate(PermissionBase):
     pass
 
 
@@ -57,9 +57,8 @@ class PermissionsRolesBase(BaseModel):
     id_permission : str
     
 class PermissionsRoles(PermissionsRolesBase):
-
     class Config:
         from_attributes = True
 
-class PermissionsRolesCreate(UserBase):
+class PermissionsRolesCreate(PermissionsRolesBase):
     pass
