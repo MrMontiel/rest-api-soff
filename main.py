@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 # Routes
+from app.sales.adapters.routes.sales import sales
+from app.products.adapters.routes.routes import products
 from app.sales.adapters.routes.sales import sales
 
 app = FastAPI()
@@ -16,3 +19,4 @@ app.add_middleware(
 
 # Add routes
 app.include_router(sales)
+app.include_router(products)

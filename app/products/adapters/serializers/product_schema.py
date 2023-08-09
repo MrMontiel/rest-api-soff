@@ -18,7 +18,8 @@ def recipeDetailSchema(recipeDetail:RecipeDetail)-> dict:
         "supply_id": recipeDetail.supply_id,
         "supply": recipeDetail.supply,
         "amount_supply": recipeDetail.amount_supply,
-        "unit_measure": recipeDetail.unit_measure
+        "unit_measure": recipeDetail.unit_measure,
+        "subtotal":recipeDetail.subtotal
     }
 
 def recipeDetailsSchema(recipeDetails:list[RecipeDetail])->list:
