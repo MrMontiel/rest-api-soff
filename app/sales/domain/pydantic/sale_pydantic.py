@@ -9,7 +9,7 @@ class StatusSale(str, Enum):
   PENDING = "pending"
 
 class SaleBase(BaseModel):
-  id_client: str
+  id_client: Optional[str]
   payment_method: str
   type_sale: str
   

@@ -6,29 +6,30 @@ from app.sales.adapters.serializers.sale_schema import ordersSchema, orderSchema
 from app.sales.domain.pydantic.sale_pydantic import (
   ClientCreate, SaleCreate, SalesOrdersCreate
 )
-from app.sales.adapters.sqlalchemy.sale import Sale, Client, SalesOrders
+from app.sales.adapters.sqlalchemy.sale import Sale, Client, SalesOrders, StatusSale
 from app.products.adapters.sqlalchemy.product import Product
 
 session = SessionLocal()
 
+def getGeneralClient() -> Client:
+  client = session.scalars(select(Client).where(Client.name == "general")).one()
+  if not client:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="client not found")
+  return client
+
 def GetAllSales(limit:int = 100):
-  sales = session.scalars(select(Sale)).all()
-  print(sales)
+  sales = session.scalars(select(Sale).limit(limit)).all()
   if not sales:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="sales not found")
   return sales
 
-def CreateSale(sale: SaleCreate):
-  if not sale:
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="sale is required")
-  if sale.type_sale == "" or sale.payment_method == "" or sale.id_client == "":
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the type of sale, the payment_method and client are required")
-  
-  client = session.scalars(select(Client).where(Client.id == sale.id_client)).one()
-  if not client:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="client not found")
+def GetSaleById(id:str):
+  sale = session.get(Sale, uuid.UUID(id))
+  return sale
 
-  new_sale = Sale(pyment_method=sale.payment_method, type_sale=sale.type_sale, id_client=uuid.UUID(sale.id_client))
+def CreateSale():
+  client = getGeneralClient()
+  new_sale = Sale(pyment_method="", type_sale="", id_client=client.id)
   session.add(new_sale)
   session.commit()
   session.refresh(new_sale)
@@ -37,6 +38,7 @@ def CreateSale(sale: SaleCreate):
 def AddOrder(id_sale: str, order: SalesOrdersCreate):
   statement = select(Product).where(Product.id == order.product_id)
   product = session.scalars(statement).one()
+  
   if not product:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
   price_total:float = product.price * order.amount_product
@@ -45,6 +47,15 @@ def AddOrder(id_sale: str, order: SalesOrdersCreate):
   if not sale:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="sale not found")
   
+  order_added = session.scalars(select(SalesOrders).where(SalesOrders.sale_id == id_sale)).all()
+  for n in order_added:
+    if n.product_id == uuid.UUID(order.product_id):
+      n.amount_product += order.amount_product
+      n.total = n.amount_product * n.product.price
+      session.add(n)
+      session.commit()
+      session.refresh(n) 
+      return n 
   new_order = SalesOrders(sale_id=id_sale, product_id=order.product_id, amount_product=order.amount_product, total=price_total)
   session.add(new_order)
   session.commit()
@@ -62,19 +73,24 @@ def ConfirmSale(id_sale: str, saleCreate: SaleCreate):
   
   for order in orders:
     total += order['total']
+ 
+  if saleCreate.type_sale == "" or saleCreate.payment_method == "" or saleCreate.id_client == "":
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the type of sale, the payment_method and client are required")
     
   sale = session.scalars(select(Sale).where(Sale.id == id_sale)).one()
   
-  if sale.type_sale == "" or sale.payment_method == "" or sale.id_client == "":
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the type of sale, the payment_method and client are required")
-
   if not sale:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="sale not found")
   
+  # if sale.status == StatusSale.PAID:
+  #   raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="sorry, you can't modify a sale")
+
+  
   sale.amount_order = len(orders)
   sale.total = total
-  sale.pyment_method = saleCreate.pyment_method
+  sale.pyment_method = saleCreate.payment_method
   sale.type_sale = saleCreate.type_sale
+  sale.status = StatusSale.PAID
   session.commit()
   session.refresh(sale)
   return sale
@@ -90,5 +106,15 @@ def AddClient(client: ClientCreate):
   session.refresh(new_client)
   return new_client
 
-def CambiarEstado():
-  pass
+def seeSalesOrders(id_sale: str):
+  if not id_sale:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="id_sale if required")
+  statement = select(SalesOrders).where(SalesOrders.sale_id == id_sale)
+  orders = session.scalars(statement).all()
+  return orders
+
+def GetClient(id: str):
+  client = session.get(Client, uuid.UUID(id))
+  if not client:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="client not found")
+  return client
