@@ -30,6 +30,7 @@ class Sale(Base):
   
   products: Mapped[List["SalesOrders"]] =  relationship()
 
+
 class SalesOrders(Base):
   __tablename__ = 'sales_orders'
   

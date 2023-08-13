@@ -1,6 +1,7 @@
 from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders, Client
 
 def saleSchema(sale: Sale) -> dict:
+  # client = GetClient(sale.id_client)
   return {
     "id": sale.id,
     "sale_date": sale.sale_date,
@@ -9,7 +10,8 @@ def saleSchema(sale: Sale) -> dict:
     "id_client": sale.id_client,
     "total": sale.total,
     "type_sale": sale.type_sale,
-    "status": sale.status
+    "status": sale.status,
+    "client": sale.client
   }
   
 def salesSchema(sales: list[Sale]) -> list:
@@ -19,6 +21,8 @@ def orderSchema(order: SalesOrders) -> dict:
   return {
     "sale_id": order.sale_id,
     "product_id": order.product_id,
+    "product": order.product.name,
+    "price":order.product.price,
     "amount_product": order.amount_product,
     "total": order.total
   }

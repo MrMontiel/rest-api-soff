@@ -10,8 +10,8 @@ class Product(Base):
 
     id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=False,  default=uuid.uuid4())
     name: Mapped[str] = mapped_column(String(60), nullable=False)
-    price: Mapped[float] = mapped_column(Float, nullable=False)
-    sale_price: Mapped[float] = mapped_column(Float, nullable=False)
+    price: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    sale_price: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     status: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
 class RecipeDetail(Base):
@@ -22,6 +22,4 @@ class RecipeDetail(Base):
     supply: Mapped["Supply"] = relationship()
     amount_supply: Mapped[int] = mapped_column(Integer, nullable=False)
     unit_measure: Mapped[str] = mapped_column(String(10), nullable=False)
-
-
-
+    subtotal: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
