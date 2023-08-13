@@ -9,9 +9,10 @@ from app.sales.adapters.services.services import (
   ConfirmSale, 
   seeSalesOrders, 
   getGeneralClient,
-  GetSaleById
+  GetSaleById,
+  UpdateAmountOrder
   )
-
+import uuid
 from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders, Client
 from app.products.adapters.sqlalchemy.product import Product
 from app.sales.adapters.serializers.sale_schema import saleSchema, salesSchema, orderSchema, ordersSchema, clientsSchema, clientSchema
@@ -29,7 +30,7 @@ sales = APIRouter(
   tags=["Sales"]
 )
 
-@sales.get('/products') # -> HTTP GET 'localhost:8000/sales/products'
+@sales.get('/products')
 async def get_all_products():
   products = session.scalars(select(Product)).all()
   return productsSchema(products)
@@ -44,7 +45,7 @@ async def get_client_by_id():
   client = getGeneralClient()
   return client
 
-@sales.get('/')# -> HTTP GET 'localhost:8000/sales/'
+@sales.get('/')
 async def get_all_sales(limit: int = 100):
   sales = GetAllSales()
   return {
@@ -93,4 +94,21 @@ async def getAllOrdersBySaleId(id_sale: str):
   return {
     "id_sale": id_sale,
     "orders": ordersSchema(orders)
+  }
+  
+@sales.put('/update-amount-order')
+async def UpdateAmountOrderBySaleId(id_order:str, amount_product: int):
+  order = UpdateAmountOrder(id_order, amount_product)
+  return orderSchema(order)
+
+
+@sales.delete('/{id_order}/delete')
+async def DeleteOrderById(id_order: str):
+  order = session.get(SalesOrders, uuid.UUID(id_order))
+  if not order:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="order not found")
+  session.delete(order)
+  session.commit()
+  return {
+    "message": "Order deleted successfully"
   }

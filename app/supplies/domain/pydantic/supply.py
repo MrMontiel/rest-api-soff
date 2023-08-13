@@ -18,3 +18,12 @@ class Supply(SupplyBase):
 class SupplyCreate(SupplyBase):
     
     pass
+
+class SupplyUpdate(SupplyBase):
+    
+    pass
+
+class SupplyDelete(SupplyBase):
+    
+    pass
+

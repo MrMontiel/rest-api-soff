@@ -41,7 +41,7 @@ def AddOrder(id_sale: str, order: SalesOrdersCreate):
   
   if not product:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
-  price_total:float = product.price * order.amount_product
+  price_total:float = product.sale_price * order.amount_product
 
   sale = session.scalars(select(Sale).where(Sale.id == id_sale)).one() 
   if not sale:
@@ -51,7 +51,7 @@ def AddOrder(id_sale: str, order: SalesOrdersCreate):
   for n in order_added:
     if n.product_id == uuid.UUID(order.product_id):
       n.amount_product += order.amount_product
-      n.total = n.amount_product * n.product.price
+      n.total = n.amount_product * n.product.sale_price
       session.add(n)
       session.commit()
       session.refresh(n) 
@@ -82,15 +82,15 @@ def ConfirmSale(id_sale: str, saleCreate: SaleCreate):
   if not sale:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="sale not found")
   
-  # if sale.status == StatusSale.PAID:
-  #   raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="sorry, you can't modify a sale")
+  if sale.status == StatusSale.PAID:
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="sorry, you can't modify a sale")
 
-  
   sale.amount_order = len(orders)
   sale.total = total
   sale.pyment_method = saleCreate.payment_method
   sale.type_sale = saleCreate.type_sale
-  sale.status = StatusSale.PAID
+  sale.id_client = saleCreate.id_client
+  sale.status = StatusSale.PAID if saleCreate.type_sale == "fisico" else StatusSale.PENDING
   session.commit()
   session.refresh(sale)
   return sale
@@ -118,3 +118,17 @@ def GetClient(id: str):
   if not client:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="client not found")
   return client
+
+
+
+def UpdateAmountOrder(id_order: str, amount_product: int):
+  order = session.get(SalesOrders, uuid.UUID(id_order))
+  if not order:
+    raise HTTPException(status_code=404, detail="not found order")
+  print(order)
+  order.amount_product = amount_product
+  order.total = order.product.sale_price * amount_product
+  session.add(order)
+  session.commit()
+  session.refresh(order)
+  return order
