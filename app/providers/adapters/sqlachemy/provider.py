@@ -16,6 +16,6 @@ class Provider(Base):
   address: Mapped[str] = mapped_column(String, nullable=False)
   date_registration: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow) 
   email: Mapped[str] = mapped_column(String, nullable=False)
-  phone: Mapped[int] = mapped_column(Integer)
+  phone: Mapped[str] = mapped_column(String)
   city: Mapped[str] = mapped_column(String, nullable=False)
   status: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)

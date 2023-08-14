@@ -19,4 +19,13 @@ class Provider(ProviderBase):
         from_attributes = True
     
 class ProviderCreate(ProviderBase):
+    
+    pass
+
+class ProviderUpdate(ProviderBase):
+    
+    pass
+
+class ProviderDelete(ProviderBase):
+    
     pass

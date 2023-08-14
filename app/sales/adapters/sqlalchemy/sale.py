@@ -34,8 +34,9 @@ class Sale(Base):
 class SalesOrders(Base):
   __tablename__ = 'sales_orders'
   
-  sale_id:Mapped[str] = mapped_column(ForeignKey("sales.id"), primary_key=True)
-  product_id:Mapped[str] = mapped_column(ForeignKey("products.id"), primary_key=True)
+  id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+  sale_id:Mapped[str] = mapped_column(ForeignKey("sales.id"))
+  product_id:Mapped[str] = mapped_column(ForeignKey("products.id"))
   product: Mapped["Product"] = relationship()
   amount_product:Mapped[int] = Column(Integer, nullable=False)
   total:Mapped[float] = Column(Float, nullable=False, default=0.0)

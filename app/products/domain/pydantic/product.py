@@ -3,11 +3,11 @@ from typing import Optional
 
 class ProductBase (BaseModel):
     name: str
-    price: float
     sale_price: float
 
 class Product(ProductBase):
     id: Optional[str]
+    price: float
     status: bool = True
 
     class Config:
@@ -22,11 +22,13 @@ class RecipeDetailBase(BaseModel):
     amount_supply: int
     unit_measure:str
 
+class RecipeDetailCreate(RecipeDetailBase):
+    pass
+
 class RecipeDatail(RecipeDetailBase):
     id: Optional[str]
+    subtotal: float
 
     class Config:
         from_attribute = True
 
-class RecipeDetailCreate(RecipeDetailBase):
-    pass
