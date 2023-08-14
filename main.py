@@ -18,5 +18,4 @@ app.add_middleware(
 )
 
 # Add routes
-app.include_router(sales)
 app.include_router(purchases)
