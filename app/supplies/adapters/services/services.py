@@ -16,14 +16,24 @@ def GetAllSupplies(limit:int = 100):
   return supplies
 
 
+def GetOneSupply(id:str):
+  supplies = session.scalars(select(Supply).where(Supply.id==id)).one()
+  if not supplies:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Supply not found")
+  return supplies
+
+
 def AddSupply(supply: SupplyCreate):
   if not supply:
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="supply not created")
-  else: 
-    new_supply = supply(name=supply.name, price=supply.price, quantity_stock=supply.quantity_stock, unit_measure=supply.unit_measure)
-    session.add(new_supply)
-    session.commit()
-    session.refresh(supply)
+  if supply.name == "" or supply.price == "":
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the fields name, price, quantity and unit: are obligatory")
+  new_supply = Supply(name=supply.name, price=supply.price, quantity_stock=supply.quantity_stock, unit_measure=supply.unit_measure)
+  
+  session.add(new_supply)
+  session.commit()
+  session.refresh(new_supply)
+  return new_supply
     
     
 def UpdateSupply(id: str, supply_update: SupplyUpdate):
@@ -40,12 +50,11 @@ def UpdateSupply(id: str, supply_update: SupplyUpdate):
       
 def DeleteSupply(id: str):
     supply = session.query(Supply).filter(Supply.id == uuid.UUID(id)).first()
-    if supply:
-        session.delete(supply)
-        session.commit()
-        return True
-    else:
-        return False
+    if not supply:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Supply not found")
+    session.delete(supply)
+    session.commit()
+    return supply
 
 
 

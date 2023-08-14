@@ -2,7 +2,7 @@ from sqlalchemy import select
 from app.infrastructure.database import SessionLocal
 from app.providers.adapters.serializers.provider_schema import providersSchema
 from fastapi import APIRouter, HTTPException, status
-from app.providers.adapters.services.services import GetAllProviders, UpdateProvider, DeleteProvider
+from app.providers.adapters.services.services import GetAllProviders,AddProvider, UpdateProvider, DeleteProvider, GetOneProvider
 from app.providers.adapters.sqlachemy.provider import Provider
 from app.providers.adapters.services.services import GetAllProviders
 from app.providers.adapters.serializers.provider_schema import ProviderSchema, providersSchema
@@ -26,32 +26,34 @@ async def get_all_providers(limit: int = 100):
         "providers": providersSchema(providers)
     }
     
+@providers.get("/{id}/get_provider/")
+async def get_provider(id: str ):
+    providers = GetOneProvider(id)
+    return{
+        "supply":ProviderSchema(providers)
+    }
+
+    
 
 @providers.post('/create_provider')
 async def create_provider(provider: ProviderCreate):
-  new_provider = provider(name=provider.name, company=provider.company, address=provider.address, date_registration=provider.date_registration, email=provider.email, phone=provider.phone, city=provider.city)
-  session.add(new_provider)
-  session.commit()
-  session.refresh(new_provider)
+  new_provider = AddProvider(provider)
   return {
-    "Provider": providersSchema(new_provider)
+    "Provider create": ProviderSchema(new_provider)
   }
 
   
 @providers.put('/update_provider/{id}')
 async def update_provider_route(id: str, provider_update: ProviderUpdate):
     updated_provider = UpdateProvider(id, provider_update)
-    if updated_provider:
-        return {"provider": providersSchema(updated_provider)}
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="provider not found")
+    return {"Provider Update": ProviderSchema(updated_provider)
+    }
 
 
 @providers.delete('/delete_provider/{id}')
 async def delete_provider_route(id: str):
-    delete_response = DeleteProvider(id)
-    if delete_response:
-        return {"message": "Provider deleted"}
-    else:
-        raise HTTPException(status_code=status.HTTP_405_NOT_FOUND, detail="SProvider not found")
-      
+    delete_provider = DeleteProvider(id)
+    return{
+        "Provider Delete": ProviderSchema(delete_provider)
+        
+    }
