@@ -38,6 +38,7 @@ class SalesOrdersCreate(OrderBase):
   pass
 
 class SalesOrders(OrderBase):
+  id: Optional[str]
   total: float = 0.0
   
   class Config:
