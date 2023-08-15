@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase
 from fastapi import APIRouter, HTTPException, status
 from app.purchases.adapters.services.services import (
   CreatePurchase, 
@@ -19,8 +19,7 @@ from app.purchases.domain.pydantic.purchase import PurchaseCreate, OrderPurchase
 from app.supplies.adapters.sqlalchemy.supply import Supply
 from app.supplies.adapters.serializers.supply_schema import SupplySchema, suppliesSchema
 
-
-session = SessionLocal()
+session = ConectDatabase.getInstance()
 
 purchases = APIRouter(
   prefix='/purchases',

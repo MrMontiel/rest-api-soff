@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase
 from fastapi import APIRouter, HTTPException, status
 from app.sales.adapters.services.services import (
   CreateSale, 
@@ -23,7 +23,7 @@ from app.products.adapters.sqlalchemy.product import Product
 from app.products.adapters.serializers.product_schema import productSchema, productsSchema
 
 
-session = SessionLocal()
+session = ConectDatabase.getInstance()
 
 sales = APIRouter(
   prefix='/sales',

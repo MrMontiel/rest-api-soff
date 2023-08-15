@@ -1,4 +1,3 @@
-from enum import Enum
 from pydantic import BaseModel
 from typing import Optional
 
@@ -7,7 +6,7 @@ class ProviderBase(BaseModel):
     company: str
     address: str
     email: str
-    phone: int
+    phone: str
     city: str
     
 class Provider(ProviderBase):

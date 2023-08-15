@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase
 from app.supplies.adapters.serializers.supply_schema import SupplySchema
 from fastapi import APIRouter, HTTPException, status
 from app.supplies.adapters.services.services import GetAllSupplies, UpdateSupply, DeleteSupply, AddSupply, GetOneSupply
@@ -8,7 +8,7 @@ from app.supplies.adapters.serializers.supply_schema import SupplySchema, suppli
 
 from app.supplies.domain.pydantic.supply import SupplyCreate, SupplyUpdate, SupplyDelete
 
-session = SessionLocal()
+session = ConectDatabase.getInstance()
 
 supplies = APIRouter(
     prefix='/supplies',

@@ -1,12 +1,12 @@
 from sqlalchemy import select
 from fastapi import status, HTTPException
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
 from app.products.adapters.sqlalchemy.product import Product, RecipeDetail
 from app.supplies.adapters.sqlalchemy.supply import Supply
 from app.products.adapters.serializers.product_schema import productSchema, productsSchema, recipeDetailSchema, recipeDetailsSchema
 
-session = SessionLocal()
+session = ConectDatabase.getInstance()
 
 products = session.scalars(select(Product)).all()
 

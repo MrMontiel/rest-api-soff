@@ -1,12 +1,12 @@
 import uuid
 from sqlalchemy import select
 from fastapi import status, HTTPException
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase
 from app.users.domain.pydantic.user import UserCreate, RoleCreate, PermissionCreate
 from app.users.adapters.sqlalchemy.user import User, Role
 from app.users.adapters.serializer.user_eschema import User, usersSchema
 
-session = SessionLocal()
+session = ConectDatabase.getInstance()
 
 
 

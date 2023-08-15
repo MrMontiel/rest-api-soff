@@ -10,7 +10,7 @@ from app.infrastructure.database import Base
 class Purchase(Base):
   __tablename__ = "purchases"
   
-  id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=True, default=uuid.uuid4())
+  id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
   purchase_date: Mapped[datetime] = mapped_column(DateTime, nullable=False,  default=datetime.utcnow)
   amount_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
   provider_id:Mapped[str] = mapped_column(ForeignKey("providers.id"))
@@ -21,6 +21,7 @@ class Purchase(Base):
 class PurchasesOrders(Base):
   __tablename__ = "purchases_orders"
   
+  id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
   purchase_id: Mapped[str] = mapped_column(ForeignKey("purchases.id"), primary_key=True)
   supply_id: Mapped[str] = mapped_column(ForeignKey("supplies.id"), primary_key=True)
   supply: Mapped["Supply"] = relationship()

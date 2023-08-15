@@ -1,15 +1,16 @@
 import uuid
-from sqlalchemy import String, Integer, Boolean, Float
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+
+from sqlalchemy import Boolean, Float, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
 from app.infrastructure.database import Base
+
 
 class Supply(Base):
   __tablename__ = "supplies"
   
-  id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=False, default=uuid.uuid4())
+  id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
   name: Mapped[str] = mapped_column(String, nullable=False) 
   price: Mapped[float] = mapped_column(Float, nullable=False)
   quantity_stock: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

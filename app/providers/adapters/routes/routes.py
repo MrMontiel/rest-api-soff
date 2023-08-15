@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase
 from app.providers.adapters.serializers.provider_schema import providersSchema
 from fastapi import APIRouter, HTTPException, status
 from app.providers.adapters.services.services import GetAllProviders,AddProvider, UpdateProvider, DeleteProvider, GetOneProvider
@@ -10,7 +10,7 @@ from app.providers.domain.pydantic.provider import ProviderCreate, ProviderUpdat
 
 
 
-session = SessionLocal()
+session = ConectDatabase.getInstance()
 
 providers = APIRouter(
     prefix='/providers',

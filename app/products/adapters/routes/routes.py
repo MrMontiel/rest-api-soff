@@ -1,10 +1,10 @@
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase
 from fastapi import APIRouter, HTTPException, status
 from app.products.adapters.serializers.product_schema import productSchema, productsSchema, recipeDetailSchema,recipeDetailsSchema
 from app.products.adapters.services.services import GetAllProducts, CreateProduct, AddDetail, ConfirmProduct, GetDetailsProduct, GetProductById, UpdateDetail
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
 
-session = SessionLocal()
+session = ConectDatabase.getInstance()
 
 products = APIRouter(
   prefix='/products',

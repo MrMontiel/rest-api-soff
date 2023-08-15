@@ -8,7 +8,7 @@ from app.infrastructure.database import Base
 class Product(Base):
     __tablename__ = "products"
 
-    id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=False, default=uuid.uuid4())
+    id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(60), nullable=False)
     price: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     sale_price: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
@@ -17,7 +17,7 @@ class Product(Base):
 class RecipeDetail(Base):
     __tablename__ = "recipe_detail"
 
-    id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=False,  default=uuid.uuid4())
+    id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
     supply_id: Mapped[str] = mapped_column(ForeignKey("supplies.id"))
     supply: Mapped["Supply"] = relationship()

@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy import select
 from fastapi import status, HTTPException
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase
 from app.purchases.adapters.serializers.purchase_schema import ordersSchema, orderSchema
 from app.purchases.domain.pydantic.purchase import (
   PurchaseCreate, OrderPurchaseCreate
@@ -10,10 +10,10 @@ from app.purchases.adapters.sqlalchemy.purchase import Purchase, PurchasesOrders
 from app.supplies.adapters.sqlalchemy.supply import Supply
 from app.providers.adapters.sqlachemy.provider import Provider
 
-session = SessionLocal()
+session = ConectDatabase.getInstance()
 
 def getGeneralProvider() -> Provider:
-  provider = session.scalars(select(Provider).where(Provider.name == "general")).all()
+  provider = session.scalars(select(Provider).where(Provider.name == "general")).one()
   if not provider:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="provider not found")
   return provider
@@ -30,7 +30,7 @@ def GetPurchaseById(id:str):
 
 def CreatePurchase():
   provider = getGeneralProvider()
-  new_purchase = Purchase(provider_id = provider[0].id)
+  new_purchase = Purchase(provider_id= provider.id)
   session.add(new_purchase)
   session.commit()
   session.refresh(new_purchase)

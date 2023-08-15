@@ -10,7 +10,7 @@ from app.infrastructure.database import Base
 class Provider(Base):
   __tablename__ = "providers"
   
-  id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=False, default=uuid.uuid4())
+  id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
   name: Mapped[str] = mapped_column(String, nullable=False) 
   company: Mapped[str] = mapped_column(String, nullable=False)
   address: Mapped[str] = mapped_column(String, nullable=False)

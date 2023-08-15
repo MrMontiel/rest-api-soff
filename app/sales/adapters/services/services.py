@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy import select
 from fastapi import status, HTTPException
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase
 from app.sales.adapters.serializers.sale_schema import ordersSchema, orderSchema
 from app.sales.domain.pydantic.sale_pydantic import (
   ClientCreate, SaleCreate, SalesOrdersCreate
@@ -9,7 +9,7 @@ from app.sales.domain.pydantic.sale_pydantic import (
 from app.sales.adapters.sqlalchemy.sale import Sale, Client, SalesOrders, StatusSale
 from app.products.adapters.sqlalchemy.product import Product
 
-session = SessionLocal()
+session = ConectDatabase.getInstance()
 
 def getGeneralClient() -> Client:
   client = session.scalars(select(Client).where(Client.name == "general")).one()

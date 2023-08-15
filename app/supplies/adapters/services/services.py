@@ -1,11 +1,11 @@
 import uuid
 from sqlalchemy import select
 from fastapi import status, HTTPException
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase
 from app.supplies.domain.pydantic.supply import SupplyCreate, SupplyUpdate, SupplyDelete
 from app.supplies.adapters.sqlalchemy.supply import Supply
 
-session = SessionLocal()
+session = ConectDatabase.getInstance()
 
 
 

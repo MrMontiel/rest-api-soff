@@ -1,11 +1,11 @@
 import uuid
 from sqlalchemy import select
 from fastapi import status, HTTPException
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase
 from app.providers.domain.pydantic.provider import ProviderCreate, ProviderUpdate, ProviderDelete
 from app.providers.adapters.sqlachemy.provider import Provider
 
-session = SessionLocal()
+session = ConectDatabase.getInstance()
 
 def GetAllProviders(limit:int = 100):
   providers = session.scalars(select(Provider)).all()
@@ -19,10 +19,6 @@ def GetOneProvider(id:str):
   if not providers:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Supply not found")
   return providers
-
-
-
-
 
 def AddProvider(provider: ProviderCreate):
   if not provider:

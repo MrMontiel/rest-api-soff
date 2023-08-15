@@ -1,12 +1,16 @@
 import uuid
-from enum import Enum as PyEnum 
-from typing import List
 from datetime import datetime
-from sqlalchemy import Boolean, Enum, Column, ForeignKey, Integer, String, DateTime, Float
-from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
+from enum import Enum as PyEnum
+from typing import List
+
+from sqlalchemy import (Boolean, Column, DateTime, Enum, Float, ForeignKey,
+                        Integer, String)
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
 from app.infrastructure.database import Base
 from app.products.adapters.sqlalchemy.product import Product
+
 
 class StatusSale(PyEnum):
   OPEN = "open"
