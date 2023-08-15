@@ -1,7 +1,7 @@
 from app.infrastructure.database import ConectDatabase
 from fastapi import APIRouter, HTTPException, status
 from app.products.adapters.serializers.product_schema import productSchema, productsSchema, recipeDetailSchema,recipeDetailsSchema
-from app.products.adapters.services.services import GetAllProducts, CreateProduct, AddDetail, ConfirmProduct, GetDetailsProduct, GetProductById, UpdateDetail
+from app.products.adapters.services.services import GetAllProducts, CreateProduct, AddDetail, ConfirmProduct, GetDetailsProduct, GetProductById, UpdateDetail, UpdateDetail, UpdateProduct, DeleteDetail, DeleteProduct
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
 
 session = ConectDatabase.getInstance()
@@ -58,11 +58,26 @@ async def confirm_product(id_product: str, productCreate: ProductCreate):
     "product": productSchema(product)
   }
 
-@products.put('/{id_product}/{id_supply}/update_detail')
-async def update_detail(id_product: str, id_supply:str, recipeDetailCreate: RecipeDetailCreate):
-  UpdateDetail(id_product, id_supply, recipeDetailCreate)
-  return{
-    "message": "Detail updated successfully"
+@products.put('/update_detail')
+async def update_detail(id_detail:str, amount_supply: int):
+  detail = UpdateDetail(id_detail, amount_supply)
+  return recipeDetailSchema(detail)
+
+@products.put('/update_product')
+async def update_product(id_product:str, products:ProductCreate):
+  product = UpdateProduct(id_product, products)
+  return productSchema(product)
+
+@products.delete('{id_detail}/delete_detail')
+async def delete_detail(id_detail:str):
+  DeleteDetail(id_detail)
+  return {
+    "message":"Detail deleted successfully"
   }
 
-
+@products.delete('{id_product}/delete_product')
+async def delete_product(id_product:str):
+  DeleteProduct(id_product)
+  return {
+    "message":"Product deleted successfully"
+  }
