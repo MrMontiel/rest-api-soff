@@ -4,9 +4,9 @@ def ProviderSchema(provider: Provider) -> dict:
     return{
         "id": provider.id,
         "name": provider.name,
-        "company": provider.price,
-        "address": provider.quantity_stock,
-        "date_registration": provider.unit_measure,
+        "company": provider.company,
+        "address": provider.address,
+        "date_registration": provider.date_registration,
         "email": provider.email,
         "phone": provider.phone,
         "city": provider.city,
