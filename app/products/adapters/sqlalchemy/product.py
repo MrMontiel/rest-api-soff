@@ -14,6 +14,8 @@ class Product(Base):
     sale_price: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     status: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
+    details = relationship("RecipeDetail", cascade="all, delete-orphan")
+
 class RecipeDetail(Base):
     __tablename__ = "recipe_detail"
 
@@ -24,3 +26,5 @@ class RecipeDetail(Base):
     amount_supply: Mapped[int] = mapped_column(Integer, nullable=False)
     unit_measure: Mapped[str] = mapped_column(String(10), nullable=False)
     subtotal: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+
+    product = relationship("Product")
