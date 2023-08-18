@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from fastapi import status, HTTPException
 from app.infrastructure.database import ConectDatabase
 from app.purchases.adapters.serializers.purchase_schema import ordersSchema, orderSchema
@@ -57,7 +57,7 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
       session.commit()
       session.refresh(n) 
       return n 
-  new_order = PurchasesOrders(purchase_id=id_purchase, supply_id=order.supply_id, amount_supplies=order.amount_supplies, subtotal=price_total)
+  new_order = PurchasesOrders(purchase_id=id_purchase, supply_id=order.supply_id, amount_supplies=order.amount_supplies,price_supplies=order.price_supplies, subtotal=price_total)
   session.add(new_order)
   session.commit()
   session.refresh(new_order)
@@ -94,3 +94,23 @@ def seePurchasesOrders(id_purchase: str):
   statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == id_purchase)
   orders = session.scalars(statement).all()
   return orders
+
+def UpdateAmountOrder(id_order: str, amount_supplies: int):
+  order = session.get(PurchasesOrders, uuid.UUID(id_order))
+  if not order:
+    raise HTTPException(status_code=404, detail="not found order")
+  print(order)
+  order.amount_supplies = amount_supplies
+  order.subtotal = order.supply.price * amount_supplies
+  session.add(order)
+  session.commit()
+  session.refresh(order)
+  return order
+
+def DeleteOrderById(id_order: str):
+  order = session.get(PurchasesOrders, uuid.UUID(id_order))
+  print(order)
+  if not order:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="order not found")
+  session.delete(order)
+  session.commit()

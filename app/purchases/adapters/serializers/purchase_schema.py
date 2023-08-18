@@ -15,6 +15,8 @@ def purchasesSchema(purchases: list[Purchase]) -> list:
 
 def orderSchema(order: PurchasesOrders) -> dict:
     return{
+        
+        "id_order": order.id,
         "purchase_id": order.purchase_id,
         "supply_id": order.supply_id,
         "amount_supplies": order.amount_supplies,

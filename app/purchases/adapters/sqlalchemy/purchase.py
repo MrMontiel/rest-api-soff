@@ -22,8 +22,8 @@ class PurchasesOrders(Base):
   __tablename__ = "purchases_orders"
   
   id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-  purchase_id: Mapped[str] = mapped_column(ForeignKey("purchases.id"), primary_key=True)
-  supply_id: Mapped[str] = mapped_column(ForeignKey("supplies.id"), primary_key=True)
+  purchase_id: Mapped[str] = mapped_column(ForeignKey("purchases.id"))
+  supply_id: Mapped[str] = mapped_column(ForeignKey("supplies.id"))
   supply: Mapped["Supply"] = relationship()
   amount_supplies: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
   price_supplies: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
