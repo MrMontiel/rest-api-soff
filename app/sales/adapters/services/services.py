@@ -66,30 +66,43 @@ def ConfirmSale(id_sale: str, saleCreate: SaleCreate):
   statement = select(SalesOrders).where(SalesOrders.sale_id == id_sale)
   orders = ordersSchema(session.scalars(statement).all())
   
+  # We verify that the number of orders is greater that zero.
   if len(orders) <= 0:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="orders required for confirm sale")
   
-  total:float = 0.0
   
-  for order in orders:
-    total += order['total']
- 
-  if saleCreate.type_sale == "" or saleCreate.payment_method == "" or saleCreate.id_client == "":
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the type of sale, the payment_method and client are required")
-    
+  # We verify that the type sale and payment method is different from empty.
+  if saleCreate.type_sale == "" or saleCreate.payment_method == "":
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the type of sale and the payment_method are required")
+  
+  # Get sale from database.
   sale = session.scalars(select(Sale).where(Sale.id == id_sale)).one()
   
+  # We verify that the sale exists.
   if not sale:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="sale not found")
   
+  # We verify that the sale is not paid.
   if sale.status == StatusSale.PAID:
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="sorry, you can't modify a sale")
-
+  
+  # If the sale is a "pedido", We will add the client, if not, we will add general client.
+  if saleCreate.type_sale == "pedido":
+    client = AddClient(saleCreate.client)
+    sale.id_client = client.id
+  else:
+    generalClient = getGeneralClient()
+    sale.id_client = generalClient.id
+  
+  # We calculate the total
+  total:float = 0.0
+  for order in orders:
+    total += order['total']
+  
   sale.amount_order = len(orders)
   sale.total = total
   sale.pyment_method = saleCreate.payment_method
   sale.type_sale = saleCreate.type_sale
-  sale.id_client = saleCreate.id_client
   sale.status = StatusSale.PAID if saleCreate.type_sale == "fisico" else StatusSale.PENDING
   session.commit()
   session.refresh(sale)
