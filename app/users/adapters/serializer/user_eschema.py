@@ -31,13 +31,13 @@ def permissionSchema(permission: Permission)-> dict:
         "name":permission.name,
     }
     
-def PermossionsSchema(permissions: list[Permission])->list:
+def PermissionsSchema(permissions: list[Permission])->list:
     return[permissionSchema(permission) for permission in permissions]
 
 
 
 
-def permissionsRolesSchema(permisisonsroles: PermissionsRoles)-> dict:
+def permissionRolesSchema(permisisonsroles: PermissionsRoles)-> dict:
     return{
         "id_role":permisisonsroles.id_role,
         "id_permission":permisisonsroles.id_permission
@@ -45,4 +45,4 @@ def permissionsRolesSchema(permisisonsroles: PermissionsRoles)-> dict:
     }
 
 def permissionsRolesSchema(permissionsroles: list[PermissionsRoles])-> list:
-    return[permissionsRolesSchema(permissionsroles) for permissionsroles in permissionsroles]
+    return[permissionRolesSchema(permissionsroles) for permissionsroles in permissionsroles]
