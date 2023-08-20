@@ -22,6 +22,7 @@ from app.sales.domain.pydantic.sale_pydantic import SaleCreate, SalesOrdersCreat
 from app.products.adapters.sqlalchemy.product import Product
 from app.products.adapters.serializers.product_schema import productSchema, productsSchema
 
+from app.sales.adapters.routes.clients import clients
 
 session = ConectDatabase.getInstance()
 
@@ -29,6 +30,8 @@ sales = APIRouter(
   prefix='/sales',
   tags=["Sales"]
 )
+
+sales.include_router(clients)
 
 @sales.get('/products')
 async def get_all_products():

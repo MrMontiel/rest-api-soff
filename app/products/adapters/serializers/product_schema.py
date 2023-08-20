@@ -14,6 +14,7 @@ def productsSchema(products:list[Product])->list:
 
 def recipeDetailSchema(recipeDetail:RecipeDetail)-> dict:
     return {
+        "id": recipeDetail.id,
         "product_id": recipeDetail.product_id,
         "supply_id": recipeDetail.supply_id,
         "supply": recipeDetail.supply,

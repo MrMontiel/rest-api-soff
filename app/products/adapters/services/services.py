@@ -1,4 +1,5 @@
-from sqlalchemy import select
+import uuid
+from sqlalchemy import select, delete
 from fastapi import status, HTTPException
 from app.infrastructure.database import ConectDatabase
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
@@ -8,9 +9,8 @@ from app.products.adapters.serializers.product_schema import productSchema, prod
 
 session = ConectDatabase.getInstance()
 
-products = session.scalars(select(Product)).all()
-
 def GetAllProducts(limit:int = 100):
+  products = session.scalars(select(Product).limit(limit)).all()
   if not products:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="products not found")
   return products
@@ -83,18 +83,47 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
   return product
 
 
-def UpdateDetail(id_product:str, id_supply:str, recipeDetailCreate:RecipeDetailCreate):
-  details = session.scalars(select(RecipeDetail).where(RecipeDetail.product_id == id_product)).all()
+def UpdateDetail(id_detail:str, amount_supply:int):
+  detail = session.get(RecipeDetail, uuid.UUID(id_detail))
 
-  if len(details) <= 0:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="details required for confirm product")
+  if not detail:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="details not found")
   
-  if recipeDetailCreate.amount_supply == 0:
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The amount supply is required")
-  
-  supply = session.scalars(select(RecipeDetail).where(RecipeDetail.product_id == id_product)).all() 
-    
-  supply.amount_supply = recipeDetailCreate.amount_supply
+  detail.amount_supply = amount_supply
+  detail.subtotal = detail.supply.price * amount_supply
+  session.add(detail)
   session.commit()
-  session.refresh(supply)
-  return supply
+  session.refresh(detail)
+  return detail
+
+def UpdateProduct(id_product: str, products:ProductCreate):
+  product = session.get(Product, uuid.UUID(id_product))
+
+  if not product:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
+
+  product.name = products.name
+  product.sale_price = products.sale_price
+  session.add(product)
+  session.commit()
+  session.refresh(product)
+  return product
+
+def DeleteDetail(id_detail:str):
+  detail = session.get(RecipeDetail, uuid.UUID(id_detail))
+
+  if not detail:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Detail not found")
+  
+  session.delete(detail)
+  session.commit()
+
+def DeleteProduct(id_product:str):
+  product = session.get(Product, uuid.UUID(id_product))
+
+  if not product:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+  
+  session.delete(product)
+  session.commit()
+
