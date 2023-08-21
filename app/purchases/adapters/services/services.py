@@ -3,6 +3,7 @@ from sqlalchemy import select, delete
 from fastapi import status, HTTPException
 from app.infrastructure.database import ConectDatabase
 from app.purchases.adapters.serializers.purchase_schema import ordersSchema, orderSchema
+from app.supplies.adapters.serializers.supply_schema import suppliesSchema, SupplySchema
 from app.purchases.domain.pydantic.purchase import (
   PurchaseCreate, OrderPurchaseCreate
 )
@@ -18,7 +19,7 @@ def getGeneralProvider() -> Provider:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="provider not found")
   return provider
 
-def GetAllPurchases(limit:int = 100):
+def GetAllPurchases(limit:int):
   purchases = session.scalars(select(Purchase).limit(limit)).all()
   if not purchases:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchases not found")
@@ -74,6 +75,13 @@ def ConfirmPurchase(id_purchase: str, id_provider: str):
   
   for order in orders:
     total += order['subtotal']
+    supplies = session.get(Supply, uuid.UUID(order['supply_id']) )
+    if supplies:
+      supplies.quantity_stock += order.amount_supplies
+      supplies.price = order.price_supplies
+      session.commit()
+      session.refresh(supplies)
+    
  
   purchase = session.scalars(select(Purchase).where(Purchase.id == id_purchase)).one()
   
