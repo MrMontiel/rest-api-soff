@@ -9,8 +9,8 @@ from app.products.adapters.serializers.product_schema import productSchema, prod
 
 session = ConectDatabase.getInstance()
 
-def GetAllProducts(limit:int = 100):
-  products = session.scalars(select(Product).limit(limit)).all()
+def GetAllProducts(limit:int, offset:int):
+  products = session.scalars(select(Product).offset(offset).limit(limit)).all()
   if not products:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="products not found")
   return products
@@ -24,13 +24,8 @@ def GetProductById(id_product):
   product = session.scalars(select(Product).where(Product.id == id_product)).one() 
   return product
 
-def CreateProduct (product: ProductCreate):
-  if not product:
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="product is required")
-  if product.name == "" or product.sale_price == 0:
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="name's product and price's product is required")
-  
-  new_product = Product(name=product.name, sale_price=product.sale_price)
+def CreateProduct ():
+  new_product = Product(name="", sale_price=0)
   session.add(new_product)
   session.commit()
   session.refresh(new_product)
@@ -49,6 +44,11 @@ def AddDetail(id_product:str, detail: RecipeDetailCreate):
   
   subtotal:float = supply.price * detail.amount_supply
 
+  detail_added = session.scalars(select(RecipeDetail).where(RecipeDetail.product_id == id_product)).all()
+  for n in detail_added:
+    if n.supply_id == uuid.UUID(detail.supply_id):
+      raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Supply is already registered")
+
   new_detail = RecipeDetail(product_id=id_product, supply_id=detail.supply_id, amount_supply=detail.amount_supply, unit_measure=detail.unit_measure, subtotal=subtotal)
   session.add(new_detail)
   session.commit()
@@ -63,7 +63,7 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="details required for confirm product")
   
   total:float = 0.0
-
+  
   for detail in details:
     total += detail['subtotal']
 
@@ -74,7 +74,7 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
 
   if not product:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
-
+  
   product.name = productCreate.name
   product.price = total
   product.sale_price = productCreate.sale_price
@@ -87,7 +87,7 @@ def UpdateDetail(id_detail:str, amount_supply:int):
   detail = session.get(RecipeDetail, uuid.UUID(id_detail))
 
   if not detail:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="details not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="detail not found")
   
   detail.amount_supply = amount_supply
   detail.subtotal = detail.supply.price * amount_supply
@@ -118,12 +118,23 @@ def DeleteDetail(id_detail:str):
   session.delete(detail)
   session.commit()
 
-def DeleteProduct(id_product:str):
+def ChangeStatus(id_product:str):
   product = session.get(Product, uuid.UUID(id_product))
 
   if not product:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-  
-  session.delete(product)
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Detail not found")
+
+  product.status = False
+  session.add(product)
   session.commit()
+  session.refresh(product)
+
+# def DeleteProduct(id_product:str):
+#   product = session.get(Product, uuid.UUID(id_product))
+
+#   if not product:
+#     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+  
+#   session.delete(product)
+#   session.commit()
 
