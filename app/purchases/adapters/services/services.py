@@ -19,8 +19,8 @@ def getGeneralProvider() -> Provider:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="provider not found")
   return provider
 
-def GetAllPurchases(limit:int):
-  purchases = session.scalars(select(Purchase).limit(limit)).all()
+def GetAllPurchases(limit:int, offset:int):
+  purchases = session.scalars(select(Purchase).offset(offset).limit(limit)).all()
   if not purchases:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchases not found")
   return purchases
@@ -48,6 +48,9 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
   purchase = session.scalars(select(Purchase).where(Purchase.id == id_purchase)).one() 
   if not purchase:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchase not found")
+  #  Restricciones despues de confirmar compra
+  if purchase.total != 0.0:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You can't add orders because the purchase is confirmed")
   
   order_added = session.scalars(select(PurchasesOrders).where(PurchasesOrders.purchase_id == id_purchase)).all()
   for n in order_added:
@@ -75,10 +78,13 @@ def ConfirmPurchase(id_purchase: str, id_provider: str):
   
   for order in orders:
     total += order['subtotal']
-    supplies = session.get(Supply, uuid.UUID(order['supply_id']) )
+    supplies = session.get(Supply, order['supply_id'] )
     if supplies:
-      supplies.quantity_stock += order.amount_supplies
-      supplies.price = order.price_supplies
+      supplies.quantity_stock += order['amount_supplies']
+      if order['price_supplies']>supplies.price:
+        supplies.price = order['price_supplies']
+      else:
+        supplies.price = supplies.price
       session.commit()
       session.refresh(supplies)
     
