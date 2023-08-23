@@ -18,7 +18,6 @@ from app.products.adapters.services.services import (
   UpdateProduct,
   DeleteDetail,
   ChangeStatus
-  # DeleteProduct
 )
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
 
@@ -99,9 +98,3 @@ async def change_status(id_producto:str):
   return{
     "message":"Status updated"
   }
-# @products.delete('/{id_product}/delete_product')
-# async def delete_product(id_product:str):
-#   DeleteProduct(id_product)
-#   return {
-#     "message":"Product deleted successfully"
-#   }
