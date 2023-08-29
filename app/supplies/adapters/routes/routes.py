@@ -16,8 +16,8 @@ supplies = APIRouter(
 )
 
 @supplies.get('/')
-async def get_all_supplies(limit: int = 100):
-    supplies = GetAllSupplies()
+async def get_all_supplies(limit: int = 10, offset: int = 0):
+    supplies = GetAllSupplies(limit, offset)
     return{
         "amount_supplies": len(supplies),
         "supplies": suppliesSchema(supplies)
