@@ -28,15 +28,9 @@ purchases = APIRouter(
   tags=["Purchases"]
 )
 
-@purchases.get('/supplies')
-async def get_all_supplies():
-  supplies = session.scalars(select(Supply)).all()
-  return suppliesSchema(supplies)
-
-
 @purchases.get('/')
-async def get_all_purchases(limit: int = 100):
-  purchases = GetAllPurchases()
+async def get_all_purchases(limit: int = 10, offset:int=0):
+  purchases = GetAllPurchases(limit, offset)
   return {
     "amount_purchases": len(purchases),
     "purchases": purchasesSchema(purchases)

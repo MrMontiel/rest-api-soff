@@ -9,15 +9,15 @@ session = ConectDatabase.getInstance()
 
 
 
-def GetAllSupplies(limit:int = 100):
-  supplies = session.scalars(select(Supply)).all()
+def GetAllSupplies(limit:int, offset: int):
+  supplies = session.scalars(select(Supply).offset(offset).limit(limit)).all()
   if not supplies:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="supplies not found")
   return supplies
 
 
 def GetOneSupply(id:str):
-  supplies = session.scalars(select(Supply).where(Supply.id==id)).one()
+  supplies = session.get(Supply, uuid.UUID(id))
   if not supplies:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Supply not found")
   return supplies

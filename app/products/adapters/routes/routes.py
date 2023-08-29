@@ -1,7 +1,24 @@
 from app.infrastructure.database import ConectDatabase
 from fastapi import APIRouter, HTTPException, status
-from app.products.adapters.serializers.product_schema import productSchema, productsSchema, recipeDetailSchema,recipeDetailsSchema
-from app.products.adapters.services.services import GetAllProducts, CreateProduct, AddDetail, ConfirmProduct, GetDetailsProduct, GetProductById, UpdateDetail, UpdateDetail, UpdateProduct, DeleteDetail, DeleteProduct
+from app.products.adapters.serializers.product_schema import (
+  productSchema,
+  productsSchema,
+  recipeDetailSchema,
+  recipeDetailsSchema
+)
+from app.products.adapters.services.services import (
+  GetAllProducts,
+  CreateProduct,
+  AddDetail,
+  ConfirmProduct,
+  GetDetailsProduct,
+  GetProductById,
+  UpdateDetail,
+  UpdateDetail,
+  UpdateProduct,
+  DeleteDetail,
+  ChangeStatus
+)
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
 
 session = ConectDatabase.getInstance()
@@ -12,8 +29,13 @@ products = APIRouter(
 )
 
 @products.get('/')
+<<<<<<< HEAD
 async def get_all_products(limit: int = 10, skip: int = 0):
   products = GetAllProducts(limit, skip)
+=======
+async def get_all_products(limit: int = 10, offset:int =0):
+  products = GetAllProducts(limit, offset)
+>>>>>>> 2eb1d5a7faa9d3656d80c9da5d1b535cb80a0a8d
   return {
     "amount_products": len(products),
     "products": productsSchema(products)
@@ -35,8 +57,8 @@ async def get_details_product(id_product: str):
   }
 
 @products.post('/add_products')
-async def create_product(product: ProductCreate):
-  new_product = CreateProduct(product)
+async def create_product():
+  new_product = CreateProduct()
   return {
     "id": new_product.id,
     "message": "product created successfully"
@@ -68,16 +90,16 @@ async def update_product(id_product:str, products:ProductCreate):
   product = UpdateProduct(id_product, products)
   return productSchema(product)
 
-@products.delete('{id_detail}/delete_detail')
+@products.delete('/{id_detail}/delete_detail')
 async def delete_detail(id_detail:str):
   DeleteDetail(id_detail)
   return {
     "message":"Detail deleted successfully"
   }
 
-@products.delete('{id_product}/delete_product')
-async def delete_product(id_product:str):
-  DeleteProduct(id_product)
-  return {
-    "message":"Product deleted successfully"
+@products.put('/{id_product}/change_status')
+async def change_status(id_producto:str):
+  ChangeStatus(id_producto)
+  return{
+    "message":"Status updated"
   }

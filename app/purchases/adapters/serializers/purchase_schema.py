@@ -5,7 +5,7 @@ def purchaseSchema(purchase: Purchase) -> dict:
         "id" : purchase.id,
         "purchase_date": purchase.purchase_date,
         "amount_order": purchase.amount_order,
-        "provider_id": purchase.provider_id,
+        "provider": purchase.provider.name,
         "total": purchase.total,
         "status": purchase.status
     }
