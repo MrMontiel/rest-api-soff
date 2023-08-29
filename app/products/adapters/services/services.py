@@ -12,17 +12,23 @@ session = ConectDatabase.getInstance()
 def GetAllProducts(limit:int, offset:int):
   products = session.scalars(select(Product).offset(offset).limit(limit)).all()
   if not products:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="products not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Products not found")
   return products
 
 def GetDetailsProduct(id_product):
   statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
   details = session.scalars(statement).all()
+  if not details:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Details not found")
   return details
 
 def GetProductById(id_product):
-  product = session.scalars(select(Product).where(Product.id == id_product)).one() 
+  product = session.get(Product, uuid.UUID(id_product))
   return product
+
+def GetDetailById(id_detail):
+  detail = session.get(RecipeDetail, uuid.UUID(id_detail))
+  return detail
 
 def CreateProduct ():
   new_product = Product(name="", sale_price=0)
@@ -32,7 +38,7 @@ def CreateProduct ():
   return new_product
 
 def AddDetail(id_product:str, detail: RecipeDetailCreate):
-  supply = session.scalars(select(Supply).where(Supply.id == detail.supply_id)).one()
+  supply = session.get(Supply, uuid.UUID(detail.supply_id))
 
   if not supply:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="supply not found")
@@ -56,8 +62,7 @@ def AddDetail(id_product:str, detail: RecipeDetailCreate):
   return new_detail
 
 def ConfirmProduct(id_product:str, productCreate:ProductCreate):
-  statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
-  details = recipeDetailsSchema(session.scalars(statement).all())
+  details = GetDetailsProduct(id_product)
 
   if len(details) <= 0:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="details required for confirm product")
@@ -84,7 +89,7 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
 
 
 def UpdateDetail(id_detail:str, amount_supply:int):
-  detail = session.get(RecipeDetail, uuid.UUID(id_detail))
+  detail = GetDetailById(id_detail)
 
   if not detail:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="detail not found")
@@ -97,7 +102,7 @@ def UpdateDetail(id_detail:str, amount_supply:int):
   return detail
 
 def UpdateProduct(id_product: str, products:ProductCreate):
-  product = session.get(Product, uuid.UUID(id_product))
+  product = GetProductById(id_product)
 
   if not product:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
@@ -110,7 +115,7 @@ def UpdateProduct(id_product: str, products:ProductCreate):
   return product
 
 def DeleteDetail(id_detail:str):
-  detail = session.get(RecipeDetail, uuid.UUID(id_detail))
+  detail = GetDetailById(id_detail)
 
   if not detail:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Detail not found")
@@ -119,7 +124,7 @@ def DeleteDetail(id_detail:str):
   session.commit()
 
 def ChangeStatus(id_product:str):
-  product = session.get(Product, uuid.UUID(id_product))
+  product = GetProductById(id_product)
 
   if not product:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Detail not found")
@@ -128,13 +133,3 @@ def ChangeStatus(id_product:str):
   session.add(product)
   session.commit()
   session.refresh(product)
-
-# def DeleteProduct(id_product:str):
-#   product = session.get(Product, uuid.UUID(id_product))
-
-#   if not product:
-#     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-  
-#   session.delete(product)
-#   session.commit()
-
