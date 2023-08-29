@@ -157,10 +157,6 @@ async def delete_role(id_role : str):
         "role_Delete": roleSchema(rol_delete) 
     }
     
-
-    
-    
-    
 # ----------------------------------ROLEPERMISSION----------------------------------------------
 @user.post("/post-permissinosrole")
 async def create_permissionsrole(permissionsrole :PermissionsRolesCreate):

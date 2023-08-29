@@ -2,6 +2,24 @@ from enum import Enum
 from pydantic import BaseModel
 from typing import Optional
 
+
+class ClientBase(BaseModel):
+  name: str
+  direction: str
+  phone: str
+  email: str
+  
+class ClientCreate(ClientBase):
+  pass
+  
+class Client(ClientBase):
+  id: Optional[str]
+    
+  class Config:
+    from_attributes = True
+
+
+
 class StatusSale(str, Enum):
   OPEN = "open"
   PAID = "paid"
@@ -9,7 +27,6 @@ class StatusSale(str, Enum):
   PENDING = "pending"
 
 class SaleBase(BaseModel):
-  id_client: Optional[str]
   payment_method: str
   type_sale: str
   
@@ -24,6 +41,7 @@ class Sale(SaleBase):
     from_attributes = True
     
 class SaleCreate(SaleBase):
+  client: ClientBase
   pass
 
 
@@ -41,22 +59,8 @@ class SalesOrders(OrderBase):
   id: Optional[str]
   total: float = 0.0
   
+  
   class Config:
     from_attributes = True
     
 
-
-class ClientBase(BaseModel):
-  name: str
-  direction: str
-  phone: str
-  email: str
-  
-class ClientCreate(ClientBase):
-  pass
-  
-class Client(ClientBase):
-  id: Optional[str]
-    
-  class Config:
-    from_attributes = True

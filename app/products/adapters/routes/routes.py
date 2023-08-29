@@ -12,8 +12,8 @@ products = APIRouter(
 )
 
 @products.get('/')
-async def get_all_products(limit: int = 100):
-  products = GetAllProducts()
+async def get_all_products(limit: int = 10, skip: int = 0):
+  products = GetAllProducts(limit, skip)
   return {
     "amount_products": len(products),
     "products": productsSchema(products)

@@ -9,8 +9,8 @@ from app.products.adapters.serializers.product_schema import productSchema, prod
 
 session = ConectDatabase.getInstance()
 
-def GetAllProducts(limit:int = 100):
-  products = session.scalars(select(Product).limit(limit)).all()
+def GetAllProducts(limit:int = 10, skip: int = 0):
+  products = session.scalars(select(Product).offset(skip).limit(limit)).all()
   if not products:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="products not found")
   return products
