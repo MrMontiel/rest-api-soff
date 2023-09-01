@@ -118,7 +118,7 @@ async def get_role(limit: int =10):
     roles = get_roles()
     return{
         "amount_roles": len(roles),
-        "user": rolesSchema(roles)
+        "role": rolesSchema(roles)
     }
     
 @user.post("/post_rol")
@@ -155,6 +155,8 @@ async def delete_role(id_role : str):
     rol_delete = delete_role_service(id_role)
     return{
         "role_Delete": roleSchema(rol_delete) 
+        # "role_Delete": "role delete " 
+        
     }
     
 # ----------------------------------ROLEPERMISSION----------------------------------------------
@@ -172,11 +174,9 @@ async def  get_permissionrole(id_permisssionrole:str):
         "Permision Role": permissionsRolesSchema(permissionrole_get_id)
     }
     
-# ----------------------------------TESTING----------------------------------------------
-@user.get("/{id_role}/testin-replece")
-async def replace_testin(id_role:str):
-    replace_role=replace_role_base(id_role)
-    return{
-        "role Replace": usersSchema(replace_role)
-    }
+# # ----------------------------------TESTING----------------------------------------------
+# @user.put("/{id_role}/testin-replece")
+# async def replace_testin(id_role:str):
+#     replace_role=replace_role_base(id_role)
+#     return replace_role
     

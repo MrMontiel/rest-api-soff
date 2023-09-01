@@ -90,20 +90,36 @@ def update_role(role: RoleCreate, id_role:str):
     role_update.name = role.name
     session.commit()
     session.refresh(role_update)
-    return role_update
+    # return role_update
     
+# --------------------------------------ROLE REPLACE------------------------------------------------
+def replace_role_base(id_role:str):
+    permissionroles = session.scalars(select(PermissionsRoles).filter(PermissionsRoles.id_role == uuid.UUID(id_role))).all()
+    for permissions in permissionroles:
+        session.delete(permissions)
+        session.commit
+        
+    user_replce= session.scalars(select(User).filter(User.id_role== uuid.UUID(id_role))).all()
+    role_replce_new= session.scalars(select(Role).filter(Role.name== "Base")).one()
+    for user in user_replce:
+        user.id_role=role_replce_new.id
+        session.add(user)
+        session.commit()
+    
+# --------------------------------------ROLE------------------------------------------------
 
 def delete_role_service(id_role:str):
-    article_query =  session.query(Role).filter(Role.id == id_role).first()
+    article_query =  session.query(Role).filter(Role.id == uuid.UUID(id_role)).first()
     if not article_query:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
+    replace_role_base(id_role)
+    
     session.delete(article_query)
     session.commit()
     return article_query
 
-
-    
 # ----------------------------------ROLEPERMISSION SERVICES-----------------------------------------------
+
 
 
 def permissionroles_get(id_permissionrole:str):
@@ -182,13 +198,3 @@ def delete_user(id_user:str):
     session.commit()
     return user_detelete_id
 
-# --------------------------------------------------------------------------------------
-def replace_role_base(id_role):
-    user_replce= session.scalars(select(User).filter(User.id_role== id_role)).all()
-    role_replce= session.scalars(select(Role).filter(Role.id== id_role)).one()
-    role_replce_new= session.scalars(select(Role).filter(Role.name== "Base")).one()
-    for ban in user_replce:
-        ban.id_role=role_replce_new.id
-        session.add(user_replce)
-        session.commit()
-    return user_replce 
