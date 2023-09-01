@@ -17,7 +17,7 @@ def recipeDetailSchema(recipeDetail:RecipeDetail)-> dict:
         "id": recipeDetail.id,
         "product_id": recipeDetail.product_id,
         "supply_id": recipeDetail.supply_id,
-        "supply": recipeDetail.supply,
+        "supply": recipeDetail.supply.name,
         "amount_supply": recipeDetail.amount_supply,
         "unit_measure": recipeDetail.unit_measure,
         "subtotal":recipeDetail.subtotal

@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from app.infrastructure.database import ConectDatabase
 from fastapi import APIRouter, HTTPException, status
 from app.products.adapters.serializers.product_schema import (
@@ -17,9 +18,11 @@ from app.products.adapters.services.services import (
   UpdateDetail,
   UpdateProduct,
   DeleteDetail,
-  ChangeStatus
+  # ChangeStatus
 )
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
+from app.supplies.adapters.sqlalchemy.supply import Supply
+from app.supplies.adapters.serializers.supply_schema import suppliesSchema
 
 session = ConectDatabase.getInstance()
 
@@ -27,6 +30,11 @@ products = APIRouter(
   prefix='/products',
   tags=["Products"]
 )
+
+@products.get('/supplies')
+async def get_all_supplies():
+  supplies = session.scalars(select(Supply)).all()
+  return suppliesSchema(supplies)
 
 @products.get('/')
 async def get_all_products(limit: int = 10, offset:int =0):
@@ -68,7 +76,7 @@ async def add_detail(id_product:str, detail:RecipeDetailCreate):
   }
 
 @products.put('/{id_product}/confirm_product')
-async def confirm_product(id_product: str, productCreate: ProductCreate):
+async def confirm_product(id_product: str, productCreate:ProductCreate):
   product = ConfirmProduct(id_product, productCreate)
   return {
     "id_product": product.id,
@@ -92,9 +100,9 @@ async def delete_detail(id_detail:str):
     "message":"Detail deleted successfully"
   }
 
-@products.put('/{id_product}/change_status')
-async def change_status(id_producto:str):
-  ChangeStatus(id_producto)
-  return{
-    "message":"Status updated"
-  }
+# @products.put('/{id_product}/change_status')
+# async def change_status(id_producto:str):
+#   ChangeStatus(id_producto)
+#   return{
+#     "message":"Status updated"
+#   }
