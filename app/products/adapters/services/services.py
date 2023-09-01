@@ -15,6 +15,13 @@ def GetAllProducts(limit:int, offset:int):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Products not found")
   return products
 
+def GetDetailsProduct(id_product):
+  statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
+  details = session.scalars(statement).all()
+  if not details:
+    return []
+    # raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Details not found")
+  return details
 def GetProductById(id_product):
   product = session.get(Product, uuid.UUID(id_product))
 
@@ -74,7 +81,7 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
   total:float = 0.0
   
   for detail in details:
-    total += detail['subtotal']
+    total += detail.subtotal
 
 
   product = session.scalars(select(Product).where(Product.id == id_product)).one()

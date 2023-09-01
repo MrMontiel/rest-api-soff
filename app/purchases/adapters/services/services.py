@@ -1,8 +1,9 @@
 import uuid
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from fastapi import status, HTTPException
 from app.infrastructure.database import ConectDatabase
 from app.purchases.adapters.serializers.purchase_schema import ordersSchema, orderSchema
+from app.supplies.adapters.serializers.supply_schema import suppliesSchema, SupplySchema
 from app.purchases.domain.pydantic.purchase import (
   PurchaseCreate, OrderPurchaseCreate
 )
@@ -18,8 +19,8 @@ def getGeneralProvider() -> Provider:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="provider not found")
   return provider
 
-def GetAllPurchases(limit:int = 100):
-  purchases = session.scalars(select(Purchase).limit(limit)).all()
+def GetAllPurchases(limit:int, offset:int):
+  purchases = session.scalars(select(Purchase).offset(offset).limit(limit)).all()
   if not purchases:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchases not found")
   return purchases
@@ -47,6 +48,9 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
   purchase = session.scalars(select(Purchase).where(Purchase.id == id_purchase)).one() 
   if not purchase:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchase not found")
+  #  Restricciones despues de confirmar compra
+  if purchase.total != 0.0:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You can't add orders because the purchase is confirmed")
   
   order_added = session.scalars(select(PurchasesOrders).where(PurchasesOrders.purchase_id == id_purchase)).all()
   for n in order_added:
@@ -57,7 +61,7 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
       session.commit()
       session.refresh(n) 
       return n 
-  new_order = PurchasesOrders(purchase_id=id_purchase, supply_id=order.supply_id, amount_supplies=order.amount_supplies, subtotal=price_total)
+  new_order = PurchasesOrders(purchase_id=id_purchase, supply_id=order.supply_id, amount_supplies=order.amount_supplies,price_supplies=order.price_supplies, subtotal=price_total)
   session.add(new_order)
   session.commit()
   session.refresh(new_order)
@@ -74,6 +78,16 @@ def ConfirmPurchase(id_purchase: str, id_provider: str):
   
   for order in orders:
     total += order['subtotal']
+    supplies = session.get(Supply, order['supply_id'] )
+    if supplies:
+      supplies.quantity_stock += order['amount_supplies']
+      if order['price_supplies']>supplies.price:
+        supplies.price = order['price_supplies']
+      else:
+        supplies.price = supplies.price
+      session.commit()
+      session.refresh(supplies)
+    
  
   purchase = session.scalars(select(Purchase).where(Purchase.id == id_purchase)).one()
   
@@ -94,3 +108,23 @@ def seePurchasesOrders(id_purchase: str):
   statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == id_purchase)
   orders = session.scalars(statement).all()
   return orders
+
+def UpdateAmountOrder(id_order: str, amount_supplies: int):
+  order = session.get(PurchasesOrders, uuid.UUID(id_order))
+  if not order:
+    raise HTTPException(status_code=404, detail="not found order")
+  print(order)
+  order.amount_supplies = amount_supplies
+  order.subtotal = order.supply.price * amount_supplies
+  session.add(order)
+  session.commit()
+  session.refresh(order)
+  return order
+
+def DeleteOrderById(id_order: str):
+  order = session.get(PurchasesOrders, uuid.UUID(id_order))
+  print(order)
+  if not order:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="order not found")
+  session.delete(order)
+  session.commit()

@@ -13,8 +13,8 @@ class Product(Base):
     price: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     sale_price: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     status: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-
     # details = relationship("RecipeDetail", cascade="all, delete-orphan")
+    details = relationship("RecipeDetail", cascade="all, delete-orphan", back_populates='product')
 
 class RecipeDetail(Base):
     __tablename__ = "recipe_detail"
