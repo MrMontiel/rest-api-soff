@@ -19,7 +19,8 @@ def GetDetailsProduct(id_product):
   statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
   details = session.scalars(statement).all()
   if not details:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Details not found")
+    return []
+    # raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Details not found")
   return details
 
 def GetProductById(id_product):
@@ -70,7 +71,7 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
   total:float = 0.0
   
   for detail in details:
-    total += detail['subtotal']
+    total += detail.subtotal
 
   if productCreate.name == "" or productCreate.sale_price == 0:
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="name's product and price's product is required")

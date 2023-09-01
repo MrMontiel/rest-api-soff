@@ -18,7 +18,7 @@ def orderSchema(order: PurchasesOrders) -> dict:
         
         "id_order": order.id,
         "purchase_id": order.purchase_id,
-        "supply_id": order.supply_id,
+        "supply_id": order.supply.name,
         "amount_supplies": order.amount_supplies,
         "price_supplies": order.price_supplies,
         "subtotal": order.subtotal

@@ -4,8 +4,8 @@ from fastapi import APIRouter, HTTPException, status
 from app.sales.adapters.services.services import (
   CreateSale, 
   GetAllSales, 
-  AddClient, 
-  AddOrder, 
+  # AddClient, 
+  # AddOrder, 
   ConfirmSale, 
   seeSalesOrders, 
   getGeneralClient,
@@ -13,12 +13,14 @@ from app.sales.adapters.services.services import (
   UpdateAmountOrder,
   ConfirmOrder
   )
+
+from app.sales.adapters.services.services_order import AddOrder, OrderProcessing
 import uuid
 from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders, Client
 from app.products.adapters.sqlalchemy.product import Product
 from app.sales.adapters.serializers.sale_schema import saleSchema, salesSchema, orderSchema, ordersSchema, clientsSchema, clientSchema
 
-from app.sales.domain.pydantic.sale_pydantic import SaleCreate, SalesOrdersCreate, ClientCreate, SalesOrders as SalesOrderPy
+from app.sales.domain.pydantic.sale_pydantic import SaleCreate, SalesOrdersCreate, ClientCreate
 
 from app.products.adapters.sqlalchemy.product import Product
 from app.products.adapters.serializers.product_schema import productSchema, productsSchema
@@ -62,21 +64,22 @@ async def create_sale():
     "message": "sale created successfully"
   }
 
-@sales.post('/{id_sale}/add-orders')
-async def add_order(id_sale: str, orders: list[SalesOrdersCreate]):
-  new_order = AddOrder(id_sale, orders)
+@sales.post('/{id_sale}/add-order')
+async def add_order(id_sale: str, order_created:SalesOrdersCreate):
+  order = OrderProcessing(order_created)
+  order_added = AddOrder(order)
   return {
-    "sale_id": new_order.sale_id,
-    "message": "orders added successfully"
+    "message": "orders added successfully",
+    "order": order_added
   }
 
 class confirmSaleOrders:
   sale: SaleCreate
-  orders: list[SalesOrderPy]
+  orders: list[SaleCreate]
 
 @sales.put('/{id_sale}/confirm-sale')
-async def confirm_sale(id_sale: str, sale: SaleCreate, orders: list[SalesOrdersCreate]):
-  sale = ConfirmSale(id_sale, sale, orders)
+async def confirm_sale(id_sale: str, sale:SaleCreate):
+  sale = ConfirmSale(id_sale, sale)
   return {
     "id_sale": sale.id,
     "sale": saleSchema(sale)

@@ -9,6 +9,8 @@ from app.sales.domain.pydantic.sale_pydantic import (
 from app.sales.adapters.sqlalchemy.sale import Sale, Client, SalesOrders, StatusSale
 from app.products.adapters.sqlalchemy.product import Product
 
+
+
 session = ConectDatabase.getInstance()
 
 def getGeneralClient() -> Client:
@@ -37,41 +39,10 @@ def CreateSale():
   session.refresh(new_sale)
   return new_sale
 
-def AddOrder(id_sale: str, orders: list[SalesOrdersCreate]):
-  if not orders:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="orders not found")
+def ConfirmSale(id_sale: str, saleCreate: SaleCreate):
   
-  for order in orders:
-    statement = select(Product).where(Product.id == order.product_id)
-    product = session.scalars(statement).one()
-  
-    if not product:
-      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
-    
-    price_total:float = product.sale_price * order.amount_product
+  # 56c6cbe9-09be-45f7-8731-e5bdc1e75560
 
-    new_order = SalesOrders(sale_id=id_sale, product_id=order.product_id, amount_product=order.amount_product, total=price_total)
-    session.add(new_order)
-    session.commit()
-    
-  sale = session.get(Sale, uuid.UUID(id_sale))
-  
-  if not sale:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="sale not found")
-  
-  
-  return {
-    "message": "Orders added successfully"
-  }
-
-def ConfirmSale(id_sale: str, saleCreate: SaleCreate, orders: list[SalesOrdersCreate]):
-  
-  # We verify that the number of orders is greater that zero.
-  if len(orders) <= 0:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="orders required for confirm sale")
-  
-  
-  AddOrder(id_sale, orders)
   # We verify that the type sale and payment method is different from empty.
   if saleCreate.type_sale == "" or saleCreate.payment_method == "":
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the type of sale and the payment_method are required")
@@ -98,13 +69,12 @@ def ConfirmSale(id_sale: str, saleCreate: SaleCreate, orders: list[SalesOrdersCr
   # Consultamos todas las ordenes
   listOrders = session.scalars(select(SalesOrders).where(SalesOrders.sale_id == id_sale)).all()
   
-  
   # We calculate the total
   total:float = 0.0
   for order in listOrders:
     total += order.total
   
-  sale.amount_order = len(orders)
+  sale.amount_order = len(listOrders)
   sale.total = total
   sale.pyment_method = saleCreate.payment_method
   sale.type_sale = saleCreate.type_sale
@@ -138,8 +108,6 @@ def GetClient(id: str):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="client not found")
   return client
 
-
-
 def UpdateAmountOrder(id_order: str, amount_product: int):
   order = session.get(SalesOrders, uuid.UUID(id_order))
   if not order:
@@ -152,7 +120,6 @@ def UpdateAmountOrder(id_order: str, amount_product: int):
   session.refresh(order)
   return order
 
-
 def ConfirmOrder(id_sale: str):
   sale = GetSaleById(id_sale)
   if sale.status == StatusSale.OPEN:
@@ -160,4 +127,3 @@ def ConfirmOrder(id_sale: str):
   else:
     if sale.status == StatusSale.PENDING:
       sale.status = StatusSale.PAID
-    

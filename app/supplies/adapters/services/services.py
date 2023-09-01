@@ -17,7 +17,7 @@ def GetAllSupplies(limit:int, offset: int):
 
 
 def GetOneSupply(id:str):
-  supplies = session.get(Supply, uuid.UUID(id))
+  supplies = session.get(Supply, id)
   if not supplies:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Supply not found")
   return supplies
