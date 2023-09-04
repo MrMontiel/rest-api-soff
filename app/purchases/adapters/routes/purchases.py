@@ -29,7 +29,7 @@ purchases = APIRouter(
 )
 
 @purchases.get('/')
-async def get_all_purchases(limit: int = 10, offset:int=0):
+async def get_all_purchases(limit: int = 100, offset:int=0):
   purchases = GetAllPurchases(limit, offset)
   return {
     "amount_purchases": len(purchases),

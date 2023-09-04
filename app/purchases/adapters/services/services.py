@@ -43,11 +43,12 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
   
   if not supply:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="supply not found")
-  price_total:float = supply.price * order.amount_supplies
+  price_total:float = order.price_supplies * order.amount_supplies
 
   purchase = session.scalars(select(Purchase).where(Purchase.id == id_purchase)).one() 
   if not purchase:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchase not found")
+  
   #  Restricciones despues de confirmar compra
   if purchase.total != 0.0:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You can't add orders because the purchase is confirmed")
@@ -56,7 +57,7 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
   for n in order_added:
     if n.supply_id == uuid.UUID(order.supply_id):
       n.amount_supplies += order.amount_supplies
-      n.total = n.amount_supplies * n.supply.price
+      n.subtotal = n.amount_supplies * n.price_supplies
       session.add(n)
       session.commit()
       session.refresh(n) 
@@ -68,6 +69,7 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
   return new_order
 
 def ConfirmPurchase(id_purchase: str, id_provider: str):
+  
   statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
   orders = ordersSchema(session.scalars(statement).all())
   
@@ -78,7 +80,7 @@ def ConfirmPurchase(id_purchase: str, id_provider: str):
   
   for order in orders:
     total += order['subtotal']
-    supplies = session.get(Supply, order['supply_id'] )
+    supplies = session.get(Supply, order['supply_id'])
     if supplies:
       supplies.quantity_stock += order['amount_supplies']
       if order['price_supplies']>supplies.price:
