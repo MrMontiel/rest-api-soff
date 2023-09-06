@@ -117,7 +117,7 @@ def UpdateAmountOrder(id_order: str, amount_supplies: int):
     raise HTTPException(status_code=404, detail="not found order")
   print(order)
   order.amount_supplies = amount_supplies
-  order.subtotal = order.supply.price * amount_supplies
+  order.subtotal = order.price_supplies * amount_supplies
   session.add(order)
   session.commit()
   session.refresh(order)
