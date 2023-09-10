@@ -1,8 +1,11 @@
+from sqlalchemy import select
 from app.infrastructure.database import ConectDatabase
 from fastapi import APIRouter, HTTPException, status
 from app.products.adapters.serializers.product_schema import productSchema, productsSchema, recipeDetailSchema,recipeDetailsSchema
-from app.products.adapters.services.services import GetAllProducts, CreateProduct, AddDetail, ConfirmProduct, GetDetailsProduct, GetProductById, UpdateDetail, UpdateDetail, UpdateProduct, DeleteDetail, DeleteProduct
+from app.products.adapters.services.services import GetAllProducts, CreateProduct, AddDetail, ConfirmProduct, GetDetailsProduct, GetProductById, UpdateDetail, UpdateDetail, UpdateProduct, DeleteDetail, DeleteProduct, ChangeStatus
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
+from app.supplies.adapters.sqlalchemy.supply import Supply
+from app.supplies.adapters.serializers.supply_schema import suppliesSchema
 
 session = ConectDatabase.getInstance()
 
@@ -11,9 +14,14 @@ products = APIRouter(
   tags=["Products"]
 )
 
+@products.get('/supplies')
+async def get_all_supplies():
+  supplies = session.scalars(select(Supply)).all()
+  return suppliesSchema(supplies)
+
 @products.get('/')
-async def get_all_products(limit: int = 100):
-  products = GetAllProducts()
+async def get_all_products(limit: int = 100, offset:int =0):
+  products = GetAllProducts(limit, offset)
   return {
     "amount_products": len(products),
     "products": productsSchema(products)
@@ -35,8 +43,8 @@ async def get_details_product(id_product: str):
   }
 
 @products.post('/add_products')
-async def create_product(product: ProductCreate):
-  new_product = CreateProduct(product)
+async def create_product():
+  new_product = CreateProduct()
   return {
     "id": new_product.id,
     "message": "product created successfully"
@@ -80,4 +88,11 @@ async def delete_product(id_product:str):
   DeleteProduct(id_product)
   return {
     "message":"Product deleted successfully"
+  }
+
+@products.put('/{id_product}/change_status')
+async def change_status(id_producto:str):
+  ChangeStatus(id_producto)
+  return{
+    "message":"Status updated"
   }
