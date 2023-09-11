@@ -130,3 +130,22 @@ def DeleteOrderById(id_order: str):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="order not found")
   session.delete(order)
   session.commit()
+
+def DeletePurchaseByid(id_purchase:str):
+  purchase = session.get(Purchase, uuid.UUID(id_purchase))
+  print(purchase)
+  if not purchase:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchase not found")
+  
+  #  Restricciones despues de confirmar compra
+  if purchase.total != 0.0:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You can't delete purchase because the purchase is confirmed")
+  
+  statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
+  orders = ordersSchema(session.scalars(statement).all())
+  
+  if len(orders) > 0:
+    delete_statement = delete(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
+    session.execute(delete_statement)
+  session.delete(purchase)
+  session.commit()
