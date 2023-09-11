@@ -7,6 +7,8 @@ from app.providers.adapters.routes.routes import providers
 from app.purchases.adapters.routes.purchases import purchases
 from app.products.adapters.routes.routes import products
 from app.users.adapters.routes.routes import user
+from app.roles.adapters.routes.routes import role
+from app.permissions.adapters.routes.routes import permission
 app = FastAPI()
 
 origins = ["*"]
@@ -26,3 +28,5 @@ app.include_router(supplies)
 app.include_router(providers)
 app.include_router(products)
 app.include_router(user)
+app.include_router(role)
+app.include_router(permission)
