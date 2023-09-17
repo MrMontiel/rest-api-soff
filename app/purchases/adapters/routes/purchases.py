@@ -9,7 +9,8 @@ from app.purchases.adapters.services.services import (
   seePurchasesOrders,
   GetPurchaseById,
   UpdateAmountOrder,
-  DeleteOrderById
+  DeleteOrderById,
+  DeletePurchaseByid
   )
 
 from app.purchases.adapters.sqlalchemy.purchase import Purchase, PurchasesOrders
@@ -85,4 +86,11 @@ async def DeleteOrderPurchase(id_order: str):
   DeleteOrderById(id_order)
   return {
     "message": "Order deleted successfully"
+  }
+
+@purchases.delete('/{id_purchase}/deletepurchase')
+async def DeletePurchase(id_purchase: str):
+  DeletePurchaseByid(id_purchase)
+  return{
+    "message": "Purchase deleted successfully"
   }
