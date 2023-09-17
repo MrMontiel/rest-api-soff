@@ -19,8 +19,8 @@ providers = APIRouter(
 
 
 @providers.get('/')
-async def get_all_providers(limit: int = 100):
-    providers = GetAllProviders()
+async def get_all_providers(limit: int = 100, offset: int = 0):
+    providers = GetAllProviders(limit, offset)
     return{
         "amount_providers": len(providers),
         "providers": providersSchema(providers)
