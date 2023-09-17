@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.users.domain.pydantic.user import UserCreate
+from app.users.domain.pydantic.user import UserCreate, UserUpdate
 from app.users.adapters.services.services import (
     get_users,
     get_user_id,
@@ -43,7 +43,7 @@ async def update_user(id_user:str):
     
     
 @user.put("/{id_user}/put-user")
-async def update_user(id_user:str, user: UserCreate):
+async def update_user(id_user:str, user: UserUpdate):
     user_id_put= user_update(id_user,user)
     return{
         "user update": userSchema(user_id_put)

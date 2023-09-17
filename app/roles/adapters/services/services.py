@@ -33,7 +33,7 @@ def create_rol(role: RoleCreate):
 
 
 def get_id_role(id_role:str):
-    roles = session.scalars(select(Role).where(Role.id== id_role)).one()
+    roles = session.scalars(select(Role).where(Role.id== uuid.UUID(id_role))).one()
     if not roles:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
     return roles

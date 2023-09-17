@@ -2,7 +2,7 @@ import uuid
 from sqlalchemy import select
 from fastapi import status, HTTPException
 from app.infrastructure.database import SessionLocal
-from app.users.domain.pydantic.user import UserCreate
+from app.users.domain.pydantic.user import UserCreate, UserUpdate
 from app.users.adapters.sqlalchemy.user import User
 from app.users.adapters.serializer.user_eschema import User, usersSchema
 from app.roles.adapters.services.services import get_id_role
@@ -31,7 +31,7 @@ def post_user(user : UserCreate):
     if  user.name == "" or user.email == ""  or user.password == "" or user.id_role=="":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the fields name, email and password ")
     role_id_get_role= get_id_role(user.id_role)
-    new_user = User(name=user.name,  email=user.email, password= user.password , id_role = role_id_get_role.id)
+    new_user = User(name=user.name, document_type=user.document_type, document=user.document, phone=user.phone, email=user.email, password= user.password , id_role =role_id_get_role.id)
     session.add(new_user)
     session.commit()
     session.refresh(new_user)
@@ -47,11 +47,13 @@ def get_user_id(id_user:str):
     return user_id
     
     
-def user_update(id_user:str , user: UserCreate):
+def user_update(id_user:str , user: UserUpdate):
     if not user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user is required")
     user_id_update= get_user_id(id_user)
     user_id_update.name =user.name
+    user_id_update.document_type =user.document_type
+    user_id_update.document =user.document
     user_id_update.email= user.email
     user_id_update.password= user.password
     user_id_update.id_role= user.id_role

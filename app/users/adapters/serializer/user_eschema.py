@@ -4,6 +4,9 @@ def userSchema(user: User)-> dict:
     return{
         "id":user.id,
         "name":user.name,
+        "document_type":user.document_type,
+        "document":user.document,
+        "phone":user.phone,
         "email":user.email,
         "status":user.status,
         "role":user.role.name
