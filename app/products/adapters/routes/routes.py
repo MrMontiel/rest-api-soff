@@ -20,7 +20,7 @@ async def get_all_supplies():
   return suppliesSchema(supplies)
 
 @products.get('/')
-async def get_all_products(limit: int = 100, offset:int =0):
+async def get_all_products(limit: int = 20, offset:int =0):
   products = GetAllProducts(limit, offset)
   return {
     "amount_products": len(products),
@@ -91,8 +91,8 @@ async def delete_product(id_product:str):
   }
 
 @products.put('/{id_product}/change_status')
-async def change_status(id_producto:str):
-  ChangeStatus(id_producto)
+async def change_status(id_product:str):
+  ChangeStatus(id_product)
   return{
     "message":"Status updated"
   }

@@ -86,8 +86,8 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
   
   product = GetProductById(id_product)
 
-  if not product:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
+  # if not product:
+  #   raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
 
   product.name = productCreate.name
   product.price = total
@@ -149,12 +149,8 @@ def ChangeStatus(id_product:str):
   if not product:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
-  if product.status:
-    product.status = False
-    session.add(product) 
-    session.commit()
+  product.status = not product.status
+  session.add(product) 
+  session.commit()
 
-  else:
-    product.status = True
-    session.add(product)
-    session.commit()
+  return product
