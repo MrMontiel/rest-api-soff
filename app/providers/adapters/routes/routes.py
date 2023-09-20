@@ -2,7 +2,7 @@ from sqlalchemy import select
 from app.infrastructure.database import ConectDatabase
 from app.providers.adapters.serializers.provider_schema import providersSchema
 from fastapi import APIRouter, HTTPException, status
-from app.providers.adapters.services.services import GetAllProviders,AddProvider, UpdateProvider, DeleteProvider, GetOneProvider
+from app.providers.adapters.services.services import GetAllProviders,AddProvider, UpdateProvider, DeleteProvider, GetOneProvider, UpdateStatusProvider
 from app.providers.adapters.sqlachemy.provider import Provider
 from app.providers.adapters.services.services import GetAllProviders
 from app.providers.adapters.serializers.provider_schema import ProviderSchema, providersSchema
@@ -56,4 +56,11 @@ async def delete_provider_route(id: str):
     return{
         "Provider Delete": ProviderSchema(delete_provider)
         
+    }
+    
+@providers.put("/{id}/status_update_provider")
+async def updateStatusProvider(id:str):
+    update_provider_route = UpdateStatusProvider(id)
+    return{
+        "Provider update": ProviderSchema(update_provider_route)
     }

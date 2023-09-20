@@ -6,9 +6,13 @@ from typing import Optional
 
 class UserBase(BaseModel):
     name : str
+    document_type : str
+    document : str
+    phone : str
     email : str
     password : str
     id_role: str
+    
     
         
 class User(UserBase):
@@ -19,4 +23,7 @@ class User(UserBase):
         from_attributes = True
 
 class UserCreate(UserBase):
+    pass
+
+class UserUpdate(UserBase):
     pass

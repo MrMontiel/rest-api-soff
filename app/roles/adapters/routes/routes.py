@@ -37,10 +37,7 @@ async def get_role(limit: int =10):
 async def post_rol(role : RoleCreate):
     new_role = create_rol(role)
     return{
-        "id" : new_role.id,
-        "name": new_role.name,
-        "message": "Rol created successfully"
-        
+        "role":roleSchema(new_role)
     }
     
     
