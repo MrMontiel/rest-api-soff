@@ -4,20 +4,21 @@ from fastapi import APIRouter, HTTPException, status
 from app.sales.adapters.services.services import (
   CreateSale, 
   GetAllSales, 
-  AddClient, 
-  AddOrder, 
   ConfirmSale, 
   seeSalesOrders, 
   getGeneralClient,
   GetSaleById,
-  UpdateAmountOrder
+  UpdateAmountOrder,
+  ConfirmOrder
   )
+
+from app.sales.adapters.services.services_order import AddOrder, OrderProcessing
 import uuid
-from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders, Client
+from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders, Client, StatusSale, VoucherSale
 from app.products.adapters.sqlalchemy.product import Product
 from app.sales.adapters.serializers.sale_schema import saleSchema, salesSchema, orderSchema, ordersSchema, clientsSchema, clientSchema
 
-from app.sales.domain.pydantic.sale_pydantic import SaleCreate, SalesOrdersCreate, ClientCreate
+from app.sales.domain.pydantic.sale_pydantic import SaleCreate, SalesOrdersCreate, ClientCreate, VoucherCreate
 
 from app.products.adapters.sqlalchemy.product import Product
 from app.products.adapters.serializers.product_schema import productSchema, productsSchema
@@ -30,24 +31,14 @@ sales = APIRouter(
   tags=["Sales"]
 )
 
-@sales.get('/products')
-async def get_all_products():
-  products = session.scalars(select(Product)).all()
-  return productsSchema(products)
-
-@sales.get('/clients')
-async def get_all_products():
-  clients = session.scalars(select(Client)).all()
-  return clientsSchema(clients)
-
 @sales.get('/client/general')
 async def get_client_by_id():
   client = getGeneralClient()
   return client
 
 @sales.get('/')
-async def get_all_sales(limit: int = 100):
-  sales = GetAllSales()
+async def get_all_sales(limit: int = 25, skip:int = 0):
+  sales = GetAllSales(limit, skip)
   return {
     "amount_sales": len(sales),
     "sales": salesSchema(sales)
@@ -58,10 +49,10 @@ async def get_sale_by_id(id_sale: str):
   sale = GetSaleById(id_sale)
   return saleSchema(sale)
 
-@sales.post('/add-client')
-async def create_client(client: ClientCreate):
-  new_client = AddClient(client)
-  return clientSchema(new_client)
+# @sales.post('/add-client')
+# async def create_client(client: ClientCreate):
+#   new_client = AddClient(client)
+#   return clientSchema(new_client)
 
 @sales.post('/')
 async def create_sale():
@@ -72,17 +63,21 @@ async def create_sale():
   }
 
 @sales.post('/{id_sale}/add-order')
-async def add_order(id_sale: str, order: SalesOrdersCreate):
-  new_order = AddOrder(id_sale, order)
+async def add_order(id_sale: str, order_created:SalesOrdersCreate):
+  order = OrderProcessing(order_created)
+  order_added = AddOrder(order)
   return {
-    "sale_id": new_order.sale_id,
-    "product_id": new_order.product_id,
-    "message": "order add successfully"
+    "message": "orders added successfully",
+    "order": order_added
   }
 
+class confirmSaleOrders:
+  sale: SaleCreate
+  orders: list[SaleCreate]
+
 @sales.put('/{id_sale}/confirm-sale')
-async def confirm_sale(id_sale: str, saleCreate: SaleCreate):
-  sale = ConfirmSale(id_sale, saleCreate)
+async def confirm_sale(id_sale: str, sale:SaleCreate):
+  sale = ConfirmSale(id_sale, sale)
   return {
     "id_sale": sale.id,
     "sale": saleSchema(sale)
@@ -111,4 +106,25 @@ async def DeleteOrderById(id_order: str):
   session.commit()
   return {
     "message": "Order deleted successfully"
+  }
+  
+@sales.put('/{id_sale}/confirm-order')
+async def ConfirmOrder(id_sale: str):
+  ConfirmOrder(id_sale)
+  pass
+
+@sales.post('/{id_sale}/confirm-pending')
+async def ConfirmSalePending(id_sale: str, voucher_create: VoucherCreate):
+  sale = session.get(Sale, uuid.UUID(id_sale))
+  voucher = VoucherSale(filename=voucher_create.filename, link=voucher_create.link, sale_id=id_sale)
+  # Add voucher
+  session.add(voucher)
+  session.commit() 
+  session.refresh(voucher)
+  sale.status = StatusSale.PAID
+  session.add(sale)
+  session.commit()
+  session.refresh(sale)
+  return {
+    "message" : "voucher added successfully"
   }
