@@ -20,7 +20,7 @@ async def get_all_supplies():
   return suppliesSchema(supplies)
 
 @products.get('/')
-async def get_all_products(limit: int = 20, offset:int =0):
+async def get_all_products(limit: int = 100, offset:int =0):
   products = GetAllProducts(limit, offset)
   return {
     "amount_products": len(products),
@@ -71,19 +71,19 @@ async def update_detail(id_detail:str, amount_supply: int):
   detail = UpdateDetail(id_detail, amount_supply)
   return recipeDetailSchema(detail)
 
-@products.put('/update_product')
+@products.put('/{id_product}/update_product')
 async def update_product(id_product:str, products:ProductCreate):
   product = UpdateProduct(id_product, products)
   return productSchema(product)
 
-@products.delete('{id_detail}/delete_detail')
+@products.delete('/{id_detail}/delete_detail')
 async def delete_detail(id_detail:str):
   DeleteDetail(id_detail)
   return {
     "message":"Detail deleted successfully"
   }
 
-@products.delete('{id_product}/delete_product')
+@products.delete('/{id_product}/delete_product')
 async def delete_product(id_product:str):
   DeleteProduct(id_product)
   return {

@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, desc, asc
 from fastapi import status, HTTPException
 from app.infrastructure.database import ConectDatabase
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
@@ -10,7 +10,7 @@ from app.products.adapters.serializers.product_schema import productSchema, prod
 session = ConectDatabase.getInstance()
 
 def GetAllProducts(limit:int, offset:int):
-  products = session.scalars(select(Product).offset(offset).limit(limit)).all()
+  products = session.scalars(select(Product).offset(offset).limit(limit).order_by(desc(Product.name))).all()
   if not products:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Products not found")
   return products
@@ -70,6 +70,11 @@ def AddDetail(id_product:str, detail: RecipeDetailCreate):
 
 
 def ConfirmProduct(id_product:str, productCreate:ProductCreate):
+  # product = GetProductById(id_product)
+
+  # if product.status == False:
+  #   raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="The product is not disable")
+  
   statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
   details = recipeDetailsSchema(session.scalars(statement).all())
 
@@ -81,8 +86,6 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
   for detail in details:
     total += detail['subtotal']
 
-  if productCreate.name == "" or productCreate.sale_price == 0:
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="name's product and price's product is required")
   
   product = GetProductById(id_product)
 
@@ -111,6 +114,17 @@ def UpdateDetail(id_detail:str, amount_supply:int):
   return detail
 
 def UpdateProduct(id_product: str, products:ProductCreate):
+  statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
+  details = recipeDetailsSchema(session.scalars(statement).all())
+
+  if len(details) <= 0:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="details required for confirm product")
+  
+  total:float = 0.0
+
+  for detail in details:
+    total += detail['subtotal']
+
   product = session.get(Product, uuid.UUID(id_product))
 
   if not product:
@@ -118,6 +132,7 @@ def UpdateProduct(id_product: str, products:ProductCreate):
 
   if product.status:
     product.name = products.name
+    product.price = total
     product.sale_price = products.sale_price
     session.add(product)
     session.commit()
@@ -140,6 +155,12 @@ def DeleteProduct(id_product:str):
   if not product:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
   
+  statement = select(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
+  details = recipeDetailsSchema(session.scalars(statement).all())
+  
+  if len(details) > 0:
+    delete_statement = delete(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
+    session.execute(delete_statement)
   session.delete(product)
   session.commit()
 
