@@ -10,7 +10,7 @@ def saleSchema(sale: Sale) -> dict:
     "total": sale.total,
     "type_sale": sale.type_sale,
     "status": sale.status,
-    "client": sale.client
+    "client": sale.client.name
   }
   
 def salesSchema(sales: list[Sale]) -> list:
