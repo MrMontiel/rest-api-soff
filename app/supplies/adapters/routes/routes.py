@@ -2,7 +2,7 @@ from sqlalchemy import select
 from app.infrastructure.database import ConectDatabase
 from app.supplies.adapters.serializers.supply_schema import SupplySchema
 from fastapi import APIRouter, HTTPException, status
-from app.supplies.adapters.services.services import GetAllSupplies, UpdateSupply, DeleteSupply, AddSupply, GetOneSupply
+from app.supplies.adapters.services.services import GetAllSupplies, UpdateSupply, DeleteSupply, AddSupply, GetOneSupply, UpdateStatusSupply
 from app.supplies.adapters.sqlalchemy.supply import Supply
 from app.supplies.adapters.serializers.supply_schema import SupplySchema, suppliesSchema
 
@@ -54,4 +54,11 @@ async def delete_supply_route(id: str):
     return{
         "Supply Delete": SupplySchema(delete_supply)
         
+    }
+    
+@supplies.put("/{id}/status_update_supply")
+async def updateStatusSupply(id:str):
+    update_supply_route = UpdateStatusSupply(id)
+    return{
+        "Supply update": SupplySchema(update_supply_route)
     }

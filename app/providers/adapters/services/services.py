@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from fastapi import status, HTTPException
 from app.infrastructure.database import ConectDatabase
 from app.providers.domain.pydantic.provider import ProviderCreate, ProviderUpdate, ProviderDelete
@@ -8,7 +8,7 @@ from app.providers.adapters.sqlachemy.provider import Provider
 session = ConectDatabase.getInstance()
 
 def GetAllProviders(limit:int, offset: int):
-  providers = session.scalars(select(Provider).offset(offset).limit(limit)).all()
+  providers = session.scalars(select(Provider).offset(offset).limit(limit).order_by(desc(Provider.date_registration))).all()
   if not providers:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Providers not found")
   return providers
@@ -33,7 +33,9 @@ def AddProvider(provider: ProviderCreate):
   return new_provider
     
 def UpdateProvider(id: str, provider_update: ProviderUpdate):
-    provider = session.query(Provider).filter(Provider.id == uuid.UUID(id)).first()
+    provider = session.get(Provider, uuid.UUID(id))
+    print(provider)
+    # provider = session.query(Provider).filter(Provider.id == uuid.UUID(id)).first()
     if provider:
         for attr, value in provider_update.dict().items():
             setattr(provider, attr, value)
@@ -48,5 +50,14 @@ def DeleteProvider(id: str):
     if not provider:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Supply not found")
     session.delete(provider)
+    session.commit()
+    return provider
+  
+def UpdateStatusProvider(id:str):
+    provider = session.get(Provider, uuid.UUID(id))
+    if not provider:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Provider not found")
+    provider.status= not provider.status
+    session.add(provider)
     session.commit()
     return provider

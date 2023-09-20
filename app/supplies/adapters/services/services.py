@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from fastapi import status, HTTPException
 from app.infrastructure.database import ConectDatabase
 from app.supplies.domain.pydantic.supply import SupplyCreate, SupplyUpdate, SupplyDelete
@@ -10,7 +10,7 @@ session = ConectDatabase.getInstance()
 
 
 def GetAllSupplies(limit:int, offset: int):
-  supplies = session.scalars(select(Supply).offset(offset).limit(limit)).all()
+  supplies = session.scalars(select(Supply).offset(offset).limit(limit).order_by(desc(Supply.name))).all()
   if not supplies:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="supplies not found")
   return supplies
@@ -56,6 +56,15 @@ def DeleteSupply(id: str):
     session.commit()
     return supply
 
+
+def UpdateStatusSupply(id:str):
+    supply = session.get(Supply, uuid.UUID(id))
+    if not supply:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Supply not found")
+    supply.status= not supply.status
+    session.add(supply)
+    session.commit()
+    return supply
 
 
 
