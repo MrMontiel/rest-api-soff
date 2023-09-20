@@ -156,9 +156,16 @@ def ChangeStatus(id_purchase:str):
 
   if not purchase:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Purchase not found")
+  
+  statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
+  orders = ordersSchema(session.scalars(statement).all())
+
+  for order in orders:
+    supplies = session.get(Supply, order['supply_id'])
+    if supplies:
+      supplies.quantity_stock -= order['amount_supplies']
+      session.commit()
+      session.refresh(supplies)
 
   purchase.status = not purchase.status  
   session.add(purchase)
-  session.commit()
-  session.refresh(purchase)
-  return(purchase)
