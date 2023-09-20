@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from fastapi import status, HTTPException
 from app.infrastructure.database import SessionLocal
 from app.users.domain.pydantic.user import UserCreate, UserUpdate
@@ -16,7 +16,7 @@ session = SessionLocal()
     
 
 def get_users(limit:int = 100):
-    users = session.scalars(select(User)).all()
+    users = session.scalars(select(User).order_by(desc(User.name))).all()
     print(users)
     if not users:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="users not found")
@@ -41,7 +41,7 @@ def post_user(user : UserCreate):
             
 
 def get_user_id(id_user:str):
-    user_id= session.scalars(select(User).filter(User.id == id_user)).one()
+    user_id= session.scalars(select(User).filter(User.id == uuid.UUID(id_user))).one()
     if not user_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="users not found")
     return user_id
@@ -68,3 +68,11 @@ def delete_user(id_user:str):
     session.commit()
     return user_detelete_id
 
+def updateStatusUser(id_user:str):
+    user= get_user_id(id_user)
+    user.status= not user.status
+    session.add(user)
+    session.commit()
+    return user
+    
+    

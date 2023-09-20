@@ -3,6 +3,7 @@ from typing import List
 from sqlalchemy import String, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, Mapped, mapped_column, DeclarativeBase
+from app.permissions.adapters.slqalchemy.permission import Permission
 from app.infrastructure.database import Base
 
 class Role(Base):

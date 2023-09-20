@@ -6,6 +6,7 @@ from app.users.adapters.services.services import (
     delete_user,
     post_user,
     user_update,
+    updateStatusUser
     )
 from app.users.adapters.serializer.user_eschema import ( usersSchema,userSchema, )
 
@@ -34,8 +35,8 @@ async def get_id_user(user :UserCreate):
         "user": userSchema(user_new)  
     }
     
-@user.get("/{id_user}/put-user")
-async def update_user(id_user:str):
+@user.get("/{id_user}/get-user")
+async def get_user(id_user:str):
     id_user=get_user_id(id_user)
     return{
         "user": userSchema(id_user)
@@ -55,3 +56,12 @@ async def user_delete(id_user:str):
     return{
         "Mensaje": "Deleted successfully"
     }   
+    
+    
+@user.put("/{id_user}/status-update")
+async def updateStatus(id_user:str):
+    updateStatusUser(id_user)
+    return{
+        "Mensaje": "update Status"
+    }   
+    

@@ -10,8 +10,10 @@ from app.roles.adapters.services.services import (
     replace_role_base,
     permissionsrole_create,
     permissionroles_get,
+    Permission_role_create,
+    updateStatusRole
 )
-
+from app.roles.domain.pydantic.role import AssignPermissions
 from app.roles.adapters.serializer.roles_schema import (
     rolesSchema, 
     roleSchema, 
@@ -29,7 +31,6 @@ role = APIRouter(
 async def get_role(limit: int =10):
     roles = get_roles()
     return{
-        "amount_roles": len(roles),
         "role": rolesSchema(roles)
     }
     
@@ -86,3 +87,18 @@ async def  get_permissionrole(id_permisssionrole:str):
     return{
         "Permision Role": permissionsRolesSchema(permissionrole_get_id)
     }
+    
+@role.post("/post-permissions/{nombre_role}")
+async def assign_permissions(nombre_role:str, permissions: list[AssignPermissions]):
+    Permission_role_create(nombre_role, permissions)
+    return {
+        "message": "Permisos agregados"
+    }
+    
+@role.put("/{id_role}/status-update-role")
+async def updateStatusRol(id_role:str):
+    updateStatusRole(id_role)
+    return{
+        "Mensaje": "update Status"
+    }   
+    

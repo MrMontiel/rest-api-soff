@@ -8,6 +8,7 @@ def userSchema(user: User)-> dict:
         "document":user.document,
         "phone":user.phone,
         "email":user.email,
+        "password":user.password,
         "status":user.status,
         "role":user.role.name
     }

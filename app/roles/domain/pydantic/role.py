@@ -27,3 +27,6 @@ class PermissionsRoles(PermissionsRolesBase):
 
 class PermissionsRolesCreate(PermissionsRolesBase):
     pass
+
+class AssignPermissions(BaseModel):
+    id_permission: str

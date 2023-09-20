@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from fastapi import status, HTTPException
 from app.infrastructure.database import SessionLocal
 from app.roles.domain.pydantic.role import RoleCreate, PermissionsRolesCreate
@@ -12,7 +12,7 @@ session = SessionLocal()
 
 # ----------------------------------ROLE SERVICES-----------------------------------------------
 def get_roles(limit:int = 10):
-    roles = session.scalars(select(Role)).all()
+    roles = session.scalars(select(Role).order_by(desc(Role.name))).all()
     if not roles:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
     return roles
@@ -100,3 +100,26 @@ def permissionsrole_create(permissionsrole: PermissionsRolesCreate):
     session.commit()
     session.refresh(new_permissionsrole)
     return new_permissionsrole
+
+def Permission_role_create(nombre_role:str, permissions):
+    new_role = Role(name=nombre_role)
+    session.add(new_role)
+    session.commit()
+    session.refresh(new_role)
+    if not new_role:
+        raise HTTPException(status_code=404, detail="El rol no fue encontrado")
+    for permission in permissions:
+        permission_database = PermissionsRoles(id_role=new_role.id, id_permission=permission.id_permission)
+        session.add(permission_database)
+        session.commit()
+        
+        
+def updateStatusRole(id_role:str):
+    role = session.get(Role, uuid.UUID( id_role))
+    if not role:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
+    role.status= not role.status
+    session.add(role)
+    session.commit()
+    return role
+    
