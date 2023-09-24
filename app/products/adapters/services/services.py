@@ -10,7 +10,7 @@ from app.products.adapters.serializers.product_schema import productSchema, prod
 session = ConectDatabase.getInstance()
 
 def GetAllProducts(limit:int, offset:int):
-  products = session.scalars(select(Product).offset(offset).limit(limit).order_by(desc(Product.name))).all()
+  products = session.scalars(select(Product).where(Product.status != False).offset(offset).limit(limit).order_by(desc(Product.name))).all()
   if not products:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Products not found")
   return products

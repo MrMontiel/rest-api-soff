@@ -20,7 +20,7 @@ def getGeneralProvider() -> Provider:
   return provider
 
 def GetAllPurchases(limit:int, offset:int):
-  purchases = session.scalars(select(Purchase).offset(offset).limit(limit).order_by(desc(Purchase.purchase_date))).all()
+  purchases = session.scalars(select(Purchase).where(Purchase.amount_order >0).offset(offset).limit(limit).order_by(desc(Purchase.purchase_date))).all()
   if not purchases:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchases not found")
   return purchases
