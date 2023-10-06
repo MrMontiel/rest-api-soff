@@ -8,7 +8,7 @@ def purchaseSchema(purchase: Purchase) -> dict:
         "provider_id": purchase.provider_id,
         "provider": purchase.provider.name,
         "total": purchase.total,
-        "status": purchase.status
+        # "status": purchase.status
     }
     
 def purchasesSchema(purchases: list[Purchase]) -> list:
