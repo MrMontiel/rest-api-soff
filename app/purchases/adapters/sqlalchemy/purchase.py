@@ -16,7 +16,7 @@ class Purchase(Base):
   provider_id:Mapped[str] = mapped_column(ForeignKey("providers.id"))
   provider:Mapped["Provider"] = relationship() 
   total: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
-  status: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+  # status: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     
 class PurchasesOrders(Base):
   __tablename__ = "purchases_orders"
