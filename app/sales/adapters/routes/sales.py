@@ -37,7 +37,7 @@ async def get_client_by_id():
   return client
 
 @sales.get('/')
-async def get_all_sales(limit: int = 25, skip:int = 0):
+async def get_all_sales(limit: int = 100, skip:int = 0):
   sales = GetAllSales(limit, skip)
   return {
     "amount_sales": len(sales),
