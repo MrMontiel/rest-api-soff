@@ -39,10 +39,8 @@ async def get_client_by_id():
 @sales.get('/')
 async def get_all_sales(limit: int = 100, skip:int = 0):
   sales = GetAllSales(limit, skip)
-  return {
-    "amount_sales": len(sales),
-    "sales": salesSchema(sales)
-  }
+  return salesSchema(sales)
+  
 
 @sales.get('/{id_sale}')
 async def get_sale_by_id(id_sale: str):
@@ -86,11 +84,8 @@ async def confirm_sale(id_sale: str, sale:SaleCreate):
 @sales.get('/{id_sale}/orders')
 async def getAllOrdersBySaleId(id_sale: str):
   orders = seeSalesOrders(id_sale)
-  return {
-    "id_sale": id_sale,
-    "orders": ordersSchema(orders)
-  }
-  
+  return ordersSchema(orders)
+
 @sales.put('/update-amount-order')
 async def UpdateAmountOrderBySaleId(id_order:str, amount_product: int):
   order = UpdateAmountOrder(id_order, amount_product)
