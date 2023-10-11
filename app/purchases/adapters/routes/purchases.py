@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from app.infrastructure.database import ConectDatabase
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException
 from app.purchases.adapters.services.services import (
   CreatePurchase, 
   GetAllPurchases, 
@@ -10,8 +10,7 @@ from app.purchases.adapters.services.services import (
   GetPurchaseById,
   UpdateAmountOrder,
   DeleteOrderById,
-  DeletePurchaseByid,
-  ChangeStatus
+  DeletePurchaseByid
   )
 
 from app.purchases.adapters.sqlalchemy.purchase import Purchase, PurchasesOrders
@@ -96,9 +95,9 @@ async def DeletePurchase(id_purchase: str):
     "message": "Purchase deleted successfully"
   }
 
-@purchases.put('/{id_purchase}/change_status')
-async def change_status(id_purchase:str):
-  ChangeStatus(id_purchase)
-  return{
-    "message":"Status updated"
-  }
+# @purchases.put('/{id_purchase}/change_status')
+# async def change_status(id_purchase:str):
+#   ChangeStatus(id_purchase)
+#   return{
+#     "message":"Status updated"
+#   }

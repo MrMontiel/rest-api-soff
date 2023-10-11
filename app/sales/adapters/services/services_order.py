@@ -44,4 +44,4 @@ def AddOrder(order: SalesOrdersCreate):
   session.add(order_sqlalchemy)
   session.commit()
   session.refresh(order_sqlalchemy)
-  return order
+  return order_sqlalchemy

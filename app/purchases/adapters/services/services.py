@@ -20,7 +20,7 @@ def getGeneralProvider() -> Provider:
   return provider
 
 def GetAllPurchases(limit:int, offset:int):
-  purchases = session.scalars(select(Purchase).offset(offset).limit(limit).order_by(desc(Purchase.purchase_date))).all()
+  purchases = session.scalars(select(Purchase).where(Purchase.amount_order >0).offset(offset).limit(limit).order_by(desc(Purchase.purchase_date))).all()
   if not purchases:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchases not found")
   return purchases
@@ -151,21 +151,21 @@ def DeletePurchaseByid(id_purchase:str):
   session.commit()
 
 
-def ChangeStatus(id_purchase:str):
-  purchase = session.get(Purchase, uuid.UUID(id_purchase))
+# def ChangeStatus(id_purchase:str):
+#   purchase = session.get(Purchase, uuid.UUID(id_purchase))
 
-  if not purchase:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Purchase not found")
+#   if not purchase:
+#     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Purchase not found")
   
-  statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
-  orders = ordersSchema(session.scalars(statement).all())
+#   statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
+#   orders = ordersSchema(session.scalars(statement).all())
 
-  for order in orders:
-    supplies = session.get(Supply, order['supply_id'])
-    if supplies:
-      supplies.quantity_stock -= order['amount_supplies']
-      session.commit()
-      session.refresh(supplies)
+#   for order in orders:
+#     supplies = session.get(Supply, order['supply_id'])
+#     if supplies:
+#       supplies.quantity_stock -= order['amount_supplies']
+#       session.commit()
+#       session.refresh(supplies)
 
-  purchase.status = not purchase.status  
-  session.add(purchase)
+#   purchase.status = not purchase.status  
+#   session.add(purchase)
