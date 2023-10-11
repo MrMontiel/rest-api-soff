@@ -8,7 +8,7 @@ from app.sales.domain.pydantic.sale_pydantic import (
 )
 from app.sales.adapters.sqlalchemy.sale import Sale, Client, SalesOrders, StatusSale
 from app.products.adapters.sqlalchemy.product import Product
-
+from app.sales.adapters.exceptions.exceptions import OrderNotFound
 session = ConectDatabase.getInstance()
 
 def getGeneralClient() -> Client:
@@ -36,6 +36,8 @@ def CreateSale():
   session.commit()
   session.refresh(new_sale)
   return new_sale
+
+
 def ConfirmSale(id_sale: str, saleCreate: SaleCreate):
   
   # 56c6cbe9-09be-45f7-8731-e5bdc1e75560
@@ -108,7 +110,7 @@ def GetClient(id: str):
 def UpdateAmountOrder(id_order: str, amount_product: int):
   order = session.get(SalesOrders, uuid.UUID(id_order))
   if not order:
-    raise HTTPException(status_code=404, detail="not found order")
+    OrderNotFound()
   print(order)
   order.amount_product = amount_product
   order.total = order.product.sale_price * amount_product
