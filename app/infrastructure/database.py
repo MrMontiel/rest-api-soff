@@ -16,7 +16,6 @@ Base = declarative_base()
 class ConectDatabase:
   __instance: SessionLocal = None
   
-  
   @staticmethod
   def getInstance():
     if ConectDatabase.__instance == None:

@@ -10,7 +10,7 @@ class Purchase(PurchaseBase):
     purchase_date: str
     amount_order: int=0
     total: float = 0.0
-    status: bool = True
+    # status: bool = True
     
 class Config:
     from_attributes = True
