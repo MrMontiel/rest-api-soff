@@ -77,16 +77,22 @@ async def delete_role(id_role : str):
 @role.post("/post-permissinosrole")
 async def create_permissionsrole(permissionsrole :PermissionsRolesCreate):
     new_permissionrole= permissionsrole_create(permissionsrole)
+    print(new_permissionrole)
     return{
         "Permission_Role": permissionRolesSchema(new_permissionrole)
     }
     
-@role.get("/{id_permissionrole}/permissionrole-get")
+@role.get("/{id_permisssionrole}/permissionrole-get")
 async def  get_permissionrole(id_permisssionrole:str):
     permissionrole_get_id= permissionroles_get(id_permisssionrole)
-    return{
-        "Permision Role": permissionsRolesSchema(permissionrole_get_id)
-    }
+    return {
+        "Permission_Role":permissionsRolesSchema(permissionrole_get_id)
+        
+        }
+    
+    
+    
+    
     
 @role.post("/post-permissions/{nombre_role}")
 async def assign_permissions(nombre_role:str, permissions: list[AssignPermissions]):

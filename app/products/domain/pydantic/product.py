@@ -8,6 +8,7 @@ class ProductBase (BaseModel):
 class Product(ProductBase):
     id: Optional[str]
     price: float
+    register_date: str
     status: bool = True
 
     class Config:
@@ -20,7 +21,7 @@ class RecipeDetailBase(BaseModel):
     product_id: str
     supply_id: str
     amount_supply: int
-    unit_measure:str
+    # unit_measure:str
 
 class RecipeDetailCreate(RecipeDetailBase):
     pass
