@@ -7,6 +7,11 @@ from app.products.domain.pydantic.product import RecipeDatail
 from app.infrastructure.database import ConectDatabase
 from app.supplies.adapters.sqlalchemy.supply import Supply as SupplySQLAlchemy
 from app.sales.adapters.sqlalchemy.sale import SalesOrders
+from app.sales.adapters.exceptions.exceptions import NoContentInOrder, OrderNotAvailability
+
+
+
+
 session = ConectDatabase.getInstance()
 
 def SupplyAvailability(supply:Supply, detail:RecipeDatail) -> bool:
@@ -22,9 +27,11 @@ def UpdateStockSupply(supply: Supply, detail:RecipeDatail):
   session.refresh(supply_obt)
   return supply_obt
 
+# OrderProcessing se encarga de verificar si la orden se puede realizar, debido a que se tiene que realizar
+# un descuento del producto en stock.
 def OrderProcessing(order: SalesOrdersCreate):
   if not order:
-    raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="No content in order")
+    NoContentInOrder()
   product = GetProductById(order.product_id)
   details = GetDetailsProduct(product.id)
   counterOrder = 0
@@ -32,7 +39,7 @@ def OrderProcessing(order: SalesOrdersCreate):
     supply = GetOneSupply(detail.supply_id)
     availability = SupplyAvailability(supply, detail)
     if availability == False:
-      raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="order not added")
+      OrderNotAvailability()
     UpdateStockSupply(supply, detail)
     counterOrder += 1
   return order
@@ -44,4 +51,4 @@ def AddOrder(order: SalesOrdersCreate):
   session.add(order_sqlalchemy)
   session.commit()
   session.refresh(order_sqlalchemy)
-  return order
+  return order_sqlalchemy

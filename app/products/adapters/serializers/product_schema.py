@@ -6,6 +6,7 @@ def productSchema(product:Product)-> dict:
         "name": product.name,
         "price": product.price,
         "sale_price": product.sale_price,
+        "register_date": product.register_date,
         "status":product.status
     }
 
@@ -20,7 +21,7 @@ def recipeDetailSchema(recipeDetail:RecipeDetail)-> dict:
         "supply": recipeDetail.supply.name,
         "supply_price": recipeDetail.supply.price,
         "amount_supply": recipeDetail.amount_supply,
-        "unit_measure": recipeDetail.unit_measure,
+        "unit_measure": recipeDetail.supply.unit_measure,
         "subtotal":recipeDetail.subtotal
     }
 

@@ -10,7 +10,7 @@ from app.products.adapters.serializers.product_schema import productSchema, prod
 session = ConectDatabase.getInstance()
 
 def GetAllProducts(limit:int, offset:int):
-  products = session.scalars(select(Product).where(Product.status != False).offset(offset).limit(limit).order_by(desc(Product.name))).all()
+  products = session.scalars(select(Product).where(Product.status != False).offset(offset).limit(limit).order_by(desc(Product.register_date))).all()
   if not products:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Products not found")
   return products
@@ -60,7 +60,7 @@ def AddDetail(id_product:str, detail: RecipeDetailCreate):
         session.refresh(n) 
         return n 
 
-    new_detail = RecipeDetail(product_id=id_product, supply_id=detail.supply_id, amount_supply=detail.amount_supply, unit_measure=detail.unit_measure, subtotal=total)
+    new_detail = RecipeDetail(product_id=id_product, supply_id=detail.supply_id, amount_supply=detail.amount_supply, subtotal=total)
     session.add(new_detail)
     session.commit()
     session.refresh(new_detail)
