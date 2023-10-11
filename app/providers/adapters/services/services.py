@@ -8,7 +8,7 @@ from app.providers.adapters.sqlachemy.provider import Provider
 session = ConectDatabase.getInstance()
 
 def GetAllProviders(limit:int, offset: int):
-  providers = session.scalars(select(Provider).where(Provider.status != False).offset(offset).limit(limit).order_by(desc(Provider.date_registration))).all()
+  providers = session.scalars(select(Provider).offset(offset).limit(limit).order_by(desc(Provider.date_registration))).all()
   if not providers:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Providers not found")
   return providers
