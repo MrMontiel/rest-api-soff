@@ -23,6 +23,7 @@ class Sale(Base):
   __tablename__ = 'sales'
   
   id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+  invoice_number: Mapped[str] = mapped_column(String, nullable=False)
   sale_date:Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
   amount_order:Mapped[int] = mapped_column(Integer, nullable=False, default=0)
   pyment_method:Mapped[str] = mapped_column(String, nullable=False)
