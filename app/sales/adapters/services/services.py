@@ -70,7 +70,7 @@ def ConfirmSale(id_sale: str, saleCreate: SaleCreate):
   sale.total = total
   sale.pyment_method = saleCreate.payment_method
   sale.type_sale = saleCreate.type_sale
-  sale.status = StatusSale.PAID if saleCreate.type_sale == "fisico" else StatusSale.PENDING
+  sale.status = StatusSale.PAID if saleCreate.payment_method == "efectivo" else StatusSale.PENDING
   session.add(sale)
   session.commit()
   session.refresh(sale)
