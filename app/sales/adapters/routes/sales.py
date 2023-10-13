@@ -9,7 +9,8 @@ from app.sales.adapters.services.services import (
   getGeneralClient,
   GetSaleById,
   UpdateAmountOrder,
-  ConfirmOrder
+  ConfirmOrder,
+  CancelSale
   )
 
 from app.sales.adapters.services.services_order import AddOrder, OrderProcessing
@@ -122,4 +123,13 @@ async def ConfirmSalePending(id_sale: str, voucher_create: VoucherCreate):
   session.refresh(sale)
   return {
     "message" : "voucher added successfully"
+  }
+
+
+
+@sales.delete("/{id_sale}/cancel-sale")
+async def CancelSaleById(id_sale: str):
+  CancelSale(id_sale)
+  return {
+    "message": "Sale deleted successfully"
   }
