@@ -60,8 +60,8 @@ async def add_order(id_purchase: str, order: OrderPurchaseCreate):
   }
 
 @purchases.put('/{id_purchase}/confirm-purchase')
-async def confirm_purchase(id_purchase: str, provider_id: str):
-  purchase = ConfirmPurchase(id_purchase, provider_id)
+async def confirm_purchase(id_purchase: str, provider_id: str, ninvoice: str):
+  purchase = ConfirmPurchase(id_purchase, provider_id, ninvoice)
   return {
     "id_purchase": purchase.id,
     "purchase": purchaseSchema(purchase)
@@ -94,10 +94,3 @@ async def DeletePurchase(id_purchase: str):
   return{
     "message": "Purchase deleted successfully"
   }
-
-# @purchases.put('/{id_purchase}/change_status')
-# async def change_status(id_purchase:str):
-#   ChangeStatus(id_purchase)
-#   return{
-#     "message":"Status updated"
-#   }

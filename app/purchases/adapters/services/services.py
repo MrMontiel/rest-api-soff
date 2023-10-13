@@ -10,30 +10,31 @@ from app.purchases.domain.pydantic.purchase import (
 from app.purchases.adapters.sqlalchemy.purchase import Purchase, PurchasesOrders
 from app.supplies.adapters.sqlalchemy.supply import Supply
 from app.providers.adapters.sqlachemy.provider import Provider
+from app.purchases.adapters.exceptions.exceptions import PurchaseNotFound,NotConfirmPurchaseInvoiceExist,NotConfirmPurchase,NotDeletePurchaseConfirm,OrderNotFound,IdPurchaseRequired,OrderRequiredForConfirm,PurchaseConfirm,SupplyNotFound,PurchasesNotFound,ProviderNotFound
 
 session = ConectDatabase.getInstance()
 
 def getGeneralProvider() -> Provider:
   provider = session.scalars(select(Provider).where(Provider.name == "general")).one()
   if not provider:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="provider not found")
+    ProviderNotFound()
   return provider
 
 def GetAllPurchases(limit:int, offset:int=0):
-  purchases = session.scalars(select(Purchase).where(Purchase.amount_order >0).offset(offset).limit(limit).order_by(desc(Purchase.purchase_date))).all()
+  purchases = session.scalars(select(Purchase).offset(offset).limit(limit).order_by(desc(Purchase.purchase_date))).all()
   if not purchases:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchases not found")
+    PurchasesNotFound()
   return purchases
 
 def GetPurchaseById(id:str) -> Purchase:
   purchase = session.get(Purchase, id)
   if not purchase:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchase not found")
+    PurchaseNotFound()
   return purchase
 
 def CreatePurchase():
   provider = getGeneralProvider()
-  new_purchase = Purchase(provider_id= provider.id)
+  new_purchase = Purchase(provider_id= provider.id, invoice_number= "")
   session.add(new_purchase)
   session.commit()
   session.refresh(new_purchase)
@@ -44,16 +45,16 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
   supply = session.scalars(statement).one()
   
   if not supply:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="supply not found")
+    SupplyNotFound()
   price_total:float = order.price_supplies * order.amount_supplies
 
   purchase = session.scalars(select(Purchase).where(Purchase.id == id_purchase)).one() 
   if not purchase:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchase not found")
+    PurchaseNotFound()
   
   #  Restricciones despues de confirmar compra
   if purchase.total != 0.0:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You can't add orders because the purchase is confirmed")
+    PurchaseConfirm()
   
   order_added = session.scalars(select(PurchasesOrders).where(PurchasesOrders.purchase_id == id_purchase)).all()
   for n in order_added:
@@ -70,13 +71,13 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
   session.refresh(new_order)
   return new_order
 
-def ConfirmPurchase(id_purchase: str, id_provider: str):
+def ConfirmPurchase(id_purchase: str, id_provider: str, ninvoice: str):
   
   statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
   orders = ordersSchema(session.scalars(statement).all())
   
   if len(orders) <= 0:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="orders required for confirm purchase")
+    OrderRequiredForConfirm()
   
   total:float = 0.0
   
@@ -94,13 +95,22 @@ def ConfirmPurchase(id_purchase: str, id_provider: str):
     
  
   purchase = session.scalars(select(Purchase).where(Purchase.id == id_purchase)).one()
-  
+  invoice = select(Purchase).where(Purchase.invoice_number == ninvoice)
+
   if not purchase:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchase not found")
+    PurchaseNotFound()
+
+  # if purchase.invoice_number == "":
+  #   NotConfirmPurchase()
+
+  if purchase.invoice_number == invoice:
+    NotConfirmPurchaseInvoiceExist()
+  
 
   purchase.amount_order = len(orders)
   purchase.total = total
   purchase.provider_id = uuid.UUID(id_provider)
+  purchase.invoice_number = ninvoice
   session.commit()
   session.refresh(purchase)
   return purchase
@@ -108,7 +118,7 @@ def ConfirmPurchase(id_purchase: str, id_provider: str):
 
 def seePurchasesOrders(id_purchase: str):
   if not id_purchase:
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="id_purchase if required")
+    IdPurchaseRequired()
   statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == id_purchase)
   orders = session.scalars(statement).all()
   return orders
@@ -116,7 +126,7 @@ def seePurchasesOrders(id_purchase: str):
 def UpdateAmountOrder(id_order: str, amount_supplies: int):
   order = session.get(PurchasesOrders, uuid.UUID(id_order))
   if not order:
-    raise HTTPException(status_code=404, detail="not found order")
+    OrderNotFound()
   print(order)
   order.amount_supplies = amount_supplies
   order.subtotal = order.price_supplies * amount_supplies
@@ -129,7 +139,7 @@ def DeleteOrderById(id_order: str):
   order = session.get(PurchasesOrders, uuid.UUID(id_order))
   print(order)
   if not order:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="order not found")
+    OrderNotFound()
   session.delete(order)
   session.commit()
 
@@ -137,11 +147,11 @@ def DeletePurchaseByid(id_purchase:str):
   purchase = session.get(Purchase, uuid.UUID(id_purchase))
   print(purchase)
   if not purchase:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="purchase not found")
+    PurchaseNotFound()
   
   #  Restricciones despues de confirmar compra
   if purchase.total != 0.0:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You can't delete purchase because the purchase is confirmed")
+    NotDeletePurchaseConfirm()
   
   statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
   orders = ordersSchema(session.scalars(statement).all())
