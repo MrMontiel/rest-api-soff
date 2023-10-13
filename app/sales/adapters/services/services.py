@@ -31,7 +31,11 @@ def GetSaleById(id:str) -> Sale:
 
 def CreateSale():
   client = getGeneralClient()
-  new_sale = Sale(pyment_method="", type_sale="", id_client=client.id)
+  new_sale = Sale(pyment_method="", type_sale="", id_client=client.id, invoice_number="")
+  session.add(new_sale)
+  session.commit()
+  session.refresh(new_sale)
+  new_sale.invoice_number = GetInvoiceNumber(str(new_sale.id))
   session.add(new_sale)
   session.commit()
   session.refresh(new_sale)
@@ -41,23 +45,14 @@ def CreateSale():
 def ConfirmSale(id_sale: str, saleCreate: SaleCreate):
   
   # 56c6cbe9-09be-45f7-8731-e5bdc1e75560
-
-  # We verify that the type sale and payment method is different from empty.
   if saleCreate.type_sale == "" or saleCreate.payment_method == "":
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the type of sale and the payment_method are required")
-  
-  # Get sale from database.
+
   sale = session.scalars(select(Sale).where(Sale.id == id_sale)).one()
   
-  # We verify that the sale exists.
   if not sale:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="sale not found")
-  
-  # We verify that the sale is not paid.
-  # if sale.status == StatusSale.PAID:
-  #   raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="sorry, you can't modify a sale")
-  
-  # If the sale is a "pedido", We will add the client, if not, we will add general client.
+ 
   if saleCreate.type_sale == "pedido":
     client = AddClient(saleCreate.client)
     sale.id_client = client.id
@@ -65,10 +60,8 @@ def ConfirmSale(id_sale: str, saleCreate: SaleCreate):
     generalClient = getGeneralClient()
     sale.id_client = generalClient.id
   
-  # Consultamos todas las ordenes
   listOrders = session.scalars(select(SalesOrders).where(SalesOrders.sale_id == id_sale)).all()
   
-  # We calculate the total
   total:float = 0.0
   for order in listOrders:
     total += order.total
@@ -77,7 +70,7 @@ def ConfirmSale(id_sale: str, saleCreate: SaleCreate):
   sale.total = total
   sale.pyment_method = saleCreate.payment_method
   sale.type_sale = saleCreate.type_sale
-  sale.status = StatusSale.PAID if saleCreate.type_sale == "fisico" else StatusSale.PENDING
+  sale.status = StatusSale.PAID if saleCreate.payment_method == "efectivo" else StatusSale.PENDING
   session.add(sale)
   session.commit()
   session.refresh(sale)
@@ -126,3 +119,18 @@ def ConfirmOrder(id_sale: str):
   else:
     if sale.status == StatusSale.PENDING:
       sale.status = StatusSale.PAID
+
+
+def CancelSale(id_sale: str):
+  sale = GetSaleById(id_sale)
+  if sale.amount_order > 0:
+    for order in sale.products:
+      session.delete(order)
+      session.commit()
+  session.delete(sale)
+  session.commit()
+
+def GetInvoiceNumber(id_sale: str):
+  invoice_number_without = id_sale.replace("-", "")
+  invoice_number = "F-"+invoice_number_without[:12]
+  return invoice_number.upper()

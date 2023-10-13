@@ -9,3 +9,6 @@ def OrderNotAvailability():
 
 def OrderNotFound():
     raise HTTPException(status_code=404, detail="ORDER_NOT_FOUND")
+
+# def GetExceptions(status_code: int, detail: str):
+#     raise HTTPException(status_code=status_code, detail=detail)

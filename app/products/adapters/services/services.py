@@ -1,6 +1,16 @@
 import uuid
 from sqlalchemy import select, delete, desc, asc
 from fastapi import status, HTTPException
+from app.products.adapters.exceptions.exceptions import (
+  ProductNotFound, 
+  IdProductRequired,
+  SupplyNotFound,
+  ProductNotUpdate,
+  DetailsRequired,
+  InfoProductRequired,
+  NameProductExist,
+  DetailsNotFound
+  )
 from app.infrastructure.database import ConectDatabase
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
 from app.products.adapters.sqlalchemy.product import Product, RecipeDetail
@@ -10,14 +20,14 @@ from app.products.adapters.serializers.product_schema import productSchema, prod
 session = ConectDatabase.getInstance()
 
 def GetAllProducts(limit:int, offset:int):
-  products = session.scalars(select(Product).where(Product.status != False).offset(offset).limit(limit).order_by(desc(Product.register_date))).all()
+  products = session.scalars(select(Product).where(Product.status != False).offset(offset).limit(limit)).all()
   if not products:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Products not found")
+    ProductNotFound()
   return products
 
 def GetDetailsProduct(id_product):
   if not id_product:
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="id_product if required")
+    IdProductRequired()
 
   statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
   details = session.scalars(statement).all()
@@ -25,6 +35,8 @@ def GetDetailsProduct(id_product):
 
 def GetProductById(id_product):
   product = session.get(Product, uuid.UUID(id_product))
+  if not product:
+    ProductNotFound()
   return product
 
 def CreateProduct ():
@@ -39,14 +51,14 @@ def AddDetail(id_product:str, detail: RecipeDetailCreate):
   supply = session.scalars(statement).one()
 
   if not supply:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="supply not found")
-  
+    SupplyNotFound()
+    
   total:float = supply.price * detail.amount_supply
 
   product = session.scalars(select(Product).where(Product.id == id_product)).one() 
 
   if not product:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found") 
+    ProductNotFound()
 
   if product.status:
     detail_added = session.scalars(select(RecipeDetail).where(RecipeDetail.product_id == id_product)).all()
@@ -66,46 +78,49 @@ def AddDetail(id_product:str, detail: RecipeDetailCreate):
     session.refresh(new_detail)
     return new_detail
   
-  raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cannot update inactive product")
+  ProductNotUpdate()
 
-
-def ConfirmProduct(id_product:str, productCreate:ProductCreate):
-  # product = GetProductById(id_product)
-
-  # if product.status == False:
-  #   raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="The product is not disable")
-  
-  statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
-  details = recipeDetailsSchema(session.scalars(statement).all())
-
-  if len(details) <= 0:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="details required for confirm product")
-  
-  total:float = 0.0
-
-  for detail in details:
-    total += detail['subtotal']
-
-  
+def ConfirmProduct(id_product:str, productCreate:ProductCreate): 
   product = GetProductById(id_product)
 
-  # if not product:
-  #   raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
+  if product.status:
+    product_name = session.scalars(select(Product.name)).all()
 
-  product.name = productCreate.name
-  product.price = total
-  product.sale_price = productCreate.sale_price
-  session.commit()
-  session.refresh(product)
-  return product
+    if productCreate.name in product_name:
+      NameProductExist()
 
+    if productCreate.name == "" or productCreate.sale_price == 0:
+      InfoProductRequired()
+
+    if not product:
+      ProductNotFound()
+
+    statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
+    details = recipeDetailsSchema(session.scalars(statement).all())
+
+    if len(details) <= 0:
+      DetailsRequired()
+
+    total:float = 0.0
+
+    for detail in details:
+      total += detail['subtotal']
+
+    product.name = productCreate.name
+    product.price = total
+    product.sale_price = productCreate.sale_price
+    session.commit()
+    session.refresh(product)
+    return product
+  
+  ProductNotUpdate()
 
 def UpdateDetail(id_detail:str, amount_supply:int):
   detail = session.get(RecipeDetail, uuid.UUID(id_detail))
 
   if not detail:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="details not found")
-  
+    DetailsNotFound()
+
   detail.amount_supply = amount_supply
   detail.subtotal = detail.supply.price * amount_supply
   session.add(detail)
@@ -114,21 +129,29 @@ def UpdateDetail(id_detail:str, amount_supply:int):
   return detail
 
 def UpdateProduct(id_product: str, products:ProductCreate):
+  product_name = session.scalars(select(Product.name)).all()
+
+  if products.name in product_name:
+    NameProductExist()
+
+  if products.name == "" or products.sale_price == 0:
+    InfoProductRequired()
+  
+  product = GetProductById(id_product)
+
+  if not product:
+    ProductNotFound()
+
   statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
   details = recipeDetailsSchema(session.scalars(statement).all())
 
   if len(details) <= 0:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="details required for confirm product")
-  
+    DetailsRequired()
+    
   total:float = 0.0
 
   for detail in details:
     total += detail['subtotal']
-
-  product = session.get(Product, uuid.UUID(id_product))
-
-  if not product:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
 
   if product.status:
     product.name = products.name
@@ -139,22 +162,23 @@ def UpdateProduct(id_product: str, products:ProductCreate):
     session.refresh(product)
     return product
   
-  raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cannot update inactive product")
+  ProductNotUpdate()
 
 def DeleteDetail(id_detail:str):
   detail = session.get(RecipeDetail, uuid.UUID(id_detail))
-  print(detail)
+
   if not detail:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Detail not found")
-  session.delete(detail)
+    DetailsNotFound()
+
+  session.delete(detail)  
   session.commit()
 
 def DeleteProduct(id_product:str):
   product = session.get(Product, uuid.UUID(id_product))
 
   if not product:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-  
+    ProductNotFound()
+
   statement = select(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
   details = recipeDetailsSchema(session.scalars(statement).all())
   
@@ -168,7 +192,7 @@ def ChangeStatus(id_product:str):
   product = session.get(Product, uuid.UUID(id_product))
 
   if not product:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    ProductNotFound()
 
   product.status = not product.status
   session.add(product) 
