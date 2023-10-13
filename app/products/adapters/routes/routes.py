@@ -22,10 +22,8 @@ async def get_all_supplies():
 @products.get('/')
 async def get_all_products(limit: int = 100, offset:int =0):
   products = GetAllProducts(limit, offset)
-  return {
-    "amount_products": len(products),
-    "products": productsSchema(products)
-  }
+  return productsSchema(products)
+  
 
 @products.get('/{id_product}')
 async def get_product_by_id(id_product: str):
