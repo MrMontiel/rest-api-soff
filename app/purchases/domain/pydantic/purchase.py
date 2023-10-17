@@ -4,13 +4,13 @@ from typing import Optional
 
 class PurchaseBase(BaseModel):
     provider_id: str
+    invoice_number: str
 
 class Purchase(PurchaseBase):
     id: Optional[str]
     purchase_date: str
     amount_order: int=0
     total: float = 0.0
-    # status: bool = True
     
 class Config:
     from_attributes = True

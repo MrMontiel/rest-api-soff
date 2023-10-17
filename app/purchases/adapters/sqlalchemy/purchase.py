@@ -12,6 +12,7 @@ class Purchase(Base):
   
   id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
   purchase_date: Mapped[datetime] = mapped_column(DateTime, nullable=False,  default=datetime.utcnow)
+  invoice_number: Mapped[str] = mapped_column(String(60), nullable=False, unique=True)
   amount_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
   provider_id:Mapped[str] = mapped_column(ForeignKey("providers.id"))
   provider:Mapped["Provider"] = relationship() 
