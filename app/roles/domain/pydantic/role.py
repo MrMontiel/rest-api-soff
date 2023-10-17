@@ -5,7 +5,7 @@ from typing import Optional
 
 class RoleBase(BaseModel):
     name : str
-       
+
 class Role(RoleBase):
     id: Optional[str]
     status:bool = True
