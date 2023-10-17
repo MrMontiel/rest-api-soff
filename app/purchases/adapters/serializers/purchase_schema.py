@@ -4,11 +4,11 @@ def purchaseSchema(purchase: Purchase) -> dict:
     return{
         "id" : purchase.id,
         "purchase_date": purchase.purchase_date,
+        "invoice_number": purchase.invoice_number,
         "amount_order": purchase.amount_order,
         "provider_id": purchase.provider_id,
         "provider": purchase.provider.name,
-        "total": purchase.total,
-        # "status": purchase.status
+        "total": purchase.total
     }
     
 def purchasesSchema(purchases: list[Purchase]) -> list:
