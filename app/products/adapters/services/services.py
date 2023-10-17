@@ -2,14 +2,15 @@ import uuid
 from sqlalchemy import select, delete, desc, asc
 from fastapi import status, HTTPException
 from app.products.adapters.exceptions.exceptions import (
-  ProductNotFound, 
+  ProductNotFound,
+  ProductsNotFound,  
   IdProductRequired,
   SupplyNotFound,
   ProductNotUpdate,
   DetailsRequired,
   InfoProductRequired,
   NameProductExist,
-  DetailsNotFound
+  DetailNotFound
   )
 from app.infrastructure.database import ConectDatabase
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
@@ -22,7 +23,7 @@ session = ConectDatabase.getInstance()
 def GetAllProducts(limit:int, offset:int):
   products = session.scalars(select(Product).where(Product.status != False).offset(offset).limit(limit)).all()
   if not products:
-    ProductNotFound()
+    ProductsNotFound()
   return products
 
 def GetDetailsProduct(id_product):
@@ -119,7 +120,7 @@ def UpdateDetail(id_detail:str, amount_supply:int):
   detail = session.get(RecipeDetail, uuid.UUID(id_detail))
 
   if not detail:
-    DetailsNotFound()
+    DetailNotFound()
 
   detail.amount_supply = amount_supply
   detail.subtotal = detail.supply.price * amount_supply
@@ -168,7 +169,7 @@ def DeleteDetail(id_detail:str):
   detail = session.get(RecipeDetail, uuid.UUID(id_detail))
 
   if not detail:
-    DetailsNotFound()
+    DetailNotFound()
 
   session.delete(detail)  
   session.commit()
@@ -185,6 +186,7 @@ def DeleteProduct(id_product:str):
   if len(details) > 0:
     delete_statement = delete(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
     session.execute(delete_statement)
+
   session.delete(product)
   session.commit()
 
