@@ -26,7 +26,7 @@ def GetAllProducts(limit:int, offset:int):
     ProductsNotFound()
   return products
 
-def GetDetailsProduct(id_product):
+def GetDetailsProduct(id_product:str):
   if not id_product:
     IdProductRequired()
 
@@ -34,8 +34,8 @@ def GetDetailsProduct(id_product):
   details = session.scalars(statement).all()
   return details
 
-def GetProductById(id_product):
-  product = session.get(Product, uuid.UUID(id_product))
+def GetProductById(id_product:str) ->Product:
+  product = session.get(Product, id_product)
   if not product:
     ProductNotFound()
   return product

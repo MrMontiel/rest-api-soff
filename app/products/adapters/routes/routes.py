@@ -27,17 +27,12 @@ async def get_all_products(limit: int = 100, offset:int =0):
 @products.get('/{id_product}')
 async def get_product_by_id(id_product: str):
   product = GetProductById(id_product)
-  return {
-    "product": productSchema(product)
-  }
+  return productSchema(product)
 
 @products.get('/{id_product}/details')
 async def get_details_product(id_product: str):
   details = GetDetailsProduct(id_product)
-  return {
-    "id_product": id_product,
-    "details": recipeDetailsSchema(details)
-  }
+  return  recipeDetailsSchema(details)
 
 @products.post('/add_products')
 async def create_product():
