@@ -132,8 +132,8 @@ def UpdateDetail(id_detail:str, amount_supply:int):
 def UpdateProduct(id_product: str, products:ProductCreate):
   product_name = session.scalars(select(Product.name)).all()
 
-  if products.name in product_name:
-    NameProductExist()
+  # if products.name in product_name:
+  #   NameProductExist()
 
   if products.name == "" or products.sale_price == 0:
     InfoProductRequired()
