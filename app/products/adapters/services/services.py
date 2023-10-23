@@ -21,7 +21,7 @@ from app.products.adapters.serializers.product_schema import productSchema, prod
 session = ConectDatabase.getInstance()
 
 def GetAllProducts(limit:int, offset:int):
-  products = session.scalars(select(Product).where(Product.status != False).offset(offset).limit(limit)).all()
+  products = session.scalars(select(Product).offset(offset).limit(limit)).all()
   if not products:
     ProductsNotFound()
   return products
@@ -191,13 +191,12 @@ def DeleteProduct(id_product:str):
   session.commit()
 
 def ChangeStatus(id_product:str):
-  product = session.get(Product, uuid.UUID(id_product))
-
-  if not product:
-    ProductNotFound()
+  product= GetProductById(id_product)
 
   product.status = not product.status
   session.add(product) 
   session.commit()
+  session.refresh(product)
+
 
   return product
