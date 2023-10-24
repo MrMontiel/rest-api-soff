@@ -2,10 +2,11 @@ from pydantic import BaseModel
 from typing import Optional
 
 class ProviderBase(BaseModel):
+    nit: str
     name: str
     company: str
     address: str
-    email: str
+    # email: str
     phone: str
     city: str
     
