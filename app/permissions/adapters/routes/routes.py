@@ -16,25 +16,23 @@ from app.permissions.adapters.serializer.roles_schema import (
 
 
 permission = APIRouter(
-    prefix= "/permission",
-    tags=['permission']
+    prefix= "/permissions",
+    tags=['permissions']
 )
 # ----------------------------------PERMISSION------------------------------------------
 
 @permission.post("/post-permision")
 async def post_permission(permission: PermissionCreate):
     permission = create_permission(permission)
-    return{
-        "permission": permissionSchema(permission)
-    }
+    return permissionSchema(permission)
+
 
 
 @permission.get("/get-permision")
 async def get_permissions(limit:int= 10):
     permissions_get = get_permission()
-    return{
-        "Permissions": PermissionsSchema(permissions_get)
-    }
+    return PermissionsSchema(permissions_get)
+
 @permission.get("/{id_permission}/get_permission_id")
 async def get_permissinon_id(id_permission : str):
     permission = get_id_permission(id_permission)

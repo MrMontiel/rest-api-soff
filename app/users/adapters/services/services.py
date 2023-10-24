@@ -71,7 +71,7 @@ def delete_user(id_user:str):
 
 def updateStatusUser(id_user:str):
     user= get_user_id(id_user)
-    user.status= not user.status
+    user.status = not user.status
     session.add(user)
     session.commit()
     return user
