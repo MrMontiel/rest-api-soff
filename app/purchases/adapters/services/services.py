@@ -71,7 +71,7 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
   session.refresh(new_order)
   return new_order
 
-def ConfirmPurchase(id_purchase: str, id_provider: str, ninvoice: str):
+def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, ninvoice: str):
   
   statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
   orders = ordersSchema(session.scalars(statement).all())
@@ -86,12 +86,10 @@ def ConfirmPurchase(id_purchase: str, id_provider: str, ninvoice: str):
     supplies = session.get(Supply, order['supply_id'])
     if supplies:
       supplies.quantity_stock += order['amount_supplies']
-      if order['price_supplies']>supplies.price:
-        supplies.price = order['price_supplies']
-      else:
-        supplies.price = supplies.price
-      session.commit()
-      session.refresh(supplies)
+      average = (supplies.price + order['price_supplies'])/2
+    supplies.price = average
+    session.commit()
+    session.refresh(supplies)
     
  
   purchase = session.scalars(select(Purchase).where(Purchase.id == id_purchase)).one()
@@ -100,8 +98,6 @@ def ConfirmPurchase(id_purchase: str, id_provider: str, ninvoice: str):
   if not purchase:
     PurchaseNotFound()
 
-  # if purchase.invoice_number == "":
-  #   NotConfirmPurchase()
 
   if purchase.invoice_number == invoice:
     NotConfirmPurchaseInvoiceExist()
@@ -109,6 +105,7 @@ def ConfirmPurchase(id_purchase: str, id_provider: str, ninvoice: str):
 
   purchase.amount_order = len(orders)
   purchase.total = total
+  purchase.purchase_date = purchase_date
   purchase.provider_id = uuid.UUID(id_provider)
   purchase.invoice_number = ninvoice
   session.commit()

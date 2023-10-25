@@ -23,7 +23,7 @@ from app.roles.adapters.serializer.roles_schema import (
 )
 
 role = APIRouter(
-    prefix= "/role",
+    prefix= "/roles",
     tags=['Role']
 )
 
@@ -31,9 +31,8 @@ role = APIRouter(
 @role.get("/get-role")
 async def get_role(limit: int =10):
     roles = get_roles()
-    return{
-        "role": rolesSchema(roles)
-    }
+    return rolesSchema(roles)
+    
     
 @role.post("/post_rol")
 async def post_rol(role : RoleCreate):

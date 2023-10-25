@@ -3,8 +3,12 @@ from pydantic import BaseModel
 from typing import Optional
 
 class PurchaseBase(BaseModel):
+    purchase_date: str
     provider_id: str
     invoice_number: str
+
+class PurchasesConfirm(PurchaseBase):
+    pass
 
 class Purchase(PurchaseBase):
     id: Optional[str]
