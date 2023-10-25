@@ -11,7 +11,8 @@ from app.roles.adapters.services.services import (
     permissionsrole_create,
     permissionroles_get,
     Permission_role_create,
-    updateStatusRole
+    updateStatusRole,
+    updateRolesPermissions
 )
 from app.roles.domain.pydantic.role import AssignPermissions
 from app.roles.adapters.serializer.roles_schema import (
@@ -22,7 +23,7 @@ from app.roles.adapters.serializer.roles_schema import (
 )
 
 role = APIRouter(
-    prefix= "/role",
+    prefix= "/roles",
     tags=['Role']
 )
 
@@ -30,9 +31,8 @@ role = APIRouter(
 @role.get("/get-role")
 async def get_role(limit: int =10):
     roles = get_roles()
-    return{
-        "role": rolesSchema(roles)
-    }
+    return rolesSchema(roles)
+    
     
 @role.post("/post_rol")
 async def post_rol(role : RoleCreate):
@@ -80,18 +80,7 @@ async def create_permissionsrole(permissionsrole :PermissionsRolesCreate):
     print(new_permissionrole)
     return{
         "Permission_Role": permissionRolesSchema(new_permissionrole)
-    }
-    
-@role.get("/{id_permisssionrole}/permissionrole-get")
-async def  get_permissionrole(id_permisssionrole:str):
-    permissionrole_get_id= permissionroles_get(id_permisssionrole)
-    return {
-        "Permission_Role":permissionsRolesSchema(permissionrole_get_id)
-        
-        }
-    
-    
-    
+    } 
     
     
 @role.post("/post-permissions/{nombre_role}")
@@ -108,3 +97,24 @@ async def updateStatusRol(id_role:str):
         "Mensaje": "update Status"
     }   
     
+
+@role.get("/{id_permisssionrole}/permissionrole-get")
+async def  get_permissionrole(id_permisssionrole:str):
+    permissionrole_get_id= permissionroles_get(id_permisssionrole)
+    return {
+        "Permission_Role":permissionsRolesSchema(permissionrole_get_id)
+        
+        }
+    
+# ------------------------update roles permissions---
+@role.put("/update_role/{id_rol}")
+async def updaterolepermissions(id_rol:str,permissions: list[AssignPermissions],role : RoleCreate):
+    roles_put = update_role(role, id_rol)
+    update_permission_role= updateRolesPermissions(id_rol, permissions)
+    
+    return {
+        "name": roleSchema(roles_put),
+        # "Permission_Role":permissionsRolesSchema(update_permission_role)
+        "Permission_Role":"update Permissions"
+        
+    }

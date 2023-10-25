@@ -3,6 +3,9 @@ from fastapi import HTTPException, status
 def ProductNotFound(): 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PRODUCT_NOT_FOUND")
 
+def ProductsNotFound(): 
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PRODUCTS_NOT_FOUND")
+
 def IdProductRequired():
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="ID_PRODUCT_REQUIRED")
 
@@ -21,5 +24,5 @@ def InfoProductRequired():
 def NameProductExist():
     raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="NAME_ALREADY_EXISTS")
 
-def DetailsNotFound():
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DETAILS_NOT_FOUND")
+def DetailNotFound():
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DETAIL_NOT_FOUND")

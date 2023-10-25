@@ -13,7 +13,7 @@ from app.users.adapters.serializer.user_eschema import ( usersSchema,userSchema,
 
 
 user = APIRouter(
-    prefix= "/user",
+    prefix= "/users",
     tags=['User']
 )
 
@@ -22,10 +22,8 @@ user = APIRouter(
 @user.get("/get-users")
 async def get_user(limit: int =100):
     users = get_users()
-    return{
-        "user": len(users),
-        "user": usersSchema(users)
-    }
+    return usersSchema(users)
+    
     
 
 @user.post('/post_user')
@@ -46,9 +44,8 @@ async def get_user(id_user:str):
 @user.put("/{id_user}/put-user")
 async def update_user(id_user:str, user: UserUpdate):
     user_id_put= user_update(id_user,user)
-    return{
-        "user update": userSchema(user_id_put)
-    }
+    return userSchema(user_id_put)
+    
     
 @user.delete("/{id_user}/delete-user")
 async def user_delete(id_user:str):

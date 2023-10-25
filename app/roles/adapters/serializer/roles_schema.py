@@ -15,7 +15,6 @@ def permissionRolesSchema(permisisonsroles: PermissionsRoles)-> dict:
     return{
         "id_role":permisisonsroles.id_role,
         "id_permission":permisisonsroles.Permission.name
-   
     }
 
 def permissionsRolesSchema(permissionsroles: list[PermissionsRoles])-> list:

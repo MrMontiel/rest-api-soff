@@ -6,6 +6,7 @@ from app.users.domain.pydantic.user import UserCreate, UserUpdate
 from app.users.adapters.sqlalchemy.user import User
 from app.users.adapters.serializer.user_eschema import User, usersSchema
 from app.roles.adapters.services.services import get_id_role
+from app.users.adapters.exceptions.exceptions import Nouser, RequieredUser
 
 session = SessionLocal()
 
@@ -19,7 +20,7 @@ def get_users(limit:int = 100):
     users = session.scalars(select(User).order_by(desc(User.name))).all()
     print(users)
     if not users:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="users not found")
+        Nouser()
     return users
 
 
@@ -27,9 +28,9 @@ def get_users(limit:int = 100):
 
 def post_user(user : UserCreate):
     if not user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user is required")
+        Nouser()
     if  user.name == "" or user.email == ""  or user.password == "" or user.id_role=="":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the fields name, email and password ")
+        RequieredUser()
     role_id_get_role= get_id_role(user.id_role)
     new_user = User(name=user.name, document_type=user.document_type, document=user.document, phone=user.phone, email=user.email, password= user.password , id_role =role_id_get_role.id)
     session.add(new_user)
@@ -43,13 +44,13 @@ def post_user(user : UserCreate):
 def get_user_id(id_user:str):
     user_id= session.scalars(select(User).filter(User.id == uuid.UUID(id_user))).one()
     if not user_id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="users not found")
+        Nouser()
     return user_id
     
     
 def user_update(id_user:str , user: UserUpdate):
     if not user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user is required")
+        RequieredUser()
     user_id_update= get_user_id(id_user)
     user_id_update.name =user.name
     user_id_update.document_type =user.document_type
@@ -70,7 +71,7 @@ def delete_user(id_user:str):
 
 def updateStatusUser(id_user:str):
     user= get_user_id(id_user)
-    user.status= not user.status
+    user.status = not user.status
     session.add(user)
     session.commit()
     return user

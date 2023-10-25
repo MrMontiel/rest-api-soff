@@ -5,6 +5,7 @@ from app.infrastructure.database import SessionLocal
 from app.roles.domain.pydantic.role import RoleCreate, PermissionsRolesCreate
 from app.roles.adapters.sqlalchemy.role import Role, PermissionsRoles
 from app.users.adapters.sqlalchemy.user import User
+from app.roles.adapters.exceptions.exections import Norole, Requieredrol
 
 
 session = SessionLocal()
@@ -14,15 +15,15 @@ session = SessionLocal()
 def get_roles(limit:int = 10):
     roles = session.scalars(select(Role).order_by(desc(Role.name))).all()
     if not roles:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
+        Norole()
     return roles
 
 
 def create_rol(role: RoleCreate):
     if not role:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="role is required")
+        Requieredrol()
     if role.name == "":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="name is required ")
+        Requieredrol()
     new_role = Role(name= role.name)
     
     session.add(new_role)
@@ -35,7 +36,7 @@ def create_rol(role: RoleCreate):
 def get_id_role(id_role:str):
     roles = session.scalars(select(Role).where(Role.id== uuid.UUID(id_role))).one()
     if not roles:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
+        Norole()
     return roles
 
 
@@ -44,8 +45,7 @@ def update_role(role: RoleCreate, id_role:str):
     
     role_update = session.query(Role).filter(Role.id == uuid.UUID(id_role)).first()
     if not role_update:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
-    
+        Norole()    
     role_update.name = role.name
     session.commit()
     session.refresh(role_update)
@@ -70,7 +70,7 @@ def replace_role_base(id_role:str):
 def delete_role_service(id_role:str):
     article_query =  session.query(Role).filter(Role.id == uuid.UUID(id_role)).first()
     if not article_query:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
+        Norole()
     replace_role_base(id_role)
     
     session.delete(article_query)
@@ -83,18 +83,17 @@ def delete_role_service(id_role:str):
 
 def permissionroles_get(id_permissionrole:str):
     if not id_permissionrole:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Permission Role is required")
+        Requieredrol()
     permissionrole_get =session.scalars(select(PermissionsRoles).filter(PermissionsRoles.id_role == id_permissionrole)).all()
     if not permissionrole_get:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Permission Role not found")
+        Norole()
     return(permissionrole_get)
 
 def permissionsrole_create(permissionsrole: PermissionsRolesCreate):
     if not permissionsrole:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="user is required")
+        Requieredrol()
     if permissionsrole.id_permission == ""  or permissionsrole.id_role == "" :
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the id Permission and id rol is required")
-        
+        Requieredrol()        
     new_permissionsrole= PermissionsRoles(id_permission = permissionsrole.id_permission, id_role = permissionsrole.id_role)
     session.add(new_permissionsrole)
     session.commit()
@@ -107,7 +106,7 @@ def Permission_role_create(nombre_role:str, permissions):
     session.commit()
     session.refresh(new_role)
     if not new_role:
-        raise HTTPException(status_code=404, detail="El rol no fue encontrado")
+        Norole()
     for permission in permissions:
         permission_database = PermissionsRoles(id_role=new_role.id, id_permission=permission.id_permission)
         session.add(permission_database)
@@ -123,3 +122,12 @@ def updateStatusRole(id_role:str):
     session.commit()
     return role
     
+
+# -----------------------UPDATEROLESPERMISSIONS---------------------------
+def updateRolesPermissions(id_rol:str,permissions):
+    permiisions_query =  session.query(PermissionsRoles).all()
+    for permission in permissions:
+        permission_database = PermissionsRoles(id_role=id_rol, id_permission=permission.id_permission)
+        session.add(permission_database)
+        session.commit()
+        
