@@ -17,7 +17,7 @@ from app.purchases.adapters.sqlalchemy.purchase import Purchase, PurchasesOrders
 from app.supplies.adapters.sqlalchemy.supply import Supply
 from app.purchases.adapters.serializers.purchase_schema import purchaseSchema, purchasesSchema, orderSchema, ordersSchema
 
-from app.purchases.domain.pydantic.purchase import PurchaseCreate, OrderPurchaseCreate
+from app.purchases.domain.pydantic.purchase import PurchaseCreate, OrderPurchaseCreate, PurchasesConfirm
 
 from app.supplies.adapters.sqlalchemy.supply import Supply
 from app.supplies.adapters.serializers.supply_schema import SupplySchema, suppliesSchema
@@ -32,10 +32,8 @@ purchases = APIRouter(
 @purchases.get('/')
 async def get_all_purchases(limit: int = 100, offset:int=0):
   purchases = GetAllPurchases(limit, offset)
-  return {
-    "amount_purchases": len(purchases),
-    "purchases": purchasesSchema(purchases)
-  }
+  return purchasesSchema(purchases)
+  
 
 @purchases.get('/{id_purchase}')
 async def get_purchase_by_id(id_purchase: str):
@@ -60,8 +58,8 @@ async def add_order(id_purchase: str, order: OrderPurchaseCreate):
   }
 
 @purchases.put('/{id_purchase}/confirm-purchase')
-async def confirm_purchase(id_purchase: str, provider_id: str, ninvoice: str):
-  purchase = ConfirmPurchase(id_purchase, provider_id, ninvoice)
+async def confirm_purchase(id_purchase: str, purchaseConfirm:PurchasesConfirm):
+  purchase = ConfirmPurchase(id_purchase, purchaseConfirm.purchase_date,purchaseConfirm.provider_id, purchaseConfirm.invoice_number)
   return {
     "id_purchase": purchase.id,
     "purchase": purchaseSchema(purchase)
@@ -70,10 +68,8 @@ async def confirm_purchase(id_purchase: str, provider_id: str, ninvoice: str):
 @purchases.get('/{id_purchase}/orders')
 async def getAllOrdersByPurchaseId(id_purchase: str):
   orders = seePurchasesOrders(id_purchase)
-  return {
-    "id_purchase": id_purchase,
-    "orders": ordersSchema(orders)
-  }
+  return  ordersSchema(orders)
+  
   
 @purchases.put('/update-amount-order')
 async def UpdateAmountOrderByPurchaseId(id_order:str, amount_supplies: int):

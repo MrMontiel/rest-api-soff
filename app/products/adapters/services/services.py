@@ -129,8 +129,8 @@ def UpdateDetail(id_detail:str, amount_supply:int):
   session.refresh(detail)
   return detail
 
-def UpdateProduct(id_product: str, products:ProductCreate):
-  product_name = session.scalars(select(Product.name)).all()
+def UpdateProduct(id_product: str, products:Product):
+  # product_name = session.scalars(select(Product.name)).all()
 
   # if products.name in product_name:
   #   NameProductExist()
