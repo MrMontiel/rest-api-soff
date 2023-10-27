@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 from app.roles.domain.pydantic.role import RoleCreate, PermissionsRolesCreate
 from app.roles.adapters.services.services import (
@@ -101,20 +102,20 @@ async def updateStatusRol(id_role:str):
 @role.get("/{id_permisssionrole}/permissionrole-get")
 async def  get_permissionrole(id_permisssionrole:str):
     permissionrole_get_id= permissionroles_get(id_permisssionrole)
-    return {
-        "Permission_Role":permissionsRolesSchema(permissionrole_get_id)
-        
-        }
+    return permissionsRolesSchema(permissionrole_get_id)
+
     
 # ------------------------update roles permissions---
+class UpdateRole(BaseModel):
+    name: str
+    permissions: list[AssignPermissions]
+    
+    
 @role.put("/update_role/{id_rol}")
-async def updaterolepermissions(id_rol:str,permissions: list[AssignPermissions],role : RoleCreate):
-    roles_put = update_role(role, id_rol)
-    update_permission_role= updateRolesPermissions(id_rol, permissions)
+async def updaterolepermissions(id_rol:str, data: UpdateRole):
+    roles_put = update_role(data.name, id_rol)
+    update_permission_role= updateRolesPermissions(id_rol, data.permissions)
     
     return {
-        "name": roleSchema(roles_put),
-        # "Permission_Role":permissionsRolesSchema(update_permission_role)
         "Permission_Role":"update Permissions"
-        
     }

@@ -1,12 +1,12 @@
 import uuid
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc,delete
 from fastapi import status, HTTPException
 from app.infrastructure.database import SessionLocal
 from app.roles.domain.pydantic.role import RoleCreate, PermissionsRolesCreate
 from app.roles.adapters.sqlalchemy.role import Role, PermissionsRoles
 from app.users.adapters.sqlalchemy.user import User
 from app.roles.adapters.exceptions.exections import Norole, Requieredrol
-
+from app.roles.adapters.serializer.roles_schema import permissionsRolesSchema
 
 session = SessionLocal()
 
@@ -41,12 +41,12 @@ def get_id_role(id_role:str):
 
 
 
-def update_role(role: RoleCreate, id_role:str):
+def update_role(name:str, id_role:str):
     
     role_update = session.query(Role).filter(Role.id == uuid.UUID(id_role)).first()
     if not role_update:
         Norole()    
-    role_update.name = role.name
+    role_update.name = name
     session.commit()
     session.refresh(role_update)
     return role_update
@@ -87,7 +87,7 @@ def permissionroles_get(id_permissionrole:str):
     permissionrole_get =session.scalars(select(PermissionsRoles).filter(PermissionsRoles.id_role == id_permissionrole)).all()
     if not permissionrole_get:
         Norole()
-    return(permissionrole_get)
+    return permissionrole_get
 
 def permissionsrole_create(permissionsrole: PermissionsRolesCreate):
     if not permissionsrole:
@@ -125,9 +125,15 @@ def updateStatusRole(id_role:str):
 
 # -----------------------UPDATEROLESPERMISSIONS---------------------------
 def updateRolesPermissions(id_rol:str,permissions):
-    permiisions_query =  session.query(PermissionsRoles).all()
-    for permission in permissions:
-        permission_database = PermissionsRoles(id_role=id_rol, id_permission=permission.id_permission)
-        session.add(permission_database)
+    if permissions:
+        permiisions_query =  session.query(PermissionsRoles).all()
+        # role_permissions = permissionroles_get(id_rol)
+        delete_stmt = delete(PermissionsRoles).where(PermissionsRoles.id_role == id_rol)
+        session.execute(delete_stmt)
         session.commit()
-        
+        for permission in permissions:
+            permission_database = PermissionsRoles(id_role=id_rol, id_permission=permission.id_permission)
+            session.add(permission_database)
+            session.commit()
+    else:
+        Norole()
