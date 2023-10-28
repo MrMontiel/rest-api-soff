@@ -9,6 +9,11 @@ from app.products.adapters.routes.routes import products
 from app.users.adapters.routes.routes import user
 from app.roles.adapters.routes.routes import role
 from app.permissions.adapters.routes.routes import permission
+from app.dashboard.adapters.routes.routes import dashboard
+from app.auth.adapters.routes.routes import auth
+
+
+
 app = FastAPI()
 
 origins = ["*"]
@@ -21,7 +26,8 @@ app.add_middleware(
 )
 
 # Add routes
-
+app.include_router(auth)
+app.include_router(dashboard)
 app.include_router(purchases)
 app.include_router(sales)
 app.include_router(supplies)

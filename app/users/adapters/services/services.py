@@ -7,7 +7,7 @@ from app.users.adapters.sqlalchemy.user import User
 from app.users.adapters.serializer.user_eschema import User, usersSchema
 from app.roles.adapters.services.services import get_id_role
 from app.users.adapters.exceptions.exceptions import Nouser, RequieredUser
-
+from app.auth.adapters.services.hashed import get_password_hash
 session = SessionLocal()
 
 
@@ -32,7 +32,10 @@ def post_user(user : UserCreate):
     if  user.name == "" or user.email == ""  or user.password == "" or user.id_role=="":
         RequieredUser()
     role_id_get_role= get_id_role(user.id_role)
-    new_user = User(name=user.name, document_type=user.document_type, document=user.document, phone=user.phone, email=user.email, password= user.password , id_role =role_id_get_role.id)
+    
+    password_hashed = get_password_hash(user.password)
+    
+    new_user = User(name=user.name, document_type=user.document_type, document=user.document, phone=user.phone, email=user.email, password=password_hashed , id_role =role_id_get_role.id)
     session.add(new_user)
     session.commit()
     session.refresh(new_user)
