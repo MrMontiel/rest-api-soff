@@ -104,8 +104,8 @@ def UpdateAmountOrder(id_order: str, amount_product: int):
   order = session.get(SalesOrders, uuid.UUID(id_order))
   if not order:
     OrderNotFound()
-  print(order)
   order.amount_product = amount_product
+  # Validar insumo.
   order.total = order.product.sale_price * amount_product
   session.add(order)
   session.commit()

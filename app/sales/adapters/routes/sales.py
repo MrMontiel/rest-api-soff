@@ -1,30 +1,18 @@
+import uuid
 from sqlalchemy import select
 from app.infrastructure.database import ConectDatabase
 from fastapi import APIRouter, HTTPException, status
-from app.sales.adapters.services.services import (
-  CreateSale, 
-  GetAllSales, 
-  ConfirmSale, 
-  seeSalesOrders, 
-  getGeneralClient,
-  GetSaleById,
-  UpdateAmountOrder,
-  ConfirmOrder,
-  CancelSale
-  )
-
+from app.sales.adapters.services.services import ( CreateSale,  GetAllSales,  ConfirmSale,  seeSalesOrders,  getGeneralClient, GetSaleById, UpdateAmountOrder, ConfirmOrder, CancelSale )
 from app.sales.adapters.services.services_order import AddOrder, OrderProcessing
-import uuid
 from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders, Client, StatusSale, VoucherSale
 from app.products.adapters.sqlalchemy.product import Product
 from app.sales.adapters.serializers.sale_schema import saleSchema, salesSchema, orderSchema, ordersSchema, clientsSchema, clientSchema
-
+from fastapi import Depends
 from app.sales.domain.pydantic.sale_pydantic import SaleCreate, SalesOrdersCreate, ClientCreate, VoucherCreate
 
 from app.products.adapters.sqlalchemy.product import Product
 from app.products.adapters.serializers.product_schema import productSchema, productsSchema
-
-
+from app.auth.adapters.services.user import User, getCurrentActivateUser
 session = ConectDatabase.getInstance()
 
 sales = APIRouter(
@@ -38,13 +26,13 @@ async def get_client_by_id():
   return client
 
 @sales.get('/')
-async def get_all_sales(limit: int = 100, skip:int = 0):
+async def get_all_sales(limit: int = 100, skip:int = 0, user: User = Depends(getCurrentActivateUser)):
   sales = GetAllSales(limit, skip)
   return salesSchema(sales)
   
 
 @sales.get('/{id_sale}')
-async def get_sale_by_id(id_sale: str):
+async def get_sale_by_id(id_sale: str, user: User = Depends(getCurrentActivateUser)):
   sale = GetSaleById(id_sale)
   return saleSchema(sale)
 
