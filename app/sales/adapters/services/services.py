@@ -20,7 +20,7 @@ def getGeneralClient() -> Client:
 def GetAllSales(limit:int, skip:int = 0):
   sales = session.scalars(select(Sale).where(Sale.amount_order > 0).order_by(Sale.sale_date.desc()).offset(skip).limit(limit)).all()
   if not sales:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="sales not found")
+    return []
   return sales
 
 def GetSaleById(id:str) -> Sale:
