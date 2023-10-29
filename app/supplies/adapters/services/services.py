@@ -9,7 +9,8 @@ from app.supplies.adapters.exceptions.exceptions import (
   requiredsupply,
   notcreatedsupply,
   notdeletesupply,
-  notupdatesupply
+  notupdatesupply,
+  nameisalreadyexist
 )
 
 session = ConectDatabase.getInstance()
@@ -33,12 +34,21 @@ def GetOneSupply(id:str):
 def AddSupply(supply: SupplyCreate):
   if not supply:
     notcreatedsupply()
+    
+  existing_supply = session.query(Supply).filter(Supply.name == supply.name).first()
+    # supply_name = session.scalars(select(supply.name)).all()
+  if supply.name == existing_supply:
+    nameisalreadyexist() 
+
+  if supply.unit_measure == "Kilogramos":
+    supply.unit_measure = "Gramos"
+    
   if supply.name == "" or supply.price == "" or supply.quantity_stock == "" or supply.unit_measure == "":
-    requiredsupply()
-  
+    requiredsupply() 
+    
   else:
     new_supply = Supply(name=supply.name, price=supply.price, quantity_stock=supply.quantity_stock, unit_measure=supply.unit_measure)
-  
+    
     session.add(new_supply)
     session.commit()
     session.refresh(new_supply)
