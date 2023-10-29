@@ -16,6 +16,8 @@ def notdeleteprovider():
 def notupdateprovider():
     raise HTTPException(status_code=status.HTTP_406_NOT_FOUND, detail="PROVIDER_NOT_UPDATED")
 
+def nameisalreadyexist():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="NAME_ALREADY_EXISTS")
 
 
 

@@ -9,7 +9,8 @@ from app.providers.adapters.exceptions.exceptions import (
   requiredprovider,
   notcreatedprovider,
   notdeleteprovider,
-  notupdateprovider
+  notupdateprovider,
+  nameisalreadyexist
 )
 # from app.providers.adapters.exceptions import noprovider, requiredprovider
 
@@ -35,6 +36,10 @@ def AddProvider(provider: ProviderCreate):
   if provider.nit == "" or provider.name == "" or provider.company == "" or provider.address == "" or provider.phone == "" or provider.city == "":
     requiredprovider()
     
+  existing_provider = session.query(Provider).filter(Provider.nit == provider.nit).first()
+  if provider.nit == existing_provider:
+    nameisalreadyexist()
+    
   else:
     new_provider = Provider(nit=provider.nit, name=provider.name, company=provider.company, address=provider.address, phone=provider.phone, city=provider.city)
   
@@ -47,6 +52,7 @@ def UpdateProvider(id: str, provider_update: ProviderUpdate):
     provider = session.get(Provider, uuid.UUID(id))
     print(provider)
     # provider = session.query(Provider).filter(Provider.id == uuid.UUID(id)).first()
+    
     if provider:
         for attr, value in provider_update.dict().items():
             setattr(provider, attr, value)
