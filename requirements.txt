@@ -13,6 +13,7 @@ greenlet==3.0.0
 h11==0.14.0
 httpcore==0.18.0
 httptools==0.6.0
+bcrypt==4.0.1
 httpx==0.25.0
 idna==3.4
 itsdangerous==2.1.2
