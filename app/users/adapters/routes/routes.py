@@ -12,20 +12,15 @@ from app.users.adapters.serializer.user_eschema import ( usersSchema,userSchema,
 from app.auth.adapters.services.user import User, getCurrentActivateUser
 from fastapi import Depends
 
-
-
 user = APIRouter(
     prefix= "/users",
     tags=['User']
 )
 
-
-
 @user.get("/get-users")
 async def get_user(limit: int =100 , user: User = Depends(getCurrentActivateUser)):
     users = get_users()
     return usersSchema(users)
-    
     
 
 @user.post('/post_user')
