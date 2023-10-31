@@ -122,10 +122,10 @@ def getTargetsDashboard():
     # past_sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday - timedelta(days=6), Sale.sale_date <= monday)).all()
     
 
-    day = getBestSellingDay()
-    sales = getAmountSales()
-    money = moneyWin()
-    product = ProductMoreSale()
+    # day = getBestSellingDay()
+    # sales = getAmountSales()
+    # money = moneyWin()
+    # product = ProductMoreSale()
 
         
-    return [sales, money, day, product]
+    return {"sxx"}

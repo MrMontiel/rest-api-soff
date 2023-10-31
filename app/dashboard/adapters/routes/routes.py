@@ -11,8 +11,5 @@ dashboard = APIRouter(
 
 @dashboard.get('/')
 async def get_targets( user: User = Depends(getCurrentActivateUser)):
-  if "dashboard" in user.permissions:
-    sales = getTargetsDashboard()
-    return sales
-  else:
-    raise HTTPException(status_code=401, detail="No tienes acceso a este parte.")
+  sales = getTargetsDashboard()
+  return sales
