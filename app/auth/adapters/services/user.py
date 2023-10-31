@@ -35,7 +35,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = variables.get('ACCESS_TOKEN_EXPIRE_MINUTES')
 RESEND_API_KEY = variables.get('RESEND_API_KEY')
 SECRET_KEY_REFRESH = variables.get('SECRET_KEY_REFRESH')
 
-oauth_2_scheme = OAuth2PasswordBearer(tokenUrl='auth/confirm-recover')
+oauth_2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 
 
 def get_permissions(id_role: str):
