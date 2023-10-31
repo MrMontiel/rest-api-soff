@@ -29,11 +29,11 @@ import secrets
 session = ConectDatabase.getInstance()
 variables = dotenv_values('.env')
 
-SECRET_KEY = variables.get('SECRET_KEY')
-ALGORITHM = variables.get('ALGORITHM')
-ACCESS_TOKEN_EXPIRE_MINUTES = variables.get('ACCESS_TOKEN_EXPIRE_MINUTES')
-RESEND_API_KEY = variables.get('RESEND_API_KEY')
-SECRET_KEY_REFRESH = variables.get('SECRET_KEY_REFRESH')
+SECRET_KEY = "b902c221b0d6057df167a5fa560178327ebfd974bddde9d18c07be772e4522d7"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
+RESEND_API_KEY = "re_j7pkDx9G_CteY4E6qKzRnW22Wyua9ZTs9"
+SECRET_KEY_REFRESH = "ae95e7583fdedc822aba608edbb6cb7f046eb4b698ee118bca3107243a71f9c1"
 
 oauth_2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 
