@@ -7,7 +7,9 @@ values = dotenv_values('.env')
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{values.get('USERNAME')}:{values.get('PASSWORD')}@{values.get('SERVER')}/soff_database"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+POSTGRES_RENDER_URL = f"postgresql+psycopg2://{values.get('USERNAME')}:{values.get('PASSWORD')}@{values.get('SERVER')}/{values.get('DATABASE')}"
+
+engine = create_engine(POSTGRES_RENDER_URL)
 
 SessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine)
 
