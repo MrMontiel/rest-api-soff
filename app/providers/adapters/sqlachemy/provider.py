@@ -11,7 +11,7 @@ class Provider(Base):
   __tablename__ = "providers"
   
   id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-  nit: Mapped[str] = mapped_column(String, nullable=False) 
+  nit: Mapped[str] = mapped_column(String, nullable=False, unique=True) 
   name: Mapped[str] = mapped_column(String, nullable=False)
   company: Mapped[str] = mapped_column(String, nullable=False)
   address: Mapped[str] = mapped_column(String, nullable=False)

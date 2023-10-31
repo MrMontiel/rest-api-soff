@@ -21,9 +21,10 @@ class SupplyCreate(BaseModel):
     quantity_stock: int
     unit_measure: str
     
-    def convert_to_grams(self):
-        if self.unit_measure == 'Kilogramos':
-            self.quantity_stock *= 1000 
+    # def convert_to_grams(self):
+    #     if self.unit_measure == 'Kilogramos':
+    #         self.unit_measure == "Gramos"
+    #         self.quantity_stock *= 1000 
 
 class SupplyUpdate(SupplyBase):
     

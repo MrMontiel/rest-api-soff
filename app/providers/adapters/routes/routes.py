@@ -23,7 +23,7 @@ async def get_all_providers(limit: int = 100, offset: int = 0):
     providers = GetAllProviders(limit, offset)
     return providersSchema(providers)
     
-@providers.get("/{id}/get_provider/")
+@providers.get("/{id}")
 async def get_provider(id: str ):
     providers = GetOneProvider(id)
     return ProviderSchema(providers)
