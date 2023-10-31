@@ -71,7 +71,7 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
   session.refresh(new_order)
   return new_order
 
-def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, ninvoice: str):
+def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, invoice_number: str):
   
   statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
   orders = ordersSchema(session.scalars(statement).all())
@@ -93,13 +93,13 @@ def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, ninvoi
     
  
   purchase = session.scalars(select(Purchase).where(Purchase.id == id_purchase)).one()
-  invoice = select(Purchase).where(Purchase.invoice_number == ninvoice)
+  # invoice = select(Purchase).where(Purchase.invoice_number == ninvoice)
+  invoice = session.scalars(select(Purchase.invoice_number)).all()
 
   if not purchase:
     PurchaseNotFound()
 
-
-  if purchase.invoice_number == invoice:
+  if invoice_number in invoice:
     NotConfirmPurchaseInvoiceExist()
   
 
@@ -107,7 +107,7 @@ def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, ninvoi
   purchase.total = total
   purchase.purchase_date = purchase_date
   purchase.provider_id = uuid.UUID(id_provider)
-  purchase.invoice_number = ninvoice
+  purchase.invoice_number = invoice_number
   session.commit()
   session.refresh(purchase)
   return purchase

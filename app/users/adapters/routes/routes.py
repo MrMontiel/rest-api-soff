@@ -9,6 +9,8 @@ from app.users.adapters.services.services import (
     updateStatusUser
     )
 from app.users.adapters.serializer.user_eschema import ( usersSchema,userSchema, )
+from app.auth.adapters.services.user import User, getCurrentActivateUser
+from fastapi import Depends
 
 
 
@@ -20,21 +22,21 @@ user = APIRouter(
 
 
 @user.get("/get-users")
-async def get_user(limit: int =100):
+async def get_user(limit: int =100 , user: User = Depends(getCurrentActivateUser)):
     users = get_users()
     return usersSchema(users)
     
     
 
 @user.post('/post_user')
-async def get_id_user(user :UserCreate):
-    user_new = post_user(user)
+async def get_id_user(users :UserCreate, user: User = Depends(getCurrentActivateUser)):
+    user_new = post_user(users)
     return {
         "user": userSchema(user_new)  
     }
     
 @user.get("/{id_user}/get-user")
-async def get_user(id_user:str):
+async def get_user(id_user:str, user: User = Depends(getCurrentActivateUser)):
     id_user=get_user_id(id_user)
     return{
         "user": userSchema(id_user)
@@ -42,13 +44,13 @@ async def get_user(id_user:str):
     
     
 @user.put("/{id_user}/put-user")
-async def update_user(id_user:str, user: UserUpdate):
-    user_id_put= user_update(id_user,user)
+async def update_user(id_user:str, users: UserUpdate, user: User = Depends(getCurrentActivateUser)):
+    user_id_put= user_update(id_user,users)
     return userSchema(user_id_put)
     
     
 @user.delete("/{id_user}/delete-user")
-async def user_delete(id_user:str):
+async def user_delete(id_user:str, user: User = Depends(getCurrentActivateUser)):
     del_user= delete_user(id_user)
     return{
         "Mensaje": "Deleted successfully"
@@ -56,7 +58,7 @@ async def user_delete(id_user:str):
     
     
 @user.put("/{id_user}/status-update")
-async def updateStatus(id_user:str):
+async def updateStatus(id_user:str, user: User = Depends(getCurrentActivateUser)):
     updateStatusUser(id_user)
     return{
         "Mensaje": "update Status"

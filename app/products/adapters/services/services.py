@@ -20,8 +20,8 @@ from app.products.adapters.serializers.product_schema import productSchema, prod
 
 session = ConectDatabase.getInstance()
 
-def GetAllProducts(limit:int, offset:int):
-  products = session.scalars(select(Product).offset(offset).limit(limit)).all()
+def GetAllProducts(limit:int, offset:int, status:bool=True):
+  products = session.scalars(select(Product).where(Product.status == status).offset(offset).limit(limit).order_by(desc(Product.register_date))).all()
   if not products:
     ProductsNotFound()
   return products
@@ -87,12 +87,6 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
   if product.status:
     product_name = session.scalars(select(Product.name)).all()
 
-    if productCreate.name in product_name:
-      NameProductExist()
-
-    if productCreate.name == "" or productCreate.sale_price == 0:
-      InfoProductRequired()
-
     if not product:
       ProductNotFound()
 
@@ -106,10 +100,17 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
 
     for detail in details:
       total += detail['subtotal']
-
+      
     product.name = productCreate.name
     product.price = total
     product.sale_price = productCreate.sale_price
+
+    if productCreate.name in product_name:
+      NameProductExist()
+
+    if productCreate.name == "" or productCreate.sale_price == 0:
+      InfoProductRequired()
+
     session.commit()
     session.refresh(product)
     return product
@@ -135,8 +136,6 @@ def UpdateProduct(id_product: str, products:Product):
   # if products.name in product_name:
   #   NameProductExist()
 
-  if products.name == "" or products.sale_price == 0:
-    InfoProductRequired()
   
   product = GetProductById(id_product)
 
@@ -158,6 +157,9 @@ def UpdateProduct(id_product: str, products:Product):
     product.name = products.name
     product.price = total
     product.sale_price = products.sale_price
+
+    # if products.name == "" or products.sale_price == 0:
+    #   InfoProductRequired()
     session.add(product)
     session.commit()
     session.refresh(product)
