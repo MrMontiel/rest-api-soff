@@ -17,8 +17,8 @@ products = APIRouter(
 )
 
 @products.get('/')
-async def get_all_products(limit: int = 100, offset:int =0, user: User = Depends(getCurrentActivateUser)):
-  products = GetAllProducts(limit, offset)
+async def get_all_products(limit: int = 100, offset:int =0, status:bool = True, user: User = Depends(getCurrentActivateUser)):
+  products = GetAllProducts(limit, offset, status)
   return productsSchema(products)
 
 @products.get('/{id_product}')
