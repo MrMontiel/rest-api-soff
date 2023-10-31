@@ -6,7 +6,7 @@ SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://postgres:letmain@localhost/sof
 
 POSTGRES_RENDER_URL = f"postgresql+psycopg2://ldmontiel:pHQ3Zl9ekNaYtp231yRg0ow0W2KgMzey@dpg-cl07nojjdq6s73aj5i30-a.oregon-postgres.render.com/soff_database"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(POSTGRES_RENDER_URL)
 
 SessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine)
 
