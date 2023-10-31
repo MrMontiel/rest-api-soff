@@ -5,7 +5,7 @@ from dotenv import dotenv_values
 
 values = dotenv_values('.env')
 
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{values.get('USERNAME')}:{values.get('PASSWORD')}@{values.get('SERVER')}/soff_database"
+SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://postgres:letmain@localhost/soff_database"
 
 POSTGRES_RENDER_URL = f"postgresql+psycopg2://{values.get('USERNAME')}:{values.get('PASSWORD')}@{values.get('SERVER')}/{values.get('DATABASE')}"
 
