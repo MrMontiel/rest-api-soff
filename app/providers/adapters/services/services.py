@@ -16,8 +16,8 @@ from app.providers.adapters.exceptions.exceptions import (
 
 session = ConectDatabase.getInstance()
 
-def GetAllProviders(limit:int, offset: int):
-  providers = session.scalars(select(Provider).offset(offset).limit(limit).order_by(desc(Provider.date_registration))).all()
+def GetAllProviders(limit:int, offset: int, status:bool=True):
+  providers = session.scalars(select(Provider).where(Provider.status == status).offset(offset).limit(limit).order_by(desc(Provider.date_registration))).all()
   if not providers:
     noprovider()
   return providers
