@@ -1,4 +1,5 @@
 from datetime import timedelta
+from sqlalchemy import select
 from dotenv import dotenv_values
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
@@ -8,7 +9,7 @@ from app.auth.domain.pydantic.userauth import TokenResponse, User
 from app.auth.adapters.services.user import changePassword, createAccessToken, getCurrentActivateUser, oauth_2_scheme,  get_token_from_header,generateAccessTokenForRefreshToken, getCurrentUser, authenticateUser, createRefreshToken, recoveryPassword, confirmCode
 from fastapi import Form
 from typing import Annotated
-
+from app.users.adapters.sqlalchemy.user import User as UserSql
 
 auth = APIRouter(
     prefix='/auth',
@@ -57,5 +58,16 @@ async def change_password(password: Annotated[str, Form()], apikey: str):
 
 
 @auth.get("/user/me")
-async def get_current_user(user: User = Depends(getCurrentActivateUser)):
-    return user
+async def get_current_user(user:User = Depends(getCurrentActivateUser)):
+    userSQl:UserSql = session.scalars(select(UserSql).where(UserSql.email == user.email)).first()
+    return {
+        "id":userSQl.id,
+        "name":userSQl.name,
+        "document_type":userSQl.document_type,
+        "document":userSQl.document,
+        "phone":userSQl.phone,
+        "email":userSQl.email,
+        "status":userSQl.status,
+        "role":userSQl.role.name,
+        "permissions": user.permissions
+    }

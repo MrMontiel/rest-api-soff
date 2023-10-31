@@ -1,55 +1,119 @@
 from app.infrastructure.database import ConectDatabase
 from sqlalchemy import select, func,desc
-from app.sales.adapters.sqlalchemy.sale import Sale
+from app.products.adapters.sqlalchemy.product import Product
+from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders
 from datetime import datetime, timedelta
 
 
 session = ConectDatabase.getInstance()
 
-def getBestSellingDay(sales: list):
-    Monday = Tuesday = Wednesday = Thursday = Friday = Saturday = Sunday = 0
+def getSpanishDay(day: str):
+    if day == 'Monday':
+        return 'Lunes'
+    elif day == 'Tuesday':
+        return 'Martes'
+    elif day == 'Wednesday':
+        return 'Miércoles'
+    elif day == 'Thursday':
+        return 'Jueves'
+    elif day == 'Friday':
+        return 'Viernes'
+    elif day == 'Saturday':
+        return 'Sábado'
+    elif day == 'Sunday':
+        return 'Domingo'
+
+def getBestSellingDay():
+    today = datetime.utcnow()
+    last_monday = today - timedelta(days=(today.weekday() + 6) % 7)
+    sales_this_week = session.query(Sale).filter(Sale.sale_date >= last_monday, Sale.sale_date <= today).all()
     
+    # Crear un diccionario para contar las ventas por día
+    sales_by_day = {}
+    for sale in sales_this_week:
+        sale_day = sale.sale_date.strftime("%Y-%m-%d")
+        if sale_day in sales_by_day:
+            sales_by_day[sale_day] += 1
+        else:
+            sales_by_day[sale_day] = 1
+        
+    # Encontrar el día más vendido
+    most_sold_day = max(sales_by_day, key=sales_by_day.get)
+    total_sales_on_most_sold_day = sales_by_day[most_sold_day]
+    
+    fecha = datetime.strptime(most_sold_day, '%Y-%m-%d')
+    day = getSpanishDay(fecha.strftime('%A'))
+    
+    response = {
+        "category": 'Día más vendido',
+        "target": day,
+        "percentage": '20%',
+        "message": '¿Sabías que los sábados hay un aumento del 20% en las ventas?'
+    }
+    return response
+
+def moneyWin():
+    today = datetime.now()
+    monday = today - timedelta(days=today.weekday())
+    sunday = monday + timedelta(days=6)
+    sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday, Sale.sale_date <= sunday)).all()
+    past_sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday - timedelta(days=6), Sale.sale_date <= monday)).all()
+    
+    money = 0
     for n in sales:
-        day = str(n.sale_date.strftime("%A"))
-        if day == 'Monday':
-            Monday += 1
-        elif day == 'Tuesday':
-            Tuesday += 1
-        elif day == 'Wednesday':
-            Wednesday += 1
-        elif day == 'Thursday':
-            Thursday += 1
-        elif day == 'Friday':
-            Friday += 1
-        elif day == 'Saturday':
-            Saturday += 1
-        elif day == 'Sunday':
-            Sunday += 1
-            
-    max = ""
-    if Monday >= 0:
-        max = Monday
-    else:
-        if Tuesday > Monday and Tuesday > Wednesday and Tuesday > Thursday and Tuesday > Friday and Tuesday > Saturday and Tuesday > Sunday:
-            max = Tuesday
-        elif Tuesday > Monday and Tuesday > Wednesday and Tuesday > Thursday and Tuesday > Friday and Tuesday > Saturday and Tuesday > Sunday:
-            max = Tuesday
-    pass
-        
-        
-def getAmountSales(amount_sales: int, amount_past_sales: int):
+        money += n.total
+    response = {
+        "category": 'Dinero ganado',
+        "target": money,
+        "percentage": '08%',
+        "message": 'Realizamos un 08% más de dinero que la semana pasada'
+    }
+    return response 
     
-    percentage = (amount_past_sales * 100)/amount_sales 
+def getAmountSales():
+    today = datetime.now()
+    monday = today - timedelta(days=today.weekday())
+    sunday = monday + timedelta(days=6)
+    sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday, Sale.sale_date <= sunday)).all()
+    past_sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday - timedelta(days=6), Sale.sale_date <= monday)).all()
     
-    target = {
-        "category": "ventas",
-        "target": f"+{len(amount_past_sales)}",
+    percentage = (len(sales) * 100)/len(past_sales)
+    
+    response = {
+        "category": "Ventas",
+        "target": f"+{len(sales)}",
         "percentage": f"+{percentage * 100}%",
-        "message":  ""
+        "message": f"Realizamos un {percentage * 100}% más de ventas que la semana pasada"
     }
     
-    return target
+    return response
+
+def ProductMoreSale():
+
     
+    today = datetime.utcnow()
+    last_monday = today - timedelta(days=(today.weekday() + 6) % 7)
+
+    # Consulta para encontrar el producto más vendido en el rango de fechas dado
+    most_sold_product = session.query(Product, func.sum(SalesOrders.amount_product).label('total_sold')) \
+        .join(SalesOrders, Product.id == SalesOrders.product_id) \
+        .join(Sale, SalesOrders.sale_id == Sale.id) \
+        .filter(Sale.sale_date >= last_monday, Sale.sale_date <= today) \
+        .group_by(Product.id) \
+        .order_by(func.sum(SalesOrders.amount_product).desc()) \
+        .first()
+
+    if most_sold_product:
+        product, total_sold = most_sold_product
+        response = {
+            "category": "Producto más vendido",
+            "target": product.name,
+            "percentage": product.name,
+            "message": f"{product.name} es el producto más vendido con {total_sold} unidades vendidas."
+        }
+        return response
+
+
 def getTargetsDashboard():
     today = datetime.now()
     monday = today - timedelta(days=today.weekday())
@@ -57,7 +121,11 @@ def getTargetsDashboard():
     sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday, Sale.sale_date <= sunday)).all()
     # past_sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday - timedelta(days=6), Sale.sale_date <= monday)).all()
     
-    getBestSellingDay(sales)
-    print(len(sales))
-    
-    return getAmountSales(len(sales), 8)
+
+    day = getBestSellingDay()
+    sales = getAmountSales()
+    money = moneyWin()
+    product = ProductMoreSale()
+
+        
+    return [sales, money, day, product]
