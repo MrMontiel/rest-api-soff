@@ -10,6 +10,6 @@ dashboard = APIRouter(
 )
 
 @dashboard.get('/')
-async def get_targets( user: User = Depends(getCurrentActivateUser)):
+async def get_targets():
   sales = getTargetsDashboard()
   return sales
