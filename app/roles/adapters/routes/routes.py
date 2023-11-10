@@ -77,7 +77,7 @@ async def delete_role(id_role : str, user: User = Depends(getCurrentActivateUser
     
 # ----------------------------------ROLEPERMISSION----------------------------------------------
 @role.post("/post-permissinosrole")
-async def create_permissionsrole(permissionsrole :PermissionsRolesCreate , user: User = Depends(getCurrentActivateUser)):
+async def create_permissionsrole(permissionsrole :PermissionsRolesCreate):
     new_permissionrole= permissionsrole_create(permissionsrole)
     print(new_permissionrole)
     return{
@@ -86,7 +86,7 @@ async def create_permissionsrole(permissionsrole :PermissionsRolesCreate , user:
     
     
 @role.post("/post-permissions/{nombre_role}")
-async def assign_permissions(nombre_role:str, permissions: list[AssignPermissions], user: User = Depends(getCurrentActivateUser)):
+async def assign_permissions(nombre_role:str, permissions: list[AssignPermissions]):
     Permission_role_create(nombre_role, permissions)
     return {
         "message": "Permisos agregados"
