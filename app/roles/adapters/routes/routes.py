@@ -31,7 +31,7 @@ role = APIRouter(
 
 #  ----------------------------------ROLE------------------------------------------
 @role.get("/get-role")
-async def get_role(limit: int =100, user: User = Depends(getCurrentActivateUser) ):
+async def get_role(limit: int =100 ):
     roles = get_roles()
     return rolesSchema(roles)
     
@@ -55,7 +55,7 @@ async def get_role_id(id_role: str ,user: User = Depends(getCurrentActivateUser)
 
     
 @role.put("/{id_role}/put-role")
-async def put_rol(id_role:str, role : RoleCreate, user: User = Depends(getCurrentActivateUser)):
+async def put_rol(id_role:str, role : RoleCreate):
     roles_put = update_role(role, id_role)
     return{
         "role": roleSchema(roles_put),
@@ -113,7 +113,7 @@ class UpdateRole(BaseModel):
     
     
 @role.put("/update_role/{id_rol}")
-async def updaterolepermissions(id_rol:str, data: UpdateRole, user: User = Depends(getCurrentActivateUser)):
+async def updaterolepermissions(id_rol:str, data: UpdateRole):
     roles_put = update_role(data.name, id_rol)
     update_permission_role= updateRolesPermissions(id_rol, data.permissions)
     
