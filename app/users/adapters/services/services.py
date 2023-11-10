@@ -18,7 +18,6 @@ session = SessionLocal()
 
 def get_users(limit:int = 100):
     users = session.scalars(select(User).order_by(desc(User.name))).all()
-    print(users)
     if not users:
         Nouser()
     return users
