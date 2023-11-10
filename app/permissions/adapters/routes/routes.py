@@ -24,14 +24,14 @@ permission = APIRouter(
 # ----------------------------------PERMISSION------------------------------------------
 
 @permission.post("/post-permision")
-async def post_permission(permission: PermissionCreate, user: User = Depends(getCurrentActivateUser)):
+async def post_permission(permission: PermissionCreate):
     permission = create_permission(permission)
     return permissionSchema(permission)
 
 
 
 @permission.get("/get-permision")
-async def get_permissions(limit:int= 10, user: User = Depends(getCurrentActivateUser)):
+async def get_permissions(limit:int= 10):
     permissions_get = get_permission()
     return PermissionsSchema(permissions_get)
 
