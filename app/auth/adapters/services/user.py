@@ -80,7 +80,7 @@ def createAccessToken(data: dict, expire_delta: timedelta | None = None):
     if expire_delta:
         expire = datetime.utcnow() + expire_delta
     else:
-        expire = datetime.utcnow() + timedelta(hours=12)
+        expire = datetime.utcnow() + timedelta(days=3)
 
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

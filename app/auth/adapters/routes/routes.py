@@ -28,18 +28,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if not user:
         UnauthorizedException()
 
-    access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     access_token = createAccessToken({"sub": user.email})    
-    refresh_token = createRefreshToken({"sub": user.email})
+
     return {
         "access_token": access_token,
-        "refresh_token": refresh_token
+        "user":  user
     }
-
-# @auth.post('/refresh-token')
-# async def refresh_token(refresh_token: str = Depends(oauth_2_scheme)):
-#     access_token = generateAccessTokenForRefreshToken(refresh_token)
-#     return access_token
 
 @auth.post("/recover-password")
 async def recovery_password(email: str):

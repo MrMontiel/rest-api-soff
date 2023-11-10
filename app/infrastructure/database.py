@@ -32,6 +32,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from dotenv import dotenv_values
 
+
 values = dotenv_values('.env')
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{values.get('USERNAME')}:{values.get('PASSWORD')}@{values.get('SERVER')}/soff_database"
