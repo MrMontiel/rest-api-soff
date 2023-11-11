@@ -17,7 +17,10 @@ def notupdatesupply():
     raise HTTPException(status_code=status.HTTP_406_NOT_FOUND, detail="SUPPLY_NOT_UPDATED")
 
 def nameisalreadyexist():
-    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="NAME_ALREADY_EXISTS")
+    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="SUPPLY_ALREADY_EXISTS")
+
+def supplyassociated():
+    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="SUPPLY_ASSOCIATED")
 
 
 

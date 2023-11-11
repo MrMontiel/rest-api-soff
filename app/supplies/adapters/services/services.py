@@ -4,23 +4,29 @@ from fastapi import status, HTTPException
 from app.infrastructure.database import ConectDatabase
 from app.supplies.domain.pydantic.supply import SupplyCreate, SupplyUpdate, SupplyDelete
 from app.supplies.adapters.sqlalchemy.supply import Supply
+from app.products.adapters.serializers.product_schema import recipeDetailsSchema
+from app.purchases.adapters.serializers.purchase_schema import ordersSchema
+from app.products.adapters.sqlalchemy.product import RecipeDetail
+from app.purchases.adapters.sqlalchemy.purchase import PurchasesOrders
 from app.supplies.adapters.exceptions.exceptions import (
   notsupply,
   requiredsupply,
   notcreatedsupply,
   notdeletesupply,
   notupdatesupply,
-  nameisalreadyexist
+  nameisalreadyexist,
+  supplyassociated
 )
 
 session = ConectDatabase.getInstance()
 
 
 
-def GetAllSupplies(limit:int, offset: int):
-  supplies = session.scalars(select(Supply).offset(offset).limit(limit).order_by(desc(Supply.name))).all()
+def GetAllSupplies(limit:int, offset: int, status:bool=True):
+  supplies = session.scalars(select(Supply).where(Supply.status == status).offset(offset).limit(limit).order_by(desc(Supply.name))).all()
   if not supplies:
-    notsupply()
+    # notsupply()
+    return []
   return supplies
 
 
@@ -34,20 +40,25 @@ def GetOneSupply(id:str):
 def AddSupply(supply: SupplyCreate):
   if not supply:
     notcreatedsupply()
-    
-  existing_supply = session.query(Supply).filter(Supply.name == supply.name).first()
-    # supply_name = session.scalars(select(supply.name)).all()
-  if supply.name == existing_supply:
-    nameisalreadyexist() 
-
+  
+  # existing_supply = session.query(Supply).filter(Supply.name == supply.name).all()
   if supply.unit_measure == "Kilogramos":
     supply.unit_measure = "Gramos"
     
   if supply.name == "" or supply.price == "" or supply.quantity_stock == "" or supply.unit_measure == "":
     requiredsupply() 
     
+  supply_name = session.scalars(select(Supply.name)).all()
+  if supply.name in supply_name:
+    nameisalreadyexist()
+    
   else:
-    new_supply = Supply(name=supply.name, price=supply.price, quantity_stock=supply.quantity_stock, unit_measure=supply.unit_measure)
+    
+    
+    total = (supply.price * supply.quantity_stock)
+    new_supply = Supply(name=supply.name, price=supply.price, quantity_stock=supply.quantity_stock, unit_measure=supply.unit_measure, total=total)
+  
+    
     
     session.add(new_supply)
     session.commit()
@@ -56,19 +67,41 @@ def AddSupply(supply: SupplyCreate):
     
     
 def UpdateSupply(id: str, supply_update: SupplyUpdate):
-    supply = session.query(Supply).filter(Supply.id == uuid.UUID(id)).first()
-    if supply:
-        for attr, value in supply_update.dict().items():
-            setattr(supply, attr, value)
-        session.commit()
-        session.refresh(supply)
-        return supply
-    else:
-      notupdatesupply()
+    supply_id_update = GetOneSupply(id)
+    if not supply_id_update:
+        requiredsupply()
+
+    existing_supply = session.query(Supply).filter(
+        Supply.name == supply_update.name, Supply.id != id).first()
+
+    if existing_supply:
+        nameisalreadyexist()
+
+    supply_id_update.name = supply_update.name
+    supply_id_update.price = supply_update.price
+    supply_id_update.quantity_stock = supply_update.quantity_stock
+    supply_id_update.unit_measure = supply_update.unit_measure
+    session.commit()
+    session.refresh(supply_id_update)
+    return supply_id_update
       
       
 def DeleteSupply(id: str):
+  
     supply = session.query(Supply).filter(Supply.id == uuid.UUID(id)).first()
+    
+    statement = select(RecipeDetail).where(RecipeDetail.supply_id == id)
+    details = recipeDetailsSchema(session.scalars(statement).all())
+    
+    if details:
+      supplyassociated()
+      
+    statement = select(PurchasesOrders).where(PurchasesOrders.supply_id == id)
+    details = ordersSchema(session.scalars(statement).all())
+    
+    if details:
+      supplyassociated()
+    
     if not supply:
       notdeletesupply()
     session.delete(supply)
@@ -84,10 +117,6 @@ def UpdateStatusSupply(id:str):
     session.add(supply)
     session.commit()
     return supply
-
-
-
-
 
 
 # def UpdateSupply(supply: SupplyUpdate):
