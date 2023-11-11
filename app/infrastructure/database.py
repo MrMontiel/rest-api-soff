@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 # SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://postgres:1054542694@localhost/soff_database"
 
-POSTGRES_RENDER_URL = f"postgresql+psycopg2://ldmontiel:pHQ3Zl9ekNaYtp231yRg0ow0W2KgMzey@dpg-cl07nojjdq6s73aj5i30-a.oregon-postgres.render.com/soff_database"
+POSTGRES_RENDER_URL = f"postgresql+psycopg2://evelyn:kXNpCO6LrjNZZj6W4c6J2FHJhkWTQaMU@dpg-cl7f5cavokcc73allfm0-a.oregon-postgres.render.com/soff_database_xzqf"
 
 engine = create_engine(POSTGRES_RENDER_URL)
 
