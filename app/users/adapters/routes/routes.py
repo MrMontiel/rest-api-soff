@@ -18,20 +18,20 @@ user = APIRouter(
 )
 
 @user.get("/get-users")
-async def get_user(limit: int =100 , offset=0, status:bool=True):
+async def get_user(limit: int =100 , offset=0, status:bool=True, user: User = Depends(getCurrentActivateUser)):
     users = get_users(limit,offset,status)
     return usersSchema(users)
     
 
 @user.post('/post_user')
-async def get_id_user(users :UserCreate):
+async def get_id_user(users :UserCreate, user: User = Depends(getCurrentActivateUser)):
     user_new = post_user(users)
     return {
         "user": userSchema(user_new)  
     }
     
 @user.get("/{id_user}/get-user")
-async def get_user(id_user:str):
+async def get_user(id_user:str, user: User = Depends(getCurrentActivateUser)):
     id_user=get_user_id(id_user)
     return{
         "user": userSchema(id_user)
