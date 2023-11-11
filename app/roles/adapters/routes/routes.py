@@ -31,13 +31,13 @@ role = APIRouter(
 
 #  ----------------------------------ROLE------------------------------------------
 @role.get("/get-role")
-async def get_role(limit: int =100, user: User = Depends(getCurrentActivateUser) ):
+async def get_role(limit: int =100):
     roles = get_roles()
     return rolesSchema(roles)
     
     
 @role.post("/post_rol")
-async def post_rol(role : RoleCreate, user: User = Depends(getCurrentActivateUser)):
+async def post_rol(role : RoleCreate):
     new_role = create_rol(role)
     return{
         "role":roleSchema(new_role)
@@ -45,7 +45,7 @@ async def post_rol(role : RoleCreate, user: User = Depends(getCurrentActivateUse
     
     
 @role.get("/{id_role}/get_role_id/")
-async def get_role_id(id_role: str ,user: User = Depends(getCurrentActivateUser)):
+async def get_role_id(id_role: str):
     roles_get = get_id_role(id_role)
     return{
         "role":roleSchema(roles_get)
@@ -55,7 +55,7 @@ async def get_role_id(id_role: str ,user: User = Depends(getCurrentActivateUser)
 
     
 @role.put("/{id_role}/put-role")
-async def put_rol(id_role:str, role : RoleCreate, user: User = Depends(getCurrentActivateUser)):
+async def put_rol(id_role:str, role : RoleCreate):
     roles_put = update_role(role, id_role)
     return{
         "role": roleSchema(roles_put),
@@ -63,7 +63,7 @@ async def put_rol(id_role:str, role : RoleCreate, user: User = Depends(getCurren
     
     
 @role.delete("/{id_role}/delete-role")
-async def delete_role(id_role : str, user: User = Depends(getCurrentActivateUser)):
+async def delete_role(id_role : str):
     rol_delete = delete_role_service(id_role)
     return{
         "role_Delete": roleSchema(rol_delete) 
@@ -77,7 +77,7 @@ async def delete_role(id_role : str, user: User = Depends(getCurrentActivateUser
     
 # ----------------------------------ROLEPERMISSION----------------------------------------------
 @role.post("/post-permissinosrole")
-async def create_permissionsrole(permissionsrole :PermissionsRolesCreate , user: User = Depends(getCurrentActivateUser)):
+async def create_permissionsrole(permissionsrole :PermissionsRolesCreate):
     new_permissionrole= permissionsrole_create(permissionsrole)
     print(new_permissionrole)
     return{
@@ -86,7 +86,7 @@ async def create_permissionsrole(permissionsrole :PermissionsRolesCreate , user:
     
     
 @role.post("/post-permissions/{nombre_role}")
-async def assign_permissions(nombre_role:str, permissions: list[AssignPermissions], user: User = Depends(getCurrentActivateUser)):
+async def assign_permissions(nombre_role:str, permissions: list[AssignPermissions]):
     Permission_role_create(nombre_role, permissions)
     return {
         "message": "Permisos agregados"
@@ -101,7 +101,7 @@ async def updateStatusRol(id_role:str, user: User = Depends(getCurrentActivateUs
     
 
 @role.get("/{id_permisssionrole}/permissionrole-get")
-async def  get_permissionrole(id_permisssionrole:str, user: User = Depends(getCurrentActivateUser)):
+async def  get_permissionrole(id_permisssionrole:str):
     permissionrole_get_id= permissionroles_get(id_permisssionrole)
     return permissionsRolesSchema(permissionrole_get_id)
 

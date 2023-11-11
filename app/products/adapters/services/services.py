@@ -20,10 +20,10 @@ from app.products.adapters.serializers.product_schema import productSchema, prod
 
 session = ConectDatabase.getInstance()
 
-def GetAllProducts(limit:int, offset:int):
-  products = session.scalars(select(Product).offset(offset).limit(limit)).all()
+def GetAllProducts(limit:int, offset:int, status:bool=True):
+  products = session.scalars(select(Product).where(Product.status == status).offset(offset).limit(limit).order_by(desc(Product.register_date))).all()
   if not products:
-    ProductsNotFound()
+    return []
   return products
 
 def GetDetailsProduct(id_product:str):
@@ -130,38 +130,37 @@ def UpdateDetail(id_detail:str, amount_supply:int):
   session.refresh(detail)
   return detail
 
-def UpdateProduct(id_product: str, products:Product):
-  # product_name = session.scalars(select(Product.name)).all()
-
-  # if products.name in product_name:
-  #   NameProductExist()
-
-  
+def UpdateProduct(id_product: str, productCreate:ProductCreate):
   product = GetProductById(id_product)
 
-  if not product:
-    ProductNotFound()
-
-  statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
-  details = recipeDetailsSchema(session.scalars(statement).all())
-
-  if len(details) <= 0:
-    DetailsRequired()
-    
-  total:float = 0.0
-
-  for detail in details:
-    total += detail['subtotal']
-
   if product.status:
-    product.name = products.name
-    product.price = total
-    product.sale_price = products.sale_price
+    product_name = session.scalars(select(Product.name).where(Product.id != id_product)).all()
 
-    if products.name == "" or products.sale_price == 0:
+    if productCreate.name in product_name:
+      NameProductExist()
+      
+    if productCreate.name == "" or productCreate.sale_price == 0:
       InfoProductRequired()
 
-    session.add(product)
+    if not product:
+      ProductNotFound()
+
+    statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
+    details = recipeDetailsSchema(session.scalars(statement).all())
+
+    if len(details) <= 0:
+      DetailsRequired()
+      
+    total:float = 0.0
+
+    for detail in details:
+      total += detail['subtotal']
+
+    product.name = productCreate.name
+    product.price = total
+    product.sale_price = productCreate.sale_price
+
+    # session.add(product)
     session.commit()
     session.refresh(product)
     return product
