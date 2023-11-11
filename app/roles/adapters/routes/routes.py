@@ -31,7 +31,7 @@ role = APIRouter(
 
 #  ----------------------------------ROLE------------------------------------------
 @role.get("/get-role")
-async def get_role(limit: int =100, offset=0, status:bool=True, user: User = Depends(getCurrentActivateUser)):
+async def get_role(limit: int =100, offset=0, status:bool=True):
     roles = get_roles(limit,offset,status)
     return rolesSchema(roles)
 
