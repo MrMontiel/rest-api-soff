@@ -16,7 +16,11 @@ from app.auth.adapters.routes.routes import auth
 
 app = FastAPI()
 
-origins = ["*"]
+origins = [
+    "https://frontend-soff.vercel.app",
+    "http://localhost:3000"
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

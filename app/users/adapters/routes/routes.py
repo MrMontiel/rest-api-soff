@@ -12,31 +12,26 @@ from app.users.adapters.serializer.user_eschema import ( usersSchema,userSchema,
 from app.auth.adapters.services.user import User, getCurrentActivateUser
 from fastapi import Depends
 
-
-
 user = APIRouter(
     prefix= "/users",
     tags=['User']
 )
-
-
 
 @user.get("/get-users")
 async def get_user(limit: int =100 , offset=0, status:bool=True):
     users = get_users(limit,offset,status)
     return usersSchema(users)
     
-    
 
 @user.post('/post_user')
-async def get_id_user(users :UserCreate, user: User = Depends(getCurrentActivateUser)):
+async def get_id_user(users :UserCreate):
     user_new = post_user(users)
     return {
         "user": userSchema(user_new)  
     }
     
 @user.get("/{id_user}/get-user")
-async def get_user(id_user:str, user: User = Depends(getCurrentActivateUser)):
+async def get_user(id_user:str):
     id_user=get_user_id(id_user)
     return{
         "user": userSchema(id_user)

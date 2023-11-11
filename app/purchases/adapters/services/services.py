@@ -71,7 +71,7 @@ def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
   session.refresh(new_order)
   return new_order
 
-def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, ninvoice: str):
+def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, invoice_number: str):
   
   statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
   orders = ordersSchema(session.scalars(statement).all())
@@ -85,21 +85,26 @@ def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, ninvoi
     total += order['subtotal']
     supplies = session.get(Supply, order['supply_id'])
     if supplies:
-      supplies.quantity_stock += order['amount_supplies']
-      average = (supplies.price + order['price_supplies'])/2
-    supplies.price = average
+      if supplies.quantity_stock == 'Gramos':
+        convert = order['amount_supplies']*1000
+        supplies.quantity_stock == convert
+        convertprice = order['price_supplies']/1000
+        supplies.price = (supplies.price + convert)/2
+      else:
+        supplies.quantity_stock += order['amount_supplies']
+        average = (supplies.price + order['price_supplies'])/2
+        supplies.price = average
     session.commit()
     session.refresh(supplies)
     
  
   purchase = session.scalars(select(Purchase).where(Purchase.id == id_purchase)).one()
-  invoice = select(Purchase).where(Purchase.invoice_number == ninvoice)
+  invoice = session.scalars(select(Purchase.invoice_number)).all()
 
   if not purchase:
     PurchaseNotFound()
 
-
-  if purchase.invoice_number == invoice:
+  if invoice_number in invoice:
     NotConfirmPurchaseInvoiceExist()
   
 
@@ -107,7 +112,7 @@ def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, ninvoi
   purchase.total = total
   purchase.purchase_date = purchase_date
   purchase.provider_id = uuid.UUID(id_provider)
-  purchase.invoice_number = ninvoice
+  purchase.invoice_number = invoice_number
   session.commit()
   session.refresh(purchase)
   return purchase
