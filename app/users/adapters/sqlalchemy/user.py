@@ -14,7 +14,7 @@ class User(Base):
   id: Mapped[str] = mapped_column(UUID(as_uuid= True), primary_key=True, default=uuid.uuid4)
   name : Mapped[str]= mapped_column(String(60), nullable=False)
   document_type:Mapped[str]= mapped_column(String(60), nullable=False)
-  document:Mapped[str]= mapped_column(String(30), nullable=False)
+  document:Mapped[str]= mapped_column(String(30), nullable=False, unique=True)
   phone:Mapped[str]= mapped_column(String(15), nullable=False)
   email : Mapped[str]= mapped_column(String, nullable=True, unique=True)
   password : Mapped[str] = mapped_column(String, nullable= True )

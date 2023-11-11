@@ -22,8 +22,8 @@ user = APIRouter(
 
 
 @user.get("/get-users")
-async def get_user(limit: int =100 , user: User = Depends(getCurrentActivateUser)):
-    users = get_users()
+async def get_user(limit: int =100 , offset=0, status:bool=True):
+    users = get_users(limit,offset,status)
     return usersSchema(users)
     
     
