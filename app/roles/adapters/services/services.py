@@ -5,7 +5,7 @@ from app.infrastructure.database import SessionLocal
 from app.roles.domain.pydantic.role import RoleCreate, PermissionsRolesCreate
 from app.roles.adapters.sqlalchemy.role import Role, PermissionsRoles
 from app.users.adapters.sqlalchemy.user import User
-from app.roles.adapters.exceptions.exections import Norole, Requieredrol, roleExists
+from app.roles.adapters.exceptions.exections import Norole, Requieredrol, roleExists,noDeleteRole
 from app.roles.adapters.serializer.roles_schema import permissionsRolesSchema
 
 session = SessionLocal()
@@ -71,6 +71,9 @@ def replace_role_base(id_role:str):
 
 def delete_role_service(id_role:str):
     article_query =  session.query(Role).filter(Role.id == uuid.UUID(id_role)).first()
+    
+    if article_query.name == "Administrador" or article_query.name == "Base":
+        noDeleteRole()
     if not article_query:
         Norole()
     replace_role_base(id_role)
