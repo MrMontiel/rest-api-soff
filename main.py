@@ -18,7 +18,8 @@ app = FastAPI()
 
 origins = [
     "https://frontend-soff.vercel.app",
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "https://rest-soff.onrender.com"
 ]
 
 app.add_middleware(
@@ -28,6 +29,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 # Add routes
 app.include_router(auth)
@@ -40,3 +43,4 @@ app.include_router(products)
 app.include_router(user)
 app.include_router(role)
 app.include_router(permission)
+
