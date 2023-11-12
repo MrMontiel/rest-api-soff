@@ -3,11 +3,12 @@ from sqlalchemy import select, func,desc
 from app.products.adapters.sqlalchemy.product import Product
 from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders
 from datetime import datetime, timedelta
-import locale
+from babel.numbers import format_currency
+from babel import Locale
 
 
 session = ConectDatabase.getInstance()
-locale.setlocale(locale.LC_MONETARY, 'en_US.UTF-8')
+locale = Locale('es', 'ES')
 
 def getSpanishDay(day: str):
     if day == 'Monday':
@@ -30,22 +31,26 @@ def getBestSellingDay():
     last_monday = today - timedelta(days=(today.weekday() + 6) % 7)
     sales_this_week = session.query(Sale).filter(Sale.sale_date >= last_monday, Sale.sale_date <= today).all()
     
-    # Crear un diccionario para contar las ventas por día
-    sales_by_day = {}
-    for sale in sales_this_week:
-        sale_day = sale.sale_date.strftime("%Y-%m-%d")
-        if sale_day in sales_by_day:
-            sales_by_day[sale_day] += 1
-        else:
-            sales_by_day[sale_day] = 1
+    if len(sales_this_week) != 0:
         
-    # Encontrar el día más vendido
-    most_sold_day = max(sales_by_day, key=sales_by_day.get)
-    total_sales_on_most_sold_day = sales_by_day[most_sold_day]
-    
-    fecha = datetime.strptime(most_sold_day, '%Y-%m-%d')
-    day = getSpanishDay(fecha.strftime('%A'))
-    
+    # Crear un diccionario para contar las ventas por día
+        sales_by_day = {}
+        for sale in sales_this_week:
+            sale_day = sale.sale_date.strftime("%Y-%m-%d")
+            print(sale_day)
+            if sale_day in sales_by_day:
+                sales_by_day[sale_day] += 1
+            else:
+                sales_by_day[sale_day] = 1
+        print(sales_by_day)
+        # Encontrar el día más vendido
+        most_sold_day = max(sales_by_day, key=sales_by_day.get)
+        total_sales_on_most_sold_daysales_this_week = sales_by_day[most_sold_day]
+        
+        fecha = datetime.strptime(most_sold_day, '%Y-%m-%d')
+        day = getSpanishDay(fecha.strftime('%A'))
+    else:
+        day = "Lunes"
     response = {
         "category": 'Día más vendido',
         "target": day,
@@ -64,7 +69,7 @@ def moneyWin():
     money = 0
     for n in sales:
         money += n.total
-    valor_formateado = locale.currency(money, grouping=True)
+    valor_formateado = format_currency(money, 'EUR', locale=locale)
     value = valor_formateado.rstrip('0').rstrip('.') if '.' in valor_formateado else valor_formateado.rstrip('0')
     response = {
         "category": 'Dinero ganado',
@@ -83,7 +88,10 @@ def getAmountSales():
     sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday, Sale.sale_date <= sunday)).all()
     past_sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday - timedelta(days=6), Sale.sale_date <= monday)).all()
     
-    percentage = (len(sales))/len(past_sales)
+    if(len(sales) == 0 or len(past_sales) == 0):
+        percentage = 0
+    else:
+        percentage = (len(sales))/len(past_sales)
     
     response = {
         "category": "Ventas",
@@ -117,7 +125,14 @@ def ProductMoreSale():
             "message": f"{product.name} es el producto más vendido con {total_sold} unidades vendidas."
         }
         return response
-
+    else:
+        return {
+            "category": "Producto más vendido",
+            "target": "No hay",
+            "percentage": "No hay",
+            "message": f"Inicia las ventas para poder identificar el producto más vendido."
+        }
+        
 
 def getTargetsDashboard():
     today = datetime.now()
