@@ -17,19 +17,17 @@ from app.auth.adapters.routes.routes import auth
 app = FastAPI()
 
 origins = [
-    "https://*",
-    "http://*"
+    "https://frontend-soff.vercel.app",
+    "http://localhost:3000"
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["OPTIONS,POST,GET,PUT,DELETE,PATCH"],
-    allow_headers=["Content-Type"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
-
 
 # Add routes
 app.include_router(auth)
@@ -42,4 +40,3 @@ app.include_router(products)
 app.include_router(user)
 app.include_router(role)
 app.include_router(permission)
-
