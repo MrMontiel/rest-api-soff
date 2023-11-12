@@ -18,8 +18,8 @@ supplies = APIRouter(
 )
 
 @supplies.get('/')
-async def get_all_supplies(limit: int = 100, offset: int = 0, user: User = Depends(getCurrentActivateUser)):
-    supplies = GetAllSupplies(limit, offset)
+async def get_all_supplies(limit: int = 100, offset: int = 0, status:bool = True, user: User = Depends(getCurrentActivateUser)):
+    supplies = GetAllSupplies(limit, offset, status)
     return suppliesSchema(supplies)
 
 @supplies.get("/{id}")

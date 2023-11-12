@@ -7,6 +7,7 @@ def SupplySchema(supply: Supply) -> dict:
         "price": supply.price,
         "quantity_stock": supply.quantity_stock,
         "unit_measure": supply.unit_measure,
+        "total": supply.total,
         "status": supply.status
     }
     

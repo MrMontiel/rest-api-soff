@@ -30,11 +30,13 @@ def create_permission(permission: PermissionCreate):
     session.refresh(new_permission)
     return new_permission
 
+
 def get_id_permission(id_permission: str):
     permission_id= session.scalars(select(Permission).where(Permission.id == id_permission)).one()
     if not permission_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Permission not found")
     return permission_id   
+    
     
 def update_permission(id_permission:str, permission: PermissionCreate):
     permission_update = session.query(Permission).filter(Permission.id == uuid.UUID(id_permission)).first()

@@ -15,4 +15,5 @@ class Supply(Base):
   price: Mapped[float] = mapped_column(Float, nullable=False)
   quantity_stock: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
   unit_measure: Mapped[str] = mapped_column(String, nullable=False)
+  total: Mapped[str] = mapped_column(Float, nullable=False)
   status: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)

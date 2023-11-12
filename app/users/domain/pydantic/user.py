@@ -4,6 +4,16 @@ from typing import Optional
 
 
 
+class UpdateUserBase(BaseModel):
+    name : str
+    document_type : str
+    document : str
+    phone : str
+    email : str
+    id_role: str
+    
+
+    
 class UserBase(BaseModel):
     name : str
     document_type : str
@@ -25,5 +35,5 @@ class User(UserBase):
 class UserCreate(UserBase):
     pass
 
-class UserUpdate(UserBase):
+class UserUpdate(UpdateUserBase):
     pass

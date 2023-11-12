@@ -38,9 +38,8 @@ async def get_permissions(limit:int= 10, user: User = Depends(getCurrentActivate
 @permission.get("/{id_permission}/get_permission_id")
 async def get_permissinon_id(id_permission : str, user: User = Depends(getCurrentActivateUser)):
     permission = get_id_permission(id_permission)
-    return{
-        "permission": permissionSchema(permission)
-    }
+    return  permissionSchema(permission)
+        
     
 @permission.put("/{id_permission}/put_permission")
 async def put_permission(id_permission : str, permission: PermissionCreate, user: User = Depends(getCurrentActivateUser)): 
