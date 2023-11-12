@@ -3,9 +3,11 @@ from sqlalchemy import select, func,desc
 from app.products.adapters.sqlalchemy.product import Product
 from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders
 from datetime import datetime, timedelta
+import locale
 
 
 session = ConectDatabase.getInstance()
+locale.setlocale(locale.LC_MONETARY, 'en_US.UTF-8')
 
 def getSpanishDay(day: str):
     if day == 'Monday':
@@ -48,7 +50,7 @@ def getBestSellingDay():
         "category": 'Día más vendido',
         "target": day,
         "percentage": '20%',
-        "message": '¿Sabías que los sábados hay un aumento del 20% en las ventas?'
+        "message": f'¿Sabías que los {day} hay un aumento de ventas?'
     }
     return response
 
@@ -62,12 +64,16 @@ def moneyWin():
     money = 0
     for n in sales:
         money += n.total
+    valor_formateado = locale.currency(money, grouping=True)
+    value = valor_formateado.rstrip('0').rstrip('.') if '.' in valor_formateado else valor_formateado.rstrip('0')
     response = {
         "category": 'Dinero ganado',
-        "target": money,
+        "target": value,
         "percentage": '08%',
         "message": 'Realizamos un 08% más de dinero que la semana pasada'
     }
+    
+    
     return response 
     
 def getAmountSales():
@@ -77,20 +83,19 @@ def getAmountSales():
     sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday, Sale.sale_date <= sunday)).all()
     past_sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday - timedelta(days=6), Sale.sale_date <= monday)).all()
     
-    percentage = (len(sales) * 100)/len(past_sales)
+    percentage = (len(sales))/len(past_sales)
     
     response = {
         "category": "Ventas",
         "target": f"+{len(sales)}",
-        "percentage": f"+{percentage * 100}%",
-        "message": f"Realizamos un {percentage * 100}% más de ventas que la semana pasada"
+        "percentage": f"+{percentage}%",
+        "message": f"Realizamos un {percentage}% más de ventas que la semana pasada"
     }
     
     return response
 
 def ProductMoreSale():
 
-    
     today = datetime.utcnow()
     last_monday = today - timedelta(days=(today.weekday() + 6) % 7)
 
@@ -119,13 +124,13 @@ def getTargetsDashboard():
     monday = today - timedelta(days=today.weekday())
     sunday = monday + timedelta(days=6)
     sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday, Sale.sale_date <= sunday)).all()
-    # past_sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday - timedelta(days=6), Sale.sale_date <= monday)).all()
+    past_sales = session.scalars(select(Sale).filter(Sale.sale_date >= monday - timedelta(days=6), Sale.sale_date <= monday)).all()
     
 
-    # day = getBestSellingDay()
-    # sales = getAmountSales()
-    # money = moneyWin()
-    # product = ProductMoreSale()
+    day = getBestSellingDay()
+    sales = getAmountSales()
+    money = moneyWin()
+    product = ProductMoreSale()
 
         
-    return {"sxx"}
+    return [day, sales, money, product]
