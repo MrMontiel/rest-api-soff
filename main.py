@@ -31,6 +31,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
 # Add routes
 app.include_router(auth)
 app.include_router(dashboard)
@@ -42,3 +44,4 @@ app.include_router(products)
 app.include_router(user)
 app.include_router(role)
 app.include_router(permission)
+
