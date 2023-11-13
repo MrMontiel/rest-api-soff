@@ -32,8 +32,8 @@ async def get_details_product(id_product: str, user: User = Depends(getCurrentAc
   return  recipeDetailsSchema(details)
 
 @products.post('/add_products')
-async def create_product(user: User = Depends(getCurrentActivateUser)):
-  new_product = CreateProduct()
+async def create_product(productCreate:ProductCreate, user: User = Depends(getCurrentActivateUser)):
+  new_product = CreateProduct(productCreate)
   return {
     "id": new_product.id,
     "message": "product created successfully"
