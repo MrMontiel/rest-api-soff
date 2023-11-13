@@ -37,12 +37,11 @@ async def get_role(limit: int =100, offset=0, status:bool=True, user: User = Dep
 
     
     
-@role.get("/{id_role}/get_role_id/")
+@role.get("/{id_role}")
 async def get_role_id(id_role: str, user: User = Depends(getCurrentActivateUser)):
     roles_get = get_id_role(id_role)
-    return{
-        "role":roleSchema(roles_get)
-    }
+    return roleSchema(roles_get)
+
 
 
     
@@ -50,7 +49,7 @@ async def get_role_id(id_role: str, user: User = Depends(getCurrentActivateUser)
 async def delete_role(id_role : str, user: User = Depends(getCurrentActivateUser)):
     rol_delete = delete_role_service(id_role)
     return{
-        "role_Delete": roleSchema(rol_delete) 
+        "Delete Role": roleSchema(rol_delete) 
         # "role_Delete": "role delete " 
         
     }
@@ -60,27 +59,27 @@ async def delete_role(id_role : str, user: User = Depends(getCurrentActivateUser
     
     
 # ----------------------------------ROLEPERMISSION----------------------------------------------
-@role.post("/create_permissinosrole")
+@role.post("/assign_permissinosrole")
 async def create_permissionsrole(permissionsrole :PermissionsRolesCreate, user: User = Depends(getCurrentActivateUser)):
     new_permissionrole= permissionsrole_create(permissionsrole)
     print(new_permissionrole)
     return{
-        "Permission_Role": permissionRolesSchema(new_permissionrole)
+        "Assign Permission Role": permissionRolesSchema(new_permissionrole)
     } 
     
     
 @role.post("/create_role/{nombre_role}")
 async def assign_permissions(nombre_role:str, permissions: list[AssignPermissions], user: User = Depends(getCurrentActivateUser) ):
-    Permission_role_create(nombre_role, permissions)
+    Create_rol=Permission_role_create(nombre_role, permissions)
     return {
-        "message": "Permisos agregados"
+        "Create Rol": roleSchema(Create_rol)
     }
     
 @role.put("/status_update_role/{id_role}")
 async def updateStatusRol(id_role:str, user: User = Depends(getCurrentActivateUser)):
-    updateStatusRole(id_role)
+    update_role_status=updateStatusRole(id_role)
     return{
-        "Mensaje": "update Status"
+        "Update Status Role": rolesSchema(update_role_status)
     }   
     
 
@@ -100,5 +99,5 @@ async def updaterolepermissions(id_rol:str, data: UpdateRole, user: User = Depen
     update_permission_role= updateRolesPermissions(id_rol, data.permissions)
     
     return {
-        "Permission_Role":"update Permissions"
+        "Update Permission Role":permissionRolesSchema(update_permission_role)
     }
