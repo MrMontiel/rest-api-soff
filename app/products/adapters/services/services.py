@@ -23,8 +23,8 @@ session = ConectDatabase.getInstance()
 def GetAllProducts(limit:int, offset:int, status:bool=True):
   products = session.scalars(select(Product).where(Product.status == status).offset(offset).limit(limit).order_by(desc(Product.register_date))).all()
   if not products:
-    # return []
-    ProductNotFound()
+    return []
+    # ProductNotFound()
   return products
 
 def GetDetailsProduct(id_product:str):
