@@ -17,20 +17,20 @@ user = APIRouter(
     tags=['User']
 )
 
-@user.get("/get-users")
+@user.get("/")
 async def get_user(limit: int =100 , offset=0, status:bool=True, user: User = Depends(getCurrentActivateUser)):
     users = get_users(limit,offset,status)
     return usersSchema(users)
     
 
-@user.post('/post_user')
+@user.post('/create_user')
 async def get_id_user(users :UserCreate, user: User = Depends(getCurrentActivateUser)):
     user_new = post_user(users)
     return {
         "user": userSchema(user_new)  
     }
     
-@user.get("/{id_user}/get-user")
+@user.get("/get_user/{id_user}")
 async def get_user(id_user:str, user: User = Depends(getCurrentActivateUser)):
     id_user=get_user_id(id_user)
     return{
@@ -38,13 +38,13 @@ async def get_user(id_user:str, user: User = Depends(getCurrentActivateUser)):
     }
     
     
-@user.put("/{id_user}/put-user")
+@user.put("/update_user/{id_user}")
 async def update_user(id_user:str, users: UserUpdate, user: User = Depends(getCurrentActivateUser)):
     user_id_put= user_update(id_user,users)
     return userSchema(user_id_put)
     
     
-@user.delete("/{id_user}/delete-user")
+@user.delete("/delete_user/{id_user}")
 async def user_delete(id_user:str, user: User = Depends(getCurrentActivateUser)):
     del_user= delete_user(id_user)
     return{
@@ -52,7 +52,7 @@ async def user_delete(id_user:str, user: User = Depends(getCurrentActivateUser))
     }   
     
     
-@user.put("/{id_user}/status-update")
+@user.put("/status_update/{id_user}")
 async def updateStatus(id_user:str, user: User = Depends(getCurrentActivateUser)):
     updateStatusUser(id_user)
     return{

@@ -30,3 +30,8 @@ class PermissionsRolesCreate(PermissionsRolesBase):
 
 class AssignPermissions(BaseModel):
     id_permission: str
+    
+
+class UpdateRole(BaseModel):
+    name: str
+    permissions: list[AssignPermissions]
