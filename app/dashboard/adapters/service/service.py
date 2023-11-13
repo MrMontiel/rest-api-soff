@@ -5,7 +5,8 @@ from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders
 from datetime import datetime, timedelta
 from babel.numbers import format_currency
 from babel import Locale
-
+from fastapi.responses import FileResponse
+import plotly.express as px
 
 session = ConectDatabase.getInstance()
 locale = Locale('es', 'ES')
@@ -149,3 +150,17 @@ def getTargetsDashboard():
 
         
     return [day, sales, money, product]
+
+def getGraficSales():
+    today = datetime.now().date()
+    sales = session.query(Sale.sale_date).filter(Sale.total).all()
+
+    sales_today = [
+        venta for venta in sales 
+        if datetime.strptime(venta["fecha"], "%Y-%m-%d").date() <= today
+    ]
+
+    return sales_today
+    # fig = px.scatter(x=[1, 2, 3, 4], y=[10, 11, 12, 13], labels={'x': 'Eje X', 'y': 'Eje Y'}, title='Gráfico de dispersión')
+    # fig.write_image("scatter_plot.png")
+    # return FileResponse("scatter_plot.png")
