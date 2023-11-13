@@ -16,17 +16,13 @@ from app.auth.adapters.routes.routes import auth
 
 app = FastAPI()
 
-origins = [
-    "https://frontend-soff.vercel.app",
-    "http://localhost:3000",
-    "https://rest-soff.onrender.com"
-]
+origins = ["http://localhost:3000"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET","PATCH","POST","PUT","DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
