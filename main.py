@@ -10,6 +10,7 @@ origins = [
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:3000",
+    "https://frontend-soff-git-developv2-luis-montiels-projects.vercel.app"
 ]
 
 app.add_middleware(
