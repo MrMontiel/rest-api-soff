@@ -41,11 +41,11 @@ def GetProductById(id_product:str) ->Product:
     ProductNotFound()
   return product
 
-def CreateProduct (productCreate:ProductCreate):
-  product_name = session.scalars(select(Product.name)).all()
+def CreateProduct ():
+  # product_name = session.scalars(select(Product.name)).all()
 
-  if productCreate.name in product_name:
-    NameProductExist()
+  # if productCreate.name in product_name:
+  #   NameProductExist()
 
   new_product = Product(name="", sale_price=0.0)
   session.add(new_product)
