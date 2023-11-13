@@ -1,24 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 # Routes
-from app.sales.adapters.routes.sales import sales
-from app.supplies.adapters.routes.routes import supplies
-from app.providers.adapters.routes.routes import providers
-from app.purchases.adapters.routes.purchases import purchases
-from app.products.adapters.routes.routes import products
-from app.users.adapters.routes.routes import user
-from app.roles.adapters.routes.routes import role
-from app.permissions.adapters.routes.routes import permission
-from app.dashboard.adapters.routes.routes import dashboard
-from app.auth.adapters.routes.routes import auth
-
 
 
 app = FastAPI()
 
 origins = [
-    "https://frontend-soff.vercel.app",
-    "http://localhost:3000"
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -29,7 +20,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+from app.sales.adapters.routes.sales import sales
+from app.supplies.adapters.routes.routes import supplies
+from app.providers.adapters.routes.routes import providers
+from app.purchases.adapters.routes.purchases import purchases
+from app.products.adapters.routes.routes import products
+from app.users.adapters.routes.routes import user
+from app.roles.adapters.routes.routes import role
+from app.permissions.adapters.routes.routes import permission
+from app.dashboard.adapters.routes.routes import dashboard
+from app.auth.adapters.routes.routes import auth
 
 # Add routes
 app.include_router(auth)
@@ -42,4 +42,3 @@ app.include_router(products)
 app.include_router(user)
 app.include_router(role)
 app.include_router(permission)
-
