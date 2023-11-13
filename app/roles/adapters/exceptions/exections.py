@@ -10,3 +10,7 @@ def roleExists():
     raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="THE_ROLE_ALREADY_EXISTS")
 
 
+def noDeleteRole():
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="THE_ROLE_NO_DELETE")
+
+
