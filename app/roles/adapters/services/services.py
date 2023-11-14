@@ -5,7 +5,7 @@ from app.infrastructure.database import SessionLocal
 from app.roles.domain.pydantic.role import RoleCreate, PermissionsRolesCreate
 from app.roles.adapters.sqlalchemy.role import Role, PermissionsRoles
 from app.users.adapters.sqlalchemy.user import User
-from app.roles.adapters.exceptions.exections import Norole, Requieredrol, roleExists,noDeleteRole
+from app.roles.adapters.exceptions.exections import NoUpdateStatusRole,Norole, Requieredrol, roleExists,noDeleteRole
 from app.roles.adapters.serializer.roles_schema import permissionsRolesSchema
 
 session = SessionLocal()
@@ -127,7 +127,11 @@ def Permission_role_create(nombre_role:str, permissions):
 def updateStatusRole(id_role:str):
     role = session.get(Role, uuid.UUID( id_role))
     if not role:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
+        Norole()
+    
+    if role.name == "Administrador" or role.name== "Base":
+        NoUpdateStatusRole()
+        
     role.status= not role.status
     session.add(role)
     session.commit()
