@@ -85,7 +85,7 @@ def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, invoic
     total += order['subtotal']
     supplies = session.get(Supply, order['supply_id'])
     if supplies:
-      if supplies.quantity_stock == 'Gramos':
+      if supplies.unit_measure == 'Gramos':
         convert = order['amount_supplies']*1000
         supplies.quantity_stock == supplies.quantity_stock + convert
         convertprice = (order['price_supplies'])/1000
