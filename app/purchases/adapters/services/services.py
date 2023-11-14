@@ -89,11 +89,13 @@ def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, invoic
         convert = order['amount_supplies']*1000
         supplies.quantity_stock == convert
         convertprice = order['price_supplies']/1000
-        supplies.price = (supplies.price + convert)/2
+        supplies.price = (supplies.price + convertprice)/2
+        supplies.total = supplies.quantity_stock * supplies.price
       else:
         supplies.quantity_stock += order['amount_supplies']
         average = (supplies.price + order['price_supplies'])/2
         supplies.price = average
+        supplies.total = supplies.quantity_stock * supplies.price
     session.commit()
     session.refresh(supplies)
     
