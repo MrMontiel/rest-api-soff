@@ -5,8 +5,6 @@ from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders
 from datetime import datetime, timedelta
 from babel.numbers import format_currency
 from babel import Locale
-from fastapi.responses import FileResponse
-import plotly.express as px
 
 session = ConectDatabase.getInstance()
 locale = Locale('es', 'ES')
