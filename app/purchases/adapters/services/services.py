@@ -88,7 +88,7 @@ def ConfirmPurchase(id_purchase: str, purchase_date:str,id_provider: str, invoic
       if supplies.quantity_stock == 'Gramos':
         convert = order['amount_supplies']*1000
         supplies.quantity_stock == supplies.quantity_stock + convert
-        convertprice = order['price_supplies']/1000
+        convertprice = (order['price_supplies'])/1000
         supplies.price = (supplies.price + convertprice)/2
         supplies.total = supplies.quantity_stock * supplies.price
       else:
