@@ -23,8 +23,8 @@ session = ConectDatabase.getInstance()
 def GetAllProducts(limit:int, offset:int, status:bool=True):
   products = session.scalars(select(Product).where(Product.status == status).offset(offset).limit(limit).order_by(desc(Product.register_date))).all()
   if not products:
-    # return []
-    ProductNotFound()
+    return []
+    # ProductNotFound()
   return products
 
 def GetDetailsProduct(id_product:str):
@@ -42,6 +42,11 @@ def GetProductById(id_product:str) ->Product:
   return product
 
 def CreateProduct ():
+  # product_name = session.scalars(select(Product.name)).all()
+
+  # if productCreate.name in product_name:
+  #   NameProductExist()
+
   new_product = Product(name="", sale_price=0.0)
   session.add(new_product)
   session.commit()
