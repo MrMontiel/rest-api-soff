@@ -30,9 +30,8 @@ async def get_permissions(limit:int= 10, user: User = Depends(getCurrentActivate
 @permission.post("/")
 async def post_permission(permission: PermissionCreate, user: User = Depends(getCurrentActivateUser)):
     permission = create_permission(permission)
-    return {
-        "Create Permissions":permissionSchema(permission)
-        }
+    return permissionSchema(permission)
+
 
 
 
@@ -47,11 +46,13 @@ async def get_permissinon_id(id_permission : str, user: User = Depends(getCurren
 async def put_permission(id_permission : str, permission: PermissionCreate, user: User = Depends(getCurrentActivateUser)): 
     permission_get = update_permission(id_permission, permission)
     return{
-        "Update Permission": permissionSchema(permission_get)
+        "permission": permissionSchema(permission_get),
+        "mensaje": "Update Permission"
     }
-@permission.delete("/delete_permission/{id_permission}")
-async def permission_delete(id_permission:str, user: User = Depends(getCurrentActivateUser)):
-    permissio_delete_id= delete_permission(id_permission)
-    return{
-        "Permission delete:": permissionSchema(permissio_delete_id)
-    }
+
+# @permission.delete("/delete_permission/{id_permission}")
+# async def permission_delete(id_permission:str, user: User = Depends(getCurrentActivateUser)):
+#     permissio_delete_id= delete_permission(id_permission)
+#     return{
+#         "Permission delete:": permissionSchema(permissio_delete_id)
+#     }

@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from app.auth.adapters.services.user import User, getCurrentActivateUser
 from fastapi import Depends
-from app.roles.domain.pydantic.role import RoleCreate, PermissionsRolesCreate, UpdateRole
+from app.roles.domain.pydantic.role import RoleCreate, PermissionsRolesCreate, UpdateRole, AssignPermissions
 from app.roles.adapters.services.services import (
     get_roles, 
     get_id_role, 
@@ -16,7 +16,6 @@ from app.roles.adapters.services.services import (
     updateStatusRole,
     updateRolesPermissions
 )
-from app.roles.domain.pydantic.role import AssignPermissions
 from app.roles.adapters.serializer.roles_schema import (
     rolesSchema, 
     roleSchema, 
@@ -49,9 +48,7 @@ async def get_role_id(id_role: str, user: User = Depends(getCurrentActivateUser)
 async def delete_role(id_role : str, user: User = Depends(getCurrentActivateUser)):
     rol_delete = delete_role_service(id_role)
     return{
-        "Delete Role": roleSchema(rol_delete) 
-        # "role_Delete": "role delete " 
-        
+        "role_Delete": roleSchema(rol_delete)         
     }
     
 
@@ -59,27 +56,26 @@ async def delete_role(id_role : str, user: User = Depends(getCurrentActivateUser
     
     
 # ----------------------------------ROLEPERMISSION----------------------------------------------
-@role.post("/assign_permissinosrole")
-async def create_permissionsrole(permissionsrole :PermissionsRolesCreate, user: User = Depends(getCurrentActivateUser)):
-    new_permissionrole= permissionsrole_create(permissionsrole)
-    print(new_permissionrole)
-    return{
-        "Assign Permission Role": permissionRolesSchema(new_permissionrole)
-    } 
-    
+# @role.post("/assign_permissinosrole")
+# async def create_permissionsrole(permissionsrole :PermissionsRolesCreate, user: User = Depends(getCurrentActivateUser)):
+#     new_permissionrole= permissionsrole_create(permissionsrole)
+#     print(new_permissionrole)
+#     return{
+#         "Assign Permission Role": permissionRolesSchema(new_permissionrole)
+#     } 
     
 @role.post("/create_role/{nombre_role}")
 async def assign_permissions(nombre_role:str, permissions: list[AssignPermissions], user: User = Depends(getCurrentActivateUser) ):
     Create_rol=Permission_role_create(nombre_role, permissions)
     return {
-        "Create Rol": roleSchema(Create_rol)
+        "message": "Role created successfully"
     }
     
 @role.put("/status_update_role/{id_role}")
 async def updateStatusRol(id_role:str, user: User = Depends(getCurrentActivateUser)):
     update_role_status=updateStatusRole(id_role)
     return{
-        "Update Status Role": rolesSchema(update_role_status)
+        "message":"Status updated"
     }   
     
 
@@ -99,5 +95,6 @@ async def updaterolepermissions(id_rol:str, data: UpdateRole, user: User = Depen
     update_permission_role= updateRolesPermissions(id_rol, data.permissions)
     
     return {
-        "Update Permission Role":permissionRolesSchema(update_permission_role)
-    }
+        "Permission_Role":"update Permissions"
+    }   
+    

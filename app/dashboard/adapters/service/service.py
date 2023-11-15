@@ -5,8 +5,6 @@ from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders
 from datetime import datetime, timedelta
 from babel.numbers import format_currency
 from babel import Locale
-from fastapi.responses import FileResponse
-import plotly.express as px
 
 session = ConectDatabase.getInstance()
 locale = Locale('es', 'ES')
@@ -151,16 +149,63 @@ def getTargetsDashboard():
         
     return [day, sales, money, product]
 
+def getSpanishMounth(mounth: int):
+    if mounth == 1:
+        return 'Enero'
+    elif mounth == 2:
+        return 'Febrero'
+    elif mounth == 3:
+        return 'Marzo'
+    elif mounth == 4:
+        return 'Abril'
+    elif mounth == 5:
+        return 'Mayo'
+    elif mounth == 6:
+        return 'Junio'
+    elif mounth == 7:
+        return 'Julio'
+    elif mounth == 8:
+        return 'Agosto'
+    elif mounth == 9:
+        return 'Septiembre'
+    elif mounth == 10:
+        return 'Octubre'
+    elif mounth == 11:
+        return 'Noviembre'
+    elif mounth == 12:
+        return 'Diciembre'
+
 def getGraficSales():
-    today = datetime.now().date()
-    sales = session.query(Sale.sale_date).filter(Sale.total).all()
+    sales_by_month = (
+        session.query(
+            func.extract('year', Sale.sale_date).label('year'),
+            func.extract('month', Sale.sale_date).label('month'),
+            func.sum(Sale.total).label('total_sales')
+        ).group_by('year', 'month').order_by('year', 'month').all()
+    )
 
-    sales_today = [
-        venta for venta in sales 
-        if datetime.strptime(venta["fecha"], "%Y-%m-%d").date() <= today
-    ]
+    result = []
+    for row in sales_by_month:
+        year = row.year
+        month = row.month
+        total_sales = row.total_sales
 
-    return sales_today
+        month_name = getSpanishMounth(month)
+
+        result.append({"Año": year, "Mes": month_name, "Ventas_Totales": total_sales})
+
+    return result
+
+
+    # today = datetime.now().date()
+    # sales = session.query(Sale.sale_date).filter(Sale.total).all()
+
+    # sales_today = [
+    #     venta for venta in sales 
+    #     if datetime.strptime(venta["fecha"], "%Y-%m-%d").date() <= today
+    # ]
+
+    # return sales_today
     # fig = px.scatter(x=[1, 2, 3, 4], y=[10, 11, 12, 13], labels={'x': 'Eje X', 'y': 'Eje Y'}, title='Gráfico de dispersión')
     # fig.write_image("scatter_plot.png")
     # return FileResponse("scatter_plot.png")

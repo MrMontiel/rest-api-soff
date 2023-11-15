@@ -40,16 +40,14 @@ async def get_user(id_user:str, user: User = Depends(getCurrentActivateUser)):
 @user.put("/update_user/{id_user}")
 async def update_user(id_user:str, users: UserUpdate, user: User = Depends(getCurrentActivateUser)):
     user_id_put= user_update(id_user,users)
-    return {
-            "Update user":userSchema(user_id_put)
-        }
+    return userSchema(user_id_put)
     
     
 @user.delete("/delete_user/{id_user}")
 async def user_delete(id_user:str, user: User = Depends(getCurrentActivateUser)):
     del_user= delete_user(id_user)
     return{
-        "Delete User":userSchema(del_user)
+        "Mensaje": "Deleted successfully"
     }   
     
     
@@ -57,6 +55,6 @@ async def user_delete(id_user:str, user: User = Depends(getCurrentActivateUser))
 async def updateStatus(id_user:str, user: User = Depends(getCurrentActivateUser)):
     updateStatus_User=updateStatusUser(id_user)
     return{
-        "Update Status User":userSchema(updateStatus_User)
-    }   
+        "Mensaje": "update Status"
+    } 
     
