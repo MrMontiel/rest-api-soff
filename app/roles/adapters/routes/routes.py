@@ -50,9 +50,7 @@ async def get_role_id(id_role: str, user: User = Depends(getCurrentActivateUser)
 async def delete_role(id_role : str, user: User = Depends(getCurrentActivateUser)):
     rol_delete = delete_role_service(id_role)
     return{
-        "role_Delete": roleSchema(rol_delete) 
-        # "role_Delete": "role delete " 
-        
+        "role_Delete": roleSchema(rol_delete)         
     }
     
 
