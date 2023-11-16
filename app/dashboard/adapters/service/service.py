@@ -192,20 +192,6 @@ def getGraficSales():
 
         month_name = getSpanishMounth(month)
 
-        result.append({"Año": year, "Mes": month_name, "Ventas_Totales": total_sales})
+        result.append({"Year": year, "Month": month_name, "Total_Sales": total_sales})
 
     return result
-
-
-    # today = datetime.now().date()
-    # sales = session.query(Sale.sale_date).filter(Sale.total).all()
-
-    # sales_today = [
-    #     venta for venta in sales 
-    #     if datetime.strptime(venta["fecha"], "%Y-%m-%d").date() <= today
-    # ]
-
-    # return sales_today
-    # fig = px.scatter(x=[1, 2, 3, 4], y=[10, 11, 12, 13], labels={'x': 'Eje X', 'y': 'Eje Y'}, title='Gráfico de dispersión')
-    # fig.write_image("scatter_plot.png")
-    # return FileResponse("scatter_plot.png")

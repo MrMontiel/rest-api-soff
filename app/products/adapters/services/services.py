@@ -42,11 +42,18 @@ def GetProductById(id_product:str) ->Product:
   return product
 
 def CreateProduct ():
-  # product_name = session.scalars(select(Product.name)).all()
+  products = session.scalars(select(Product)).all()
+  for product in products:
+    if product.name == "":
+      id_product = product.id
+      DeleteProduct(id_product)
 
-  # if productCreate.name in product_name:
-  #   NameProductExist()
-
+      new_product = Product(name="", sale_price=0.0)
+      session.add(new_product)
+      session.commit()
+      session.refresh(new_product)
+      return new_product
+  
   new_product = Product(name="", sale_price=0.0)
   session.add(new_product)
   session.commit()
@@ -183,16 +190,16 @@ def DeleteDetail(id_detail:str):
   session.commit()
 
 def DeleteProduct(id_product:str):
-  product = session.get(Product, uuid.UUID(id_product))
+  product = session.get(Product, id_product)
 
   if not product:
     ProductNotFound()
 
-  statement = select(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
+  statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
   details = recipeDetailsSchema(session.scalars(statement).all())
   
   if len(details) > 0:
-    delete_statement = delete(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
+    delete_statement = delete(RecipeDetail).where(RecipeDetail.product_id == id_product)
     session.execute(delete_statement)
 
   session.delete(product)
