@@ -36,7 +36,7 @@ def create_rol(role: RoleCreate):
 def get_id_role(id_role:str):
     roles = session.scalars(select(Role).where(Role.id== uuid.UUID(id_role))).one()
     if not roles:
-        Norole()
+        Requieredrol()
     return roles
 
 
