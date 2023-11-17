@@ -5,7 +5,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://rest-soff.onrender.com", "http://localhost:3000"],
+    allow_origins=["https://rest-soff.onrender.com", "http://localhost:3000", "https://frontend-soff.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
