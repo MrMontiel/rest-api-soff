@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 POSTGRES_RENDER_URL = f"postgresql+psycopg2://evelyn:kXNpCO6LrjNZZj6W4c6J2FHJhkWTQaMU@dpg-cl7f5cavokcc73allfm0-a.oregon-postgres.render.com/soff_database_xzqf"
 
-engine = create_engine(POSTGRES_RENDER_URL)
+engine = create_engine(POSTGRES_RENDER_URL, pool_size=10, max_overflow=20)
 
 SessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine)
 
