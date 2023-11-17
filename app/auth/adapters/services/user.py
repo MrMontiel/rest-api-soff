@@ -39,14 +39,17 @@ oauth_2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 
 
 def get_permissions(id_role: str):
-    role = session.get(Role, id_role)
-    permissions = []
-    for per in role.Permissions:
-        permission = get_id_permission(per.id_permission)
-        schema_permission = permissionSchema(permission)
-        permissions.append(schema_permission["name"])
-    return permissions
-
+    try:
+        role = session.get(Role, id_role)
+        permissions = []
+        for per in role.Permissions:
+            permission = get_id_permission(per.id_permission)
+            schema_permission = permissionSchema(permission)
+            permissions.append(schema_permission["name"])
+        return permissions
+    except PendingRollbackError as e:
+        session.rollback()
+        
 def getUser(email: str):
     try:
         user:User = session.scalars(select(User).where(User.email == email)).first()
