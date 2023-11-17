@@ -1,210 +1,239 @@
 import uuid
-from sqlalchemy import select, delete, desc, asc
-from fastapi import status, HTTPException
-from app.products.adapters.exceptions.exceptions import (
-  ProductNotFound,
-  ProductsNotFound,  
-  IdProductRequired,
-  SupplyNotFound,
-  ProductNotUpdate,
-  DetailsRequired,
-  InfoProductRequired,
-  NameProductExist,
-  DetailNotFound
-  )
-from app.infrastructure.database import ConectDatabase
+from sqlalchemy import select, delete, desc
+from app.products.adapters.exceptions.exceptions import ProductNotFound, IdProductRequired, SupplyNotFound,ProductNotUpdate, DetailsRequired, InfoProductRequired, NameProductExist, DetailNotFound
+from app.infrastructure.database import ConectDatabase, SessionLocal
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
 from app.products.adapters.sqlalchemy.product import Product, RecipeDetail
 from app.supplies.adapters.sqlalchemy.supply import Supply
-from app.products.adapters.serializers.product_schema import productSchema, productsSchema, recipeDetailSchema, recipeDetailsSchema
+from app.products.adapters.serializers.product_schema import recipeDetailsSchema
+from sqlalchemy.exc import PendingRollbackError
 
-session = ConectDatabase.getInstance()
+session = SessionLocal()
 
 def GetAllProducts(limit:int, offset:int, status:bool=True):
-  products = session.scalars(select(Product).where(Product.status == status).offset(offset).limit(limit).order_by(desc(Product.register_date))).all()
-  if not products:
-    return []
-    # ProductNotFound()
-  return products
+  try:
+    products = session.scalars(select(Product).where(Product.status == status).offset(offset).limit(limit).order_by(desc(Product.register_date))).all()
+    if not products:
+      return []
+    return products
+  except PendingRollbackError as e:
+    session.rollback()
 
 def GetDetailsProduct(id_product:str):
-  if not id_product:
-    IdProductRequired()
+  try:
+    if not id_product:
+      IdProductRequired()
 
-  statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
-  details = session.scalars(statement).all()
-  return details
+    statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
+    details = session.scalars(statement).all()
+    return details
+  except PendingRollbackError as e:
+    session.rollback()
 
 def GetProductById(id_product:str) ->Product:
-  product = session.get(Product, id_product)
-  if not product:
-    ProductNotFound()
-  return product
+  try:
+    product = session.get(Product, id_product)
+    if not product:
+      ProductNotFound()
+    return product
+  except PendingRollbackError as e:
+    session.rollback()
 
 def CreateProduct ():
-  # product_name = session.scalars(select(Product.name)).all()
+  try:
+    products = session.scalars(select(Product)).all()
+    for product in products:
+      if product.name == "":
+        id_product = product.id
+        DeleteProduct(id_product)
 
-  # if productCreate.name in product_name:
-  #   NameProductExist()
+        new_product = Product(name="", sale_price=0.0)
+        session.add(new_product)
+        session.commit()
+        session.refresh(new_product)
+        return new_product
+      
+    new_product = Product(name="", sale_price=0.0)
+    session.add(new_product)
+    session.commit()
+    session.refresh(new_product)
 
-  new_product = Product(name="", sale_price=0.0)
-  session.add(new_product)
-  session.commit()
-  session.refresh(new_product)
-  return new_product
+    return new_product
+  except PendingRollbackError as e:
+    session.rollback()
 
 def AddDetail(id_product:str, detail: RecipeDetailCreate):
-  statement = select(Supply).where(Supply.id == detail.supply_id)
-  supply = session.scalars(statement).one()
+  try:
+    statement = select(Supply).where(Supply.id == detail.supply_id)
+    supply = session.scalars(statement).one()
 
-  if not supply:
-    SupplyNotFound()
+    if not supply:
+      SupplyNotFound()
+      
+    total:float = supply.price * detail.amount_supply
+
+    product = session.scalars(select(Product).where(Product.id == id_product)).one() 
+
+    if not product:
+      ProductNotFound()
+
+    if product.status:
+      detail_added = session.scalars(select(RecipeDetail).where(RecipeDetail.product_id == id_product)).all()
     
-  total:float = supply.price * detail.amount_supply
+      for n in detail_added:
+        if n.supply_id == uuid.UUID(detail.supply_id):
+          n.amount_supply += detail.amount_supply
+          n.subtotal = n.amount_supply * supply.price
+          session.add(n)
+          session.commit()
+          session.refresh(n) 
+          return n 
 
-  product = session.scalars(select(Product).where(Product.id == id_product)).one() 
+      new_detail = RecipeDetail(product_id=id_product, supply_id=detail.supply_id, amount_supply=detail.amount_supply, subtotal=total)
+      session.add(new_detail)
+      session.commit()
+      session.refresh(new_detail)
+      return new_detail
 
-  if not product:
-    ProductNotFound()
-
-  if product.status:
-    detail_added = session.scalars(select(RecipeDetail).where(RecipeDetail.product_id == id_product)).all()
-  
-    for n in detail_added:
-      if n.supply_id == uuid.UUID(detail.supply_id):
-        n.amount_supply += detail.amount_supply
-        n.subtotal = n.amount_supply * supply.price
-        session.add(n)
-        session.commit()
-        session.refresh(n) 
-        return n 
-
-    new_detail = RecipeDetail(product_id=id_product, supply_id=detail.supply_id, amount_supply=detail.amount_supply, subtotal=total)
-    session.add(new_detail)
-    session.commit()
-    session.refresh(new_detail)
-    return new_detail
-  
-  ProductNotUpdate()
+    ProductNotUpdate()
+  except PendingRollbackError as e:
+    session.rollback()
 
 def ConfirmProduct(id_product:str, productCreate:ProductCreate): 
-  product = GetProductById(id_product)
+  try:
+    product = GetProductById(id_product)
 
-  if product.status:
-    product_name = session.scalars(select(Product.name)).all()
+    if product.status:
+      product_name = session.scalars(select(Product.name)).all()
 
-    if not product:
-      ProductNotFound()
+      if not product:
+        ProductNotFound()
 
-    statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
-    details = recipeDetailsSchema(session.scalars(statement).all())
+      statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
+      details = recipeDetailsSchema(session.scalars(statement).all())
 
-    if len(details) <= 0:
-      DetailsRequired()
+      if len(details) <= 0:
+        DetailsRequired()
 
-    total:float = 0.0
+      total:float = 0.0
 
-    for detail in details:
-      total += detail['subtotal']
-      
-    product.name = productCreate.name
-    product.price = total
-    product.sale_price = productCreate.sale_price
+      for detail in details:
+        total += detail['subtotal']
+        
+      product.name = productCreate.name
+      product.price = total
+      product.sale_price = productCreate.sale_price
 
-    if productCreate.name in product_name:
-      NameProductExist()
+      if productCreate.name in product_name:
+        NameProductExist()
 
-    if productCreate.name == "" or productCreate.sale_price == 0:
-      InfoProductRequired()
+      if productCreate.name == "" or productCreate.sale_price == 0:
+        InfoProductRequired()
 
-    session.commit()
-    session.refresh(product)
-    return product
-  
-  ProductNotUpdate()
+      session.commit()
+      session.refresh(product)
+      return product
+    
+    ProductNotUpdate()
+  except PendingRollbackError as e:
+    session.rollback()
 
 def UpdateDetail(id_detail:str, amount_supply:int):
-  detail = session.get(RecipeDetail, uuid.UUID(id_detail))
+    try:
+      detail = session.get(RecipeDetail, uuid.UUID(id_detail))
 
-  if not detail:
-    DetailNotFound()
+      if not detail:
+        DetailNotFound()
 
-  detail.amount_supply = amount_supply
-  detail.subtotal = detail.supply.price * amount_supply
-  session.add(detail)
-  session.commit()
-  session.refresh(detail)
-  return detail
+      detail.amount_supply = amount_supply
+      detail.subtotal = detail.supply.price * amount_supply
+      session.add(detail)
+      session.commit()
+      session.refresh(detail)
+      return detail
+    except PendingRollbackError as e:
+      session.rollback()
 
 def UpdateProduct(id_product: str, productCreate:ProductCreate):
-  product = GetProductById(id_product)
+  try:
+    product = GetProductById(id_product)
 
-  if product.status:
-    product_name = session.scalars(select(Product.name).where(Product.id != id_product)).all()
+    if product.status:
+      product_name = session.scalars(select(Product.name).where(Product.id != id_product)).all()
 
-    if productCreate.name in product_name:
-      NameProductExist()
-      
-    if productCreate.name == "" or productCreate.sale_price == 0:
-      InfoProductRequired()
+      if productCreate.name in product_name:
+        NameProductExist()
+        
+      if productCreate.name == "" or productCreate.sale_price == 0:
+        InfoProductRequired()
 
-    if not product:
-      ProductNotFound()
+      if not product:
+        ProductNotFound()
 
-    statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
-    details = recipeDetailsSchema(session.scalars(statement).all())
+      statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
+      details = recipeDetailsSchema(session.scalars(statement).all())
 
-    if len(details) <= 0:
-      DetailsRequired()
-      
-    total:float = 0.0
+      if len(details) <= 0:
+        DetailsRequired()
+        
+      total:float = 0.0
 
-    for detail in details:
-      total += detail['subtotal']
+      for detail in details:
+        total += detail['subtotal']
 
-    product.name = productCreate.name
-    product.price = total
-    product.sale_price = productCreate.sale_price
+      product.name = productCreate.name
+      product.price = total
+      product.sale_price = productCreate.sale_price
 
-    # session.add(product)
-    session.commit()
-    session.refresh(product)
-    return product
-  
+      # session.add(product)
+      session.commit()
+      session.refresh(product)
+      return product
+  except PendingRollbackError as e:
+    session.rollback()
+
   ProductNotUpdate()
 
 def DeleteDetail(id_detail:str):
-  detail = session.get(RecipeDetail, uuid.UUID(id_detail))
+  try:
+    detail = session.get(RecipeDetail, uuid.UUID(id_detail))
 
-  if not detail:
-    DetailNotFound()
+    if not detail:
+      DetailNotFound()
 
-  session.delete(detail)  
-  session.commit()
+    session.delete(detail)  
+    session.commit()
+  except PendingRollbackError as e:
+    session.rollback()
 
 def DeleteProduct(id_product:str):
-  product = session.get(Product, uuid.UUID(id_product))
+  try:
+    product = session.get(Product, uuid.UUID(id_product))
 
-  if not product:
-    ProductNotFound()
+    if not product:
+      ProductNotFound()
 
-  statement = select(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
-  details = recipeDetailsSchema(session.scalars(statement).all())
-  
-  if len(details) > 0:
-    delete_statement = delete(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
-    session.execute(delete_statement)
+    statement = select(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
+    details = recipeDetailsSchema(session.scalars(statement).all())
+    
+    if len(details) > 0:
+      delete_statement = delete(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
+      session.execute(delete_statement)
 
-  session.delete(product)
-  session.commit()
+    session.delete(product)
+    session.commit()
+  except PendingRollbackError as e:
+    session.rollback()
 
 def ChangeStatus(id_product:str):
-  product= GetProductById(id_product)
+  try:
+    product= GetProductById(id_product)
 
-  product.status = not product.status
-  session.add(product) 
-  session.commit()
-  session.refresh(product)
+    product.status = not product.status
+    session.add(product) 
+    session.commit()
+    session.refresh(product)
 
-
-  return product
+    return product
+  except PendingRollbackError as e:
+    session.rollback()
