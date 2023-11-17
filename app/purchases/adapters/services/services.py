@@ -44,13 +44,12 @@ def CreatePurchase():
       session.commit()
       session.refresh(new_purchase)
       return new_purchase
-    else:
-      provider = getGeneralProvider()
-      new_purchase = Purchase(provider_id= provider.id, invoice_number= "")
-      session.add(new_purchase)
-      session.commit()
-      session.refresh(new_purchase)
-      return new_purchase
+  provider = getGeneralProvider()
+  new_purchase = Purchase(provider_id= provider.id, invoice_number= "")
+  session.add(new_purchase)
+  session.commit()
+  session.refresh(new_purchase)
+  return new_purchase
 
 
 def AddOrder(id_purchase: str, order: OrderPurchaseCreate):
