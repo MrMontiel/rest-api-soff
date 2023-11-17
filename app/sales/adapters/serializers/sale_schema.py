@@ -3,6 +3,7 @@ from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders, Client
 def saleSchema(sale: Sale) -> dict:
   return {
     "id": sale.id,
+    "invoice_number": sale.invoice_number,
     "sale_date": sale.sale_date,
     "amount_order": sale.amount_order,
     "payment_method": sale.pyment_method,
@@ -10,7 +11,7 @@ def saleSchema(sale: Sale) -> dict:
     "total": sale.total,
     "type_sale": sale.type_sale,
     "status": sale.status,
-    "client": sale.client
+    "client": sale.client.name
   }
   
 def salesSchema(sales: list[Sale]) -> list:

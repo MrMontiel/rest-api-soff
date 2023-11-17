@@ -23,6 +23,7 @@ class Sale(Base):
   __tablename__ = 'sales'
   
   id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+  invoice_number: Mapped[str] = mapped_column(String, nullable=False)
   sale_date:Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
   amount_order:Mapped[int] = mapped_column(Integer, nullable=False, default=0)
   pyment_method:Mapped[str] = mapped_column(String, nullable=False)
@@ -53,3 +54,11 @@ class Client(Base):
   direction: Mapped[str] = mapped_column(String(60), nullable=False)
   phone: Mapped[str] = mapped_column(String(60), nullable=False)
   email: Mapped[str] = mapped_column(String(60), nullable=False)
+  
+class VoucherSale(Base):
+  __tablename__ = 'vouchers'
+  
+  id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+  filename: Mapped[str] = mapped_column(String(60), nullable=False)
+  link: Mapped[str] = mapped_column(String(500), nullable=False)
+  sale_id:Mapped[str] = mapped_column(ForeignKey("sales.id"))

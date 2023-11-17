@@ -1,52 +1,100 @@
 import uuid
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from fastapi import status, HTTPException
 from app.infrastructure.database import ConectDatabase
 from app.providers.domain.pydantic.provider import ProviderCreate, ProviderUpdate, ProviderDelete
 from app.providers.adapters.sqlachemy.provider import Provider
+from app.purchases.adapters.serializers.purchase_schema import purchasesSchema
+from app.purchases.adapters.sqlalchemy.purchase import Purchase
+from app.providers.adapters.exceptions.exceptions import (
+  noprovider,
+  requiredprovider,
+  notcreatedprovider,
+  notdeleteprovider,
+  notupdateprovider,
+  nitisalreadyexist,
+  providerassociated
+)
+# from app.providers.adapters.exceptions import noprovider, requiredprovider
 
 session = ConectDatabase.getInstance()
 
-def GetAllProviders(limit:int = 100):
-  providers = session.scalars(select(Provider)).all()
+def GetAllProviders(limit:int, offset: int, status:bool=True):
+  providers = session.scalars(select(Provider).where(Provider.status == status).offset(offset).limit(limit).order_by(desc(Provider.date_registration))).all()
   if not providers:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Providers not found")
+    # noprovider()
+    return []
   return providers
 
 
 def GetOneProvider(id:str):
-  providers = session.scalars(select(Provider).where(Provider.id==id)).one()
+  providers = session.get(Provider, uuid.UUID(id))
   if not providers:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Supply not found")
+    noprovider()
   return providers
 
 def AddProvider(provider: ProviderCreate):
   if not provider:
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="provider not created")
-  if provider.name == "" or provider.company == "" or provider.address == "":
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the fields name, company, address and email: are obligatory")
-  new_provider = Provider(name=provider.name, company=provider.company, address=provider.address, email=provider.email, phone=provider.phone, city=provider.city)
+    # raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="provider not created")
+    notcreatedprovider()
+  if provider.nit == "" or provider.name == "" or provider.company == "" or provider.address == "" or provider.phone == "" or provider.city == "":
+    requiredprovider()
+    
+  provider_nit = session.scalars(select(Provider.nit)).all()
+  if provider.nit in provider_nit:
+    nitisalreadyexist()
   
-  session.add(new_provider)
-  session.commit()
-  session.refresh(new_provider)
-  return new_provider
+    
+  else:
+    
+    new_provider = Provider(nit=provider.nit, name=provider.name, company=provider.company, address=provider.address, phone=provider.phone, city=provider.city)
+  
+    session.add(new_provider)
+    session.commit()
+    session.refresh(new_provider)
+    return new_provider
     
 def UpdateProvider(id: str, provider_update: ProviderUpdate):
-    provider = session.query(Provider).filter(Provider.id == uuid.UUID(id)).first()
-    if provider:
-        for attr, value in provider_update.dict().items():
-            setattr(provider, attr, value)
-        session.commit()
-        session.refresh(provider)
-        return provider
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="provider not found")
+    provider_id_update = GetOneProvider(id)
+    if not provider_id_update:
+        requiredprovider()
+
+    existing_provider = session.query(Provider).filter(
+        Provider.nit == provider_update.nit, Provider.id != id).first()
+    
+    if existing_provider:
+        nitisalreadyexist()
+
+    provider_id_update.nit = provider_update.nit
+    provider_id_update.name = provider_update.name
+    provider_id_update.company = provider_update.company
+    provider_id_update.address = provider_update.address
+    provider_id_update.phone = provider_update.phone
+    provider_id_update.city = provider_update.city
+    session.commit()
+    session.refresh(provider_id_update)
+    return provider_id_update
+
     
 def DeleteProvider(id: str):
     provider = session.query(Provider).filter(Provider.id == uuid.UUID(id)).first()
+    
+    statement = select(Purchase).where(Purchase.provider_id == id)
+    details = purchasesSchema(session.scalars(statement).all())
+    if details:
+      providerassociated()
+      
     if not provider:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Supply not found")
+      notdeleteprovider()
     session.delete(provider)
+    session.commit()
+    return provider
+  
+def UpdateStatusProvider(id:str):
+    provider = session.get(Provider, uuid.UUID(id))
+    if not provider:
+        notupdateprovider()
+    provider.status= not provider.status
+    session.add(provider)
     session.commit()
     return provider

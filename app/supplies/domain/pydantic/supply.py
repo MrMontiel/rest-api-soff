@@ -10,14 +10,22 @@ class SupplyBase(BaseModel):
     
 class Supply(SupplyBase):
     id: Optional[str]
+    total: float
     status: bool = True
     
     class Config:
         from_attributes = True
     
-class SupplyCreate(SupplyBase):
+class SupplyCreate(BaseModel):
+    name: str
+    price: float
+    quantity_stock: int
+    unit_measure: str
     
-    pass
+    # def convert_to_grams(self):
+    #     if self.unit_measure == 'Kilogramos':
+    #         self.unit_measure == "Gramos"
+    #         self.quantity_stock *= 1000 
 
 class SupplyUpdate(SupplyBase):
     
