@@ -1,16 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
+# Routes
 from app.sales.adapters.routes.sales import sales
 from app.supplies.adapters.routes.routes import supplies
 from app.providers.adapters.routes.routes import providers
@@ -21,6 +11,19 @@ from app.roles.adapters.routes.routes import role
 from app.permissions.adapters.routes.routes import permission
 from app.dashboard.adapters.routes.routes import dashboard
 from app.auth.adapters.routes.routes import auth
+
+
+
+app = FastAPI()
+
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Add routes
 app.include_router(auth)
