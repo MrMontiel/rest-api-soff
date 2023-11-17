@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy import select, desc
 from fastapi import status, HTTPException
-from app.infrastructure.database import SessionLocal
+from app.infrastructure.database import ConectDatabase, SessionLocal
 from app.users.domain.pydantic.user import UserCreate, UserUpdate
 from app.users.adapters.sqlalchemy.user import User
 from app.users.adapters.serializer.user_eschema import User, usersSchema
@@ -15,7 +15,7 @@ session = SessionLocal()
     
     
     
-
+@ConectDatabase.rollback_on_pending_rollback
 def get_users(limit:int, offset:int, status:bool=True):
     # users = session.scalars(select(User).order_by(desc(User.name))).all()
     users = session.scalars(select(User).where(User.status == status).offset(offset).limit(limit).order_by(desc(User.name))).all()
@@ -26,7 +26,7 @@ def get_users(limit:int, offset:int, status:bool=True):
 
 
 
-
+@ConectDatabase.rollback_on_pending_rollback
 def post_user(user : UserCreate):
     if not user:
         Nouser()
@@ -53,14 +53,14 @@ def post_user(user : UserCreate):
 
 
             
-
+@ConectDatabase.rollback_on_pending_rollback
 def get_user_id(id_user:str):
     user_id= session.scalars(select(User).filter(User.id == uuid.UUID(id_user))).one()
     if not user_id:
         Nouser()
     return user_id
     
-    
+@ConectDatabase.rollback_on_pending_rollback
 def user_update(id_user:str , user: UserUpdate):
     
     
@@ -83,13 +83,13 @@ def user_update(id_user:str , user: UserUpdate):
     session.refresh(user_id_update)
     return user_id_update
 
-
+@ConectDatabase.rollback_on_pending_rollback
 def delete_user(id_user:str):
     user_detelete_id = get_user_id(id_user)
     session.delete(user_detelete_id)
     session.commit()
     return user_detelete_id
-
+@ConectDatabase.rollback_on_pending_rollback
 def updateStatusUser(id_user:str):
     user= get_user_id(id_user)
     user.status = not user.status
