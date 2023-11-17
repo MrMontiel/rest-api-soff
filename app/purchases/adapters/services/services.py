@@ -33,6 +33,17 @@ def GetPurchaseById(id:str) -> Purchase:
   return purchase
 
 def CreatePurchase():
+  purchases = session.scalars(select(Purchase)).all()
+  for purchase in purchases:
+    if purchase.invoice_number == "":
+      id_purchase = purchase.id
+      DeletePurchaseByid(id_purchase)
+      provider = getGeneralProvider()
+      new_purchase = Purchase(provider_id= provider.id, invoice_number= "")
+      session.add(new_purchase)
+      session.commit()
+      session.refresh(new_purchase)
+      return new_purchase
   provider = getGeneralProvider()
   new_purchase = Purchase(provider_id= provider.id, invoice_number= "")
   session.add(new_purchase)
@@ -140,7 +151,7 @@ def UpdateAmountOrder(id_order: str, amount_supplies: int):
   return order
 
 def DeleteOrderById(id_order: str):
-  order = session.get(PurchasesOrders, uuid.UUID(id_order))
+  order = session.get(PurchasesOrders, id_order)
   print(order)
   if not order:
     OrderNotFound()
@@ -148,7 +159,7 @@ def DeleteOrderById(id_order: str):
   session.commit()
 
 def DeletePurchaseByid(id_purchase:str):
-  purchase = session.get(Purchase, uuid.UUID(id_purchase))
+  purchase = session.get(Purchase, id_purchase)
   print(purchase)
   if not purchase:
     PurchaseNotFound()
@@ -157,11 +168,11 @@ def DeletePurchaseByid(id_purchase:str):
   if purchase.total != 0.0:
     NotDeletePurchaseConfirm()
   
-  statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
+  statement = select(PurchasesOrders).where(PurchasesOrders.purchase_id == id_purchase)
   orders = ordersSchema(session.scalars(statement).all())
   
   if len(orders) > 0:
-    delete_statement = delete(PurchasesOrders).where(PurchasesOrders.purchase_id == uuid.UUID(id_purchase))
+    delete_statement = delete(PurchasesOrders).where(PurchasesOrders.purchase_id == id_purchase)
     session.execute(delete_statement)
   session.delete(purchase)
   session.commit()
