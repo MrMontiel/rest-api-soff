@@ -22,7 +22,7 @@ from app.auth.adapters.sqlalchemy.models import RecoverPassword
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from mailersend import emails
+from sqlalchemy.exc import PendingRollbackError
 import secrets
 
 
@@ -48,18 +48,21 @@ def get_permissions(id_role: str):
     return permissions
 
 def getUser(email: str):
-    user:User = session.scalars(select(User).where(User.email == email)).first()
-    if not user:
-        InvalidCredentials()
-    permissions = get_permissions(user.id_role)
-    
-    return UserAuthenticated(
-        name=user.name,
-        email=user.email,
-        status=user.status,
-        permissions=permissions,
-        hashed_password=user.password
-    )
+    try:
+        user:User = session.scalars(select(User).where(User.email == email)).first()
+        if not user:
+            InvalidCredentials()
+        permissions = get_permissions(user.id_role)
+
+        return UserAuthenticated(
+            name=user.name,
+            email=user.email,
+            status=user.status,
+            permissions=permissions,
+            hashed_password=user.password
+        )
+    except PendingRollbackError as e:
+        session.rollback()
     
 def authenticateUser(email: str, password: str):
     user = getUser(email)
@@ -243,13 +246,15 @@ def recoveryPassword(email: str):
     }
 
 def verifyCode(code: str, user_id: str):
-    recovery: RecoverPassword = session.scalars(select(RecoverPassword).filter(RecoverPassword.user_id == user_id, RecoverPassword.code == code)).first()
-    if not recovery:
-        CodeNotFound()
-    if recovery.verify == True:
-        CodeConfirmed()
-    return recovery
-
+    try:
+        recovery: RecoverPassword = session.scalars(select(RecoverPassword).filter(RecoverPassword.user_id == user_id, RecoverPassword.code == code)).first()
+        if not recovery:
+            CodeNotFound()
+        if recovery.verify == True:
+            CodeConfirmed()
+        return recovery
+    except PendingRollbackError as e:
+        session.rollback()
 
 def createAccessTokenForRecoverPassword(data: dict):
     to_encode = data.copy()
@@ -263,31 +268,37 @@ def confirmCode(code: str, email: str):
     recovery = verifyCode(code, user.id)
     recovery.verify = True
     
-    session.add(recovery)
-    session.commit()
-    session.refresh(recovery)
-    return {
-        "id": recovery.id,
-        "apikey": recovery.apikey
-    }
+    try:
+        session.add(recovery)
+        session.commit()
+        session.refresh(recovery)
+        return {
+            "id": recovery.id,
+            "apikey": recovery.apikey
+        }
+    except PendingRollbackError as e:
+        session.rollback()
     
     
 def verifyApikey(apikey: str):
     pass
     
 def changePassword(new_password: str, apikey: str):
-    recovery: RecoverPassword = session.scalars(select(RecoverPassword).where(RecoverPassword.apikey == apikey)).first()
-    if not recovery:
-        ApikeyNotFound()
+    try:
+        recovery: RecoverPassword = session.scalars(select(RecoverPassword).where(RecoverPassword.apikey == apikey)).first()
+        if not recovery:
+            ApikeyNotFound()
+            
+        user: User = session.get(User, recovery.user_id) 
         
-    user: User = session.get(User, recovery.user_id) 
-    
-    if not user:
-        UserNotFound()
-        
-    new_password_hashed = get_password_hash(new_password)
-    user.password = new_password_hashed
-    session.add(user)
-    session.commit()
-    session.refresh(user)
-    return user
+        if not user:
+            UserNotFound()
+            
+        new_password_hashed = get_password_hash(new_password)
+        user.password = new_password_hashed
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user
+    except PendingRollbackError as e:
+            session.rollback()
