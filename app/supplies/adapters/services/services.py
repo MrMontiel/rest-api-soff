@@ -17,24 +17,34 @@ from app.supplies.adapters.exceptions.exceptions import (
   nameisalreadyexist,
   supplyassociated
 )
+from sqlalchemy.exc import PendingRollbackError
+
 
 session = ConectDatabase.getInstance()
 
 
 
 def GetAllSupplies(limit:int, offset: int, status:bool=True):
-  supplies = session.scalars(select(Supply).where(Supply.status == status).offset(offset).limit(limit).order_by(desc(Supply.name))).all()
-  if not supplies:
-    # notsupply()
-    return []
-  return supplies
+  try:
+    supplies = session.scalars(select(Supply).where(Supply.status == status).offset(offset).limit(limit).order_by(desc(Supply.name))).all()
+    if not supplies:
+        []
+    return supplies
+  
+  except PendingRollbackError as e:
+      session.rollback()
 
 
 def GetOneSupply(id:str):
-  supplies = session.get(Supply, id)
-  if not supplies:
-    notsupply()
-  return supplies
+  
+  try:
+    supplies = session.get(Supply, id)
+    if not supplies:
+      notsupply()
+    return supplies
+  except PendingRollbackError as e:
+      session.rollback()
+
 
 
 def AddSupply(supply: SupplyCreate):
@@ -48,25 +58,26 @@ def AddSupply(supply: SupplyCreate):
   if supply.name == "" or supply.price == "" or supply.quantity_stock == "" or supply.unit_measure == "":
     requiredsupply() 
     
-  supply_name = session.scalars(select(Supply.name)).all()
-  if supply.name in supply_name:
-    nameisalreadyexist()
-    
-  else:
-    
+  try:
+    supply_name = session.scalars(select(Supply.name)).all()
+    if supply.name in supply_name:
+      nameisalreadyexist()
     
     total = (supply.price * supply.quantity_stock)
     new_supply = Supply(name=supply.name, price=supply.price, quantity_stock=supply.quantity_stock, unit_measure=supply.unit_measure, total=total)
   
-    
-    
     session.add(new_supply)
     session.commit()
     session.refresh(new_supply)
     return new_supply
+  
+  except PendingRollbackError as e:
+        session.rollback()
+        
     
     
 def UpdateSupply(id: str, supply_update: SupplyUpdate):
+  try:
     supply_id_update = GetOneSupply(id)
     if not supply_id_update:
         requiredsupply()
@@ -84,10 +95,12 @@ def UpdateSupply(id: str, supply_update: SupplyUpdate):
     session.commit()
     session.refresh(supply_id_update)
     return supply_id_update
-      
+  
+  except PendingRollbackError as e:
+        session.rollback()
       
 def DeleteSupply(id: str):
-  
+  try:
     supply = session.query(Supply).filter(Supply.id == uuid.UUID(id)).first()
     
     statement = select(RecipeDetail).where(RecipeDetail.supply_id == id)
@@ -107,9 +120,12 @@ def DeleteSupply(id: str):
     session.delete(supply)
     session.commit()
     return supply
+  except PendingRollbackError as e:
+      session.rollback()
 
 
 def UpdateStatusSupply(id:str):
+  try:
     supply = session.get(Supply, uuid.UUID(id))
     if not supply:
       notupdatesupply()
@@ -117,6 +133,8 @@ def UpdateStatusSupply(id:str):
     session.add(supply)
     session.commit()
     return supply
+  except PendingRollbackError as e:
+      session.rollback()
 
 
 # def UpdateSupply(supply: SupplyUpdate):
