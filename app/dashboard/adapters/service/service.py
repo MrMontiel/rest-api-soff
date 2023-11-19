@@ -217,8 +217,8 @@ def getPyment():
             func.extract('year', Sale.sale_date).label('year'),
             func.extract('month', Sale.sale_date).label('month'),
             func.sum(Sale.total).label('total_sales'),
-            func.sum(case((Sale.pyment_method == 'Efectivo', Sale.total), else_=0)).label('cash_sales'),
-            func.sum(case((Sale.pyment_method == 'Transferencia', Sale.total), else_=0)).label('transfer_sales')
+            func.sum(case((Sale.pyment_method == 'efectivo', Sale.total), else_=0)).label('cash_sales'),
+            func.sum(case((Sale.pyment_method == 'transferencia', Sale.total), else_=0)).label('transfer_sales')
         ).group_by('year', 'month').order_by('year', 'month').all()
     )
 
