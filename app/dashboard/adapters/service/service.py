@@ -1,5 +1,5 @@
 from app.infrastructure.database import ConectDatabase
-from sqlalchemy import select, func,desc
+from sqlalchemy import select, func,desc, case
 from app.products.adapters.sqlalchemy.product import Product
 from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders
 from datetime import datetime, timedelta
@@ -195,3 +195,56 @@ def getGraficSales():
         result.append({"Year": year, "Month": month_name, "Total_Sales": total_sales})
 
     return result
+
+
+    # today = datetime.now().date()
+    # sales = session.query(Sale.sale_date).filter(Sale.total).all()
+
+    # sales_today = [
+    #     venta for venta in sales 
+    #     if datetime.strptime(venta["fecha"], "%Y-%m-%d").date() <= today
+    # ]
+
+    # return sales_today
+    # fig = px.scatter(x=[1, 2, 3, 4], y=[10, 11, 12, 13], labels={'x': 'Eje X', 'y': 'Eje Y'}, title='Gráfico de dispersión')
+    # fig.write_image("scatter_plot.png")
+    # return FileResponse("scatter_plot.png")
+
+
+def getPyment():
+    sales_by_month = (
+        session.query(
+            func.extract('year', Sale.sale_date).label('year'),
+            func.extract('month', Sale.sale_date).label('month'),
+            func.sum(Sale.total).label('total_sales'),
+            func.sum(case((Sale.pyment_method == 'Efectivo', Sale.total), else_=0)).label('cash_sales'),
+            func.sum(case((Sale.pyment_method == 'Transferencia', Sale.total), else_=0)).label('transfer_sales')
+        ).group_by('year', 'month').order_by('year', 'month').all()
+    )
+
+    result = []
+    for row in sales_by_month:
+        year = row.year
+        month = row.month
+        total_sales = row.total_sales
+        cash_sales = row.cash_sales
+        transfer_sales = row.transfer_sales
+
+        month_name = getSpanishMounth(month)
+
+        cash_percentage = (cash_sales / total_sales) * 100 if total_sales > 0 else 0
+        transfer_percentage = (transfer_sales / total_sales) * 100 if total_sales > 0 else 0
+
+        result.append({
+            "Año": year,
+            "Mes": month_name,
+            "Ventas_Totales": total_sales,
+            "Ventas_Efectivo": cash_sales,
+            "Ventas_Transferencia": transfer_sales,
+            "Porcentaje_Efectivo": cash_percentage,
+            "Porcentaje_Transferencia": transfer_percentage
+        })
+
+    return (result)
+
+
