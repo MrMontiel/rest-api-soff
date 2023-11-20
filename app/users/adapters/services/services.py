@@ -19,14 +19,14 @@ session = SessionLocal()
     
 def get_users(limit:int, offset:int, status:bool=True):
     # users = session.scalars(select(User).order_by(desc(User.name))).all()
-    # try:
+    try:
         users = session.scalars(select(User).where(User.status == status).offset(offset).limit(limit).order_by(desc(User.name))).all()
         if not users:
             []
         return users
         
-    # except PendingRollbackError as e:
-    #     session.rollback()
+    except PendingRollbackError as e:
+        session.rollback()
     
 
 
@@ -37,41 +37,41 @@ def post_user(user : UserCreate):
     if  user.name == "" or user.email == ""  or user.password == "" or user.id_role=="":
         RequieredUser()
         
-    # try:
-    usersExis= session.scalars(select(User.document)).all()
-    usersExiseamil= session.scalars(select(User.email)).all()
+    try:
+        usersExis= session.scalars(select(User.document)).all()
+        usersExiseamil= session.scalars(select(User.email)).all()
 
-    if user.document in usersExis:
-        UserExists()
-    if user.email in usersExiseamil:
-        UserExistsEmail()
+        if user.document in usersExis:
+            UserExists()
+        if user.email in usersExiseamil:
+            UserExistsEmail()
 
-    role_id_get_role= get_id_role(user.id_role)
+        role_id_get_role= get_id_role(user.id_role)
 
-    password_hashed = get_password_hash(user.password)
+        password_hashed = get_password_hash(user.password)
 
-    new_user = User(name=user.name, document_type=user.document_type, document=user.document, phone=user.phone, email=user.email, password=password_hashed , id_role =role_id_get_role.id)
-    session.add(new_user)
-    session.commit()
-    session.refresh(new_user)
-    # except PendingRollbackError as e:
-    #     session.rollback()
+        new_user = User(name=user.name, document_type=user.document_type, document=user.document, phone=user.phone, email=user.email, password=password_hashed , id_role =role_id_get_role.id)
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+    except PendingRollbackError as e:
+        session.rollback()
         
     return new_user
 
 
             
 def get_user_id(id_user:str):
-    # try:
+    try:
         user_id= session.scalars(select(User).filter(User.id == uuid.UUID(id_user))).one()
         if not user_id:
             Nouser()
         return user_id
-    # except PendingRollbackError as e:
-    #     session.rollback()
+    except PendingRollbackError as e:
+        session.rollback()
     
 def user_update(id_user:str , user: UserUpdate):
-    # try:
+    try:
         usersExis= session.scalars(select(User.name).where(User.id != id_user)).all()
         usersExiseamil= session.scalars(select(User.email).where(User.id != id_user)).all()
         if user.document in usersExis:
@@ -90,26 +90,26 @@ def user_update(id_user:str , user: UserUpdate):
         session.commit()
         session.refresh(user_id_update)
         return user_id_update
-    # except PendingRollbackError as e:
-    #     session.rollback()
+    except PendingRollbackError as e:
+        session.rollback()
         
 def delete_user(id_user:str):
-    # try:
+    try:
         user_detelete_id = get_user_id(id_user)
         session.delete(user_detelete_id)
         session.commit()
         return user_detelete_id
-    # except PendingRollbackError as e:
-    #     session.rollback()
+    except PendingRollbackError as e:
+        session.rollback()
         
         
 def updateStatusUser(id_user:str):
-    # try:
+    try:
         user= get_user_id(id_user)
         user.status = not user.status
         session.add(user)
         session.commit()
         return user
-    # except PendingRollbackError as e:
-    #     session.rollback()
+    except PendingRollbackError as e:
+        session.rollback()
     
