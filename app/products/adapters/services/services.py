@@ -95,6 +95,12 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
 
     if not product:
       ProductNotFound()
+      
+    if productCreate.name in product_name:
+      NameProductExist()
+
+    if productCreate.name == "" or productCreate.sale_price == 0:
+      InfoProductRequired()
 
     statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
     details = recipeDetailsSchema(session.scalars(statement).all())
@@ -111,11 +117,6 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
     product.price = total
     product.sale_price = productCreate.sale_price
 
-    if productCreate.name in product_name:
-      NameProductExist()
-
-    if productCreate.name == "" or productCreate.sale_price == 0:
-      InfoProductRequired()
 
     session.commit()
     session.refresh(product)
