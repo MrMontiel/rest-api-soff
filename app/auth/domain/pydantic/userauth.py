@@ -1,23 +1,18 @@
 from pydantic import BaseModel
-from typing import List, Optional
-
 
 class Credentials(BaseModel):
     username: str
     password: str
 
 class User(BaseModel):
-    # name: str | None = None
-    name: Optional[str] = None
+    name: str | None = None
     email: str
-    # status: bool | None = None
-    status: Optional[str] = None
+    status: bool | None = None
     permissions: list[str]
     
 class UserAuthenticated(User):
-    # hashed_password: str | None = None
-    hashed_password: Optional[str] = None
+     hashed_password: str | None = None
     
-class TokenResponse():
+class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
