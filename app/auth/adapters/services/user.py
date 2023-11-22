@@ -24,6 +24,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from sqlalchemy.exc import PendingRollbackError
 import secrets
+from typing import Optional
 
 
 session = ConectDatabase.getInstance()
@@ -81,7 +82,8 @@ def authenticateUser(email: str, password: str):
         permissions=user.permissions
     )
     
-def createAccessToken(data: dict, expire_delta: timedelta | None = None):
+# def createAccessToken(data: dict, expire_delta: timedelta | None = None):
+def createAccessToken(data: dict, expire_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expire_delta:
         expire = datetime.utcnow() + expire_delta
