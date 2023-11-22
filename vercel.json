@@ -1,0 +1,23 @@
+{
+    "functions": {
+      "api": {
+        "runtime": "python3.11.2",
+        "memory": 512
+      }
+    },
+    "builds": [
+      {
+        "src": "main.py",
+        "use": "@vercel/python"
+      }
+    ],
+    "routes": [
+      { "src": "/.*", "dest": "/main.py" }
+    ],
+    "env": {
+      "APP_MODULE": "main:app"
+    },
+    "scripts": {
+      "install": "python -m venv venv && source venv/bin/activate && pip install -r requirements.txt"
+    }
+  }
