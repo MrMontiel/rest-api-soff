@@ -41,9 +41,15 @@ def AddSupply(supply: SupplyCreate):
   if not supply:
     notcreatedsupply()
   
-  # existing_supply = session.query(Supply).filter(Supply.name == supply.name).all()
+
   if supply.unit_measure == "Kilogramos":
     supply.unit_measure = "Gramos"
+    supply.quantity_stock = supply.quantity_stock * 1000
+    supply.price = (supply.price/1000)
+
+  if supply.unit_measure == "Gramos":
+    supply.price = (supply.price/1000)
+
     
   if supply.name == "" or supply.price == "" or supply.quantity_stock == "" or supply.unit_measure == "":
     requiredsupply() 
@@ -53,7 +59,6 @@ def AddSupply(supply: SupplyCreate):
     nameisalreadyexist()
     
   else:
-    
     
     total = (supply.price * supply.quantity_stock)
     new_supply = Supply(name=supply.name, price=supply.price, quantity_stock=supply.quantity_stock, unit_measure=supply.unit_measure, total=total)
