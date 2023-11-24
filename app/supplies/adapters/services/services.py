@@ -53,7 +53,8 @@ def AddSupply(supply: SupplyCreate):
     notcreatedsupply()
   
   if supply.unit_measure == "Gramos":
-    supply.price = (supply.price/1000)
+    convertor = (supply.quantity_stock/1000)
+    supply.price = (supply.price/1000)/convertor
 
   if supply.unit_measure == "Kilogramos":
     supply.unit_measure = "Gramos"
