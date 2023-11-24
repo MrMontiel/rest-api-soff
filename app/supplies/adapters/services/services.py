@@ -41,14 +41,14 @@ def AddSupply(supply: SupplyCreate):
   if not supply:
     notcreatedsupply()
   
+  if supply.unit_measure == "Gramos":
+    supply.price = (supply.price/1000)
 
   if supply.unit_measure == "Kilogramos":
     supply.unit_measure = "Gramos"
     supply.quantity_stock = supply.quantity_stock * 1000
     supply.price = (supply.price/1000)
 
-  if supply.unit_measure == "Gramos":
-    supply.price = (supply.price/1000)
 
     
   if supply.name == "" or supply.price == "" or supply.quantity_stock == "" or supply.unit_measure == "":
@@ -63,7 +63,6 @@ def AddSupply(supply: SupplyCreate):
     total = (supply.price * supply.quantity_stock)
     new_supply = Supply(name=supply.name, price=supply.price, quantity_stock=supply.quantity_stock, unit_measure=supply.unit_measure, total=total)
   
-    
     
     session.add(new_supply)
     session.commit()
