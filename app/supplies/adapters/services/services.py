@@ -60,10 +60,6 @@ def AddSupply(supply: SupplyCreate):
     supply.quantity_stock = supply.quantity_stock * 1000
     supply.price = (supply.price/1000)
 
-  if supply.unit_measure == "Gramos":
-    supply.price = (supply.price/1000)
-
-    
   if supply.name == "" or supply.price == "" or supply.quantity_stock == "" or supply.unit_measure == "":
     requiredsupply() 
 
