@@ -8,6 +8,13 @@ class SupplyBase(BaseModel):
     quantity_stock: int
     unit_measure: str
     
+class SupplyU(BaseModel):
+    name: str
+    price: float
+    total: float
+    quantity_stock: int
+    unit_measure: str
+    
 class Supply(SupplyBase):
     id: Optional[str]
     total: Optional[float] 
@@ -27,7 +34,7 @@ class SupplyCreate(BaseModel):
     #         self.unit_measure == "Gramos"
     #         self.quantity_stock *= 1000 
 
-class SupplyUpdate(SupplyBase):
+class SupplyUpdate(SupplyU):
     
     pass
 

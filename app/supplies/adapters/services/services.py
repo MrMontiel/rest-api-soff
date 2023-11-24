@@ -15,7 +15,8 @@ from app.supplies.adapters.exceptions.exceptions import (
   notdeletesupply,
   notupdatesupply,
   nameisalreadyexist,
-  supplyassociated
+  supplyassociated,
+  changeunitmeasure
 )
 from sqlalchemy.exc import PendingRollbackError
 
@@ -93,10 +94,15 @@ def UpdateSupply(id: str, supply_update: SupplyUpdate):
     if existing_supply:
         nameisalreadyexist()
 
+    if supply_id_update.unit_measure != supply_update.unit_measure:
+      if supply_id_update.total == supply_update.total and supply_id_update.quantity_stock == supply_update.quantity_stock:
+        changeunitmeasure()
+      
+
     supply_id_update.name = supply_update.name
-    supply_id_update.price = supply_update.price
+    supply_id_update.total = supply_update.total
     supply_id_update.quantity_stock = supply_update.quantity_stock
-    supply_id_update.total = supply_update.price * supply_update.quantity_stock
+    supply_id_update.price = supply_update.total / supply_update.quantity_stock
     supply_id_update.unit_measure = supply_update.unit_measure
     session.commit()
     session.refresh(supply_id_update)
