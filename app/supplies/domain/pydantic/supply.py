@@ -10,7 +10,7 @@ class SupplyBase(BaseModel):
     
 class Supply(SupplyBase):
     id: Optional[str]
-    total: float
+    total: Optional[float] 
     status: bool = True
     
     class Config:

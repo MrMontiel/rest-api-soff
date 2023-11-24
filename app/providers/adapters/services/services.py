@@ -84,6 +84,9 @@ def DeleteProvider(id: str):
     if details:
       providerassociated()
       
+    if provider.nit and provider.nit.lower() == "general":
+      providerassociated()
+      
     if not provider:
       notdeleteprovider()
     session.delete(provider)
