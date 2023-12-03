@@ -197,6 +197,16 @@ def getGraficSales():
     return result
 
 def getPyment():
+    # sales_by_month = (
+    #     session.query(
+    #         func.extract('year', Sale.sale_date).label('year'),
+    #         func.extract('month', Sale.sale_date).label('month'),
+    #         func.sum(Sale.total).label('total_sales'),
+    #         func.sum(case((Sale.pyment_method == 'efectivo', Sale.total), else_=0)).label('cash_sales'),
+    #         func.sum(case((Sale.pyment_method == 'transferencia', Sale.total), else_=0)).label('transfer_sales')
+    #     ).group_by('year', 'month').order_by('year', 'month').all()
+    # )
+    current_month = func.extract('month', func.current_date())
     sales_by_month = (
         session.query(
             func.extract('year', Sale.sale_date).label('year'),
@@ -204,9 +214,11 @@ def getPyment():
             func.sum(Sale.total).label('total_sales'),
             func.sum(case((Sale.pyment_method == 'efectivo', Sale.total), else_=0)).label('cash_sales'),
             func.sum(case((Sale.pyment_method == 'transferencia', Sale.total), else_=0)).label('transfer_sales')
-        ).group_by('year', 'month').order_by('year', 'month').all()
+        ).filter(func.extract('month', Sale.sale_date) == current_month)
+        .group_by('year', 'month')
+        .order_by('year', 'month')
+        .all()
     )
-
     result = []
     for row in sales_by_month:
         year = row.year
