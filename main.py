@@ -1,14 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://rest-soff.onrender.com", "http://localhost:3000", "https://frontend-soff.vercel.app"],
+    allow_origins=["http://localhost:3000", "https://frontend-soff.vercel.app", "http://localhost:19006"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_origin_regex='https://my-site-.*\.vercel\.app'
 )
 
 from app.sales.adapters.routes.sales import sales
@@ -33,3 +36,6 @@ app.include_router(products)
 app.include_router(user)
 app.include_router(role)
 app.include_router(permission)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=80)
