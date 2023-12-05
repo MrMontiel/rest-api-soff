@@ -243,3 +243,27 @@ def getPyment():
         })
 
     return (result)
+
+def get_topproducts():
+    top_products = (
+        session.query(
+            Product.name,
+            func.sum(SalesOrders.amount_product).label('total_sales')
+        ).join(SalesOrders, SalesOrders.product_id == Product.id)
+        .group_by(Product.name)
+        .order_by(desc('total_sales'))
+        .limit(3)
+        .all()
+    )
+
+    result = []
+    for row in top_products:
+        product_name = row.name
+        total_sales = row.total_sales
+
+        result.append({
+            "Producto": product_name,
+            "Ventas_Totales": total_sales
+        })
+
+    return result

@@ -31,7 +31,7 @@ purchases = APIRouter(
 )
 
 @purchases.get('/')
-async def get_all_purchases(limit: int = 100, offset:int=0, user: User = Depends(getCurrentActivateUser)):
+async def get_all_purchases(limit: int = 100, offset:int=0):
   purchases = GetAllPurchases(limit, offset)
   return purchasesSchema(purchases)
   
@@ -67,7 +67,7 @@ async def confirm_purchase(id_purchase: str, purchaseConfirm:PurchasesConfirm, u
   }
   
 @purchases.get('/{id_purchase}/orders')
-async def getAllOrdersByPurchaseId(id_purchase: str, user: User = Depends(getCurrentActivateUser)):
+async def getAllOrdersByPurchaseId(id_purchase: str):
   orders = seePurchasesOrders(id_purchase)
   return  ordersSchema(orders)
   

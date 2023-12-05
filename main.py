@@ -11,18 +11,22 @@ from app.roles.adapters.routes.routes import role
 from app.permissions.adapters.routes.routes import permission
 from app.dashboard.adapters.routes.routes import dashboard
 from app.auth.adapters.routes.routes import auth
-
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
+origins = [
+ "http://localhost:3000", # Aquí debes agregar la URL de tu frontend
+]
 
 origins = ["*"]
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+ CORSMiddleware,
+ allow_origins=origins,
+ allow_credentials=True,
+ allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+ allow_headers=["*"],
 )
 
 # Add routes

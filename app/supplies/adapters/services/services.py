@@ -95,8 +95,9 @@ def UpdateSupply(id: str, supply_update: SupplyUpdate):
         nameisalreadyexist()
 
     if supply_id_update.unit_measure != supply_update.unit_measure:
-      if supply_id_update.total == supply_update.total and supply_id_update.quantity_stock == supply_update.quantity_stock:
-        changeunitmeasure()
+      if supply_id_update.total == supply_update.total:
+        if  supply_id_update.quantity_stock == supply_update.quantity_stock:
+          changeunitmeasure()
       
 
     supply_id_update.name = supply_update.name

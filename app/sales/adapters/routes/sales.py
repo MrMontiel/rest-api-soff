@@ -26,7 +26,7 @@ async def get_client_by_id( user: User = Depends(getCurrentActivateUser)):
   return client
 
 @sales.get('/')
-async def get_all_sales(limit: int = 100, skip:int = 0, user: User = Depends(getCurrentActivateUser)):
+async def get_all_sales(limit: int = 100, skip:int = 0):
   sales = GetAllSales(limit, skip)
   return salesSchema(sales)
   
