@@ -24,6 +24,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from sqlalchemy.exc import PendingRollbackError
 import secrets
+from typing import Optional
 
 
 session = ConectDatabase.getInstance()
@@ -39,14 +40,17 @@ oauth_2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 
 
 def get_permissions(id_role: str):
-    role = session.get(Role, id_role)
-    permissions = []
-    for per in role.Permissions:
-        permission = get_id_permission(per.id_permission)
-        schema_permission = permissionSchema(permission)
-        permissions.append(schema_permission["name"])
-    return permissions
-
+    try:
+        role = session.get(Role, id_role)
+        permissions = []
+        for per in role.Permissions:
+            permission = get_id_permission(per.id_permission)
+            schema_permission = permissionSchema(permission)
+            permissions.append(schema_permission["name"])
+        return permissions
+    except PendingRollbackError as e:
+        session.rollback()
+        
 def getUser(email: str):
     try:
         user:User = session.scalars(select(User).where(User.email == email)).first()
@@ -78,7 +82,8 @@ def authenticateUser(email: str, password: str):
         permissions=user.permissions
     )
     
-def createAccessToken(data: dict, expire_delta: timedelta | None = None):
+# def createAccessToken(data: dict, expire_delta: timedelta | None = None):
+def createAccessToken(data: dict, expire_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expire_delta:
         expire = datetime.utcnow() + expire_delta
