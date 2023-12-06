@@ -151,29 +151,29 @@ def getTargetsDashboard():
 
 def getSpanishMounth(mounth: int):
     if mounth == 1:
-        return 'Ene'
+        return 'Ene.'
     elif mounth == 2:
-        return 'Feb'
+        return 'Feb.'
     elif mounth == 3:
-        return 'Mar'
+        return 'Mar.'
     elif mounth == 4:
-        return 'Abr'
+        return 'Abr.'
     elif mounth == 5:
-        return 'May'
+        return 'May.'
     elif mounth == 6:
-        return 'Jun'
+        return 'Jun.'
     elif mounth == 7:
-        return 'Jul'
+        return 'Jul.'
     elif mounth == 8:
-        return 'Ago'
+        return 'Ago.'
     elif mounth == 9:
-        return 'Sep'
+        return 'Sep.'
     elif mounth == 10:
-        return 'Oct'
+        return 'Oct.'
     elif mounth == 11:
-        return 'Nov'
+        return 'Nov.'
     elif mounth == 12:
-        return 'Dic'
+        return 'Dic.'
 
 def getGraficSales():
     sales_by_month = (
