@@ -208,16 +208,16 @@ def DeleteDetail(id_detail:str):
 
 def DeleteProduct(id_product:str):
   try:
-    product = session.get(Product, uuid.UUID(id_product))
+    product = session.get(Product, id_product)
 
     if not product:
       ProductNotFound()
 
-    statement = select(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
+    statement = select(RecipeDetail).where(RecipeDetail.product_id == id_product)
     details = recipeDetailsSchema(session.scalars(statement).all())
     
     if len(details) > 0:
-      delete_statement = delete(RecipeDetail).where(RecipeDetail.product_id == uuid.UUID(id_product))
+      delete_statement = delete(RecipeDetail).where(RecipeDetail.product_id == id_product)
       session.execute(delete_statement)
 
     session.delete(product)
