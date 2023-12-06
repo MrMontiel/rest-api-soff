@@ -197,15 +197,6 @@ def getGraficSales():
     return result
 
 def getPyment():
-    # sales_by_month = (
-    #     session.query(
-    #         func.extract('year', Sale.sale_date).label('year'),
-    #         func.extract('month', Sale.sale_date).label('month'),
-    #         func.sum(Sale.total).label('total_sales'),
-    #         func.sum(case((Sale.pyment_method == 'efectivo', Sale.total), else_=0)).label('cash_sales'),
-    #         func.sum(case((Sale.pyment_method == 'transferencia', Sale.total), else_=0)).label('transfer_sales')
-    #     ).group_by('year', 'month').order_by('year', 'month').all()
-    # )
     current_month = func.extract('month', func.current_date())
     sales_by_month = (
         session.query(
@@ -229,8 +220,13 @@ def getPyment():
 
         month_name = getSpanishMounth(month)
 
-        cash_percentage = (cash_sales / total_sales) * 100 if total_sales > 0 else 0
-        transfer_percentage = (transfer_sales / total_sales) * 100 if total_sales > 0 else 0
+        # cash_percentage = (cash_sales / total_sales) * 100 if total_sales > 0 else 0
+        # transfer_percentage = (transfer_sales / total_sales) * 100 if total_sales > 0 else 0
+
+        cash_percentage = int((cash_sales / total_sales) * 100) if total_sales > 0 else 0
+        transfer_percentage = int((transfer_sales / total_sales) * 100) if total_sales > 0 else 0
+
+
 
         result.append({
             "Año": year,
