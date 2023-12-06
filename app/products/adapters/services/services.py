@@ -186,10 +186,9 @@ def UpdateProduct(id_product: str, productCreate:ProductCreate):
       session.commit()
       session.refresh(product)
       return product
+    ProductNotUpdate()
   except PendingRollbackError as e:
     session.rollback()
-
-  ProductNotUpdate()
 
 def DeleteDetail(id_detail:str):
   try:
