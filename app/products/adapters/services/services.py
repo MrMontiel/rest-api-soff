@@ -1,6 +1,6 @@
 import uuid
 from sqlalchemy import select, delete, desc
-from app.products.adapters.exceptions.exceptions import ProductNotFound, IdProductRequired, SupplyNotFound,ProductNotUpdate, DetailsRequired, InfoProductRequired, NameProductExist, DetailNotFound
+from app.products.adapters.exceptions.exceptions import LowSalePrice, ProductNotFound, IdProductRequired, SupplyNotFound,ProductNotUpdate, DetailsRequired, InfoProductRequired, NameProductExist, DetailNotFound
 from app.infrastructure.database import ConectDatabase, SessionLocal
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
 from app.products.adapters.sqlalchemy.product import Product, RecipeDetail
@@ -116,7 +116,10 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
 
       for detail in details:
         total += detail['subtotal']
-        
+      
+      if productCreate.sale_price < total:
+        LowSalePrice()
+
       product.name = productCreate.name
       product.price = total
       product.sale_price = productCreate.sale_price
@@ -177,6 +180,9 @@ def UpdateProduct(id_product: str, productCreate:ProductCreate):
 
       for detail in details:
         total += detail['subtotal']
+
+      if productCreate.sale_price < total:
+          LowSalePrice()
 
       product.name = productCreate.name
       product.price = total
