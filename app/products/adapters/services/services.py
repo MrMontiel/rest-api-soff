@@ -46,18 +46,15 @@ def CreateProduct ():
       if product.name == "":
         id_product = product.id
         DeleteProduct(id_product)
-
         new_product = Product(name="", sale_price=0.0)
         session.add(new_product)
         session.commit()
         session.refresh(new_product)
         return new_product
-      
     new_product = Product(name="", sale_price=0.0)
     session.add(new_product)
     session.commit()
     session.refresh(new_product)
-
     return new_product
   except PendingRollbackError as e:
     session.rollback()
