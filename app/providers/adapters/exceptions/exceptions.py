@@ -21,6 +21,3 @@ def nitisalreadyexist():
 
 def providerassociated():
     raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="PROVIDER_ASSOCIATED")
-
-
-
