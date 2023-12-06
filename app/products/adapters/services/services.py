@@ -1,6 +1,6 @@
 import uuid
 from sqlalchemy import select, delete, desc
-from app.products.adapters.exceptions.exceptions import LowSalePrice, ProductNotFound, IdProductRequired, SupplyNotFound,ProductNotUpdate, DetailsRequired, InfoProductRequired, NameProductExist, DetailNotFound
+from app.products.adapters.exceptions.exceptions import AmountSupplyMax, LowSalePrice, ProductNotFound, IdProductRequired, SupplyNotFound,ProductNotUpdate, DetailsRequired, InfoProductRequired, NameProductExist, DetailNotFound
 from app.infrastructure.database import ConectDatabase, SessionLocal
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
 from app.products.adapters.sqlalchemy.product import Product, RecipeDetail
@@ -81,10 +81,15 @@ def AddDetail(id_product:str, detail: RecipeDetailCreate):
         if n.supply_id == uuid.UUID(detail.supply_id):
           n.amount_supply += detail.amount_supply
           n.subtotal = n.amount_supply * supply.price
+          if supply.unit_measure == "Gramos" and n.amount_supply < 20:
+            AmountSupplyMax()
           session.add(n)
           session.commit()
           session.refresh(n) 
           return n 
+
+      if supply.unit_measure == "Gramos" and detail.amount_supply < 20:
+        AmountSupplyMax()
 
       new_detail = RecipeDetail(product_id=id_product, supply_id=detail.supply_id, amount_supply=detail.amount_supply, subtotal=total)
       session.add(new_detail)
@@ -145,6 +150,9 @@ def UpdateDetail(id_detail:str, amount_supply:int):
       if not detail:
         DetailNotFound()
 
+      if detail.supply.unit_measure == "Gramos" and amount_supply < 20:
+        AmountSupplyMax()
+        
       detail.amount_supply = amount_supply
       detail.subtotal = detail.supply.price * amount_supply
       session.add(detail)
