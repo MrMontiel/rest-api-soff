@@ -221,8 +221,8 @@ def getPyment():
 
         month_name = getSpanishMounth(month)
 
-        cash_percentage = (cash_sales / total_sales) * 100 if total_sales > 0 else 0
-        transfer_percentage = (transfer_sales / total_sales) * 100 if total_sales > 0 else 0
+        cash_percentage = int((cash_sales / total_sales) * 100) if total_sales > 0 else 0
+        transfer_percentage = int((transfer_sales / total_sales) * 100) if total_sales > 0 else 0
 
         result.append({
             "Año": year,
