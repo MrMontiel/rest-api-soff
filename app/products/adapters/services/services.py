@@ -10,7 +10,8 @@ from app.products.adapters.exceptions.exceptions import (
   DetailsRequired,
   InfoProductRequired,
   NameProductExist,
-  DetailNotFound
+  DetailNotFound,
+  LowSalePrice
   )
 from app.infrastructure.database import ConectDatabase
 from app.products.domain.pydantic.product import ProductCreate, RecipeDetailCreate, ProductBase
@@ -120,6 +121,9 @@ def ConfirmProduct(id_product:str, productCreate:ProductCreate):
     for detail in details:
       total += detail['subtotal']
       
+    if productCreate.sale_price < total:
+      LowSalePrice()
+
     product.name = productCreate.name
     product.price = total
     product.sale_price = productCreate.sale_price
