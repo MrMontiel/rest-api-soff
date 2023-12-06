@@ -174,6 +174,9 @@ def UpdateProduct(id_product: str, productCreate:ProductCreate):
     for detail in details:
       total += detail['subtotal']
 
+    if productCreate.sale_price < total:
+      LowSalePrice()
+
     product.name = productCreate.name
     product.price = total
     product.sale_price = productCreate.sale_price
