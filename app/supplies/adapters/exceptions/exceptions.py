@@ -22,6 +22,5 @@ def nameisalreadyexist():
 def supplyassociated():
     raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="SUPPLY_ASSOCIATED")
 
-
-
-
+def changeunitmeasure():
+    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="SUPPLY_CHANGEUNIT")

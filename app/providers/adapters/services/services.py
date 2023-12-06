@@ -15,19 +15,16 @@ from app.providers.adapters.exceptions.exceptions import (
   nitisalreadyexist,
   providerassociated
 )
-from sqlalchemy.exc import PendingRollbackError
 # from app.providers.adapters.exceptions import noprovider, requiredprovider
 
 session = ConectDatabase.getInstance()
 
 def GetAllProviders(limit:int, offset: int, status:bool=True):
-  try:
-    providers = session.scalars(select(Provider).where(Provider.status == status).offset(offset).limit(limit).order_by(desc(Provider.date_registration))).all()
-    if not providers:
-        []
-    return providers
-  except PendingRollbackError as e:
-        session.rollback()
+  providers = session.scalars(select(Provider).where(Provider.status == status).offset(offset).limit(limit).order_by(desc(Provider.date_registration))).all()
+  if not providers:
+    # noprovider()
+    return []
+  return providers
 
 
 def GetOneProvider(id:str):
@@ -43,11 +40,12 @@ def AddProvider(provider: ProviderCreate):
   if provider.nit == "" or provider.name == "" or provider.company == "" or provider.address == "" or provider.phone == "" or provider.city == "":
     requiredprovider()
     
-  try:
-    provider_nit = session.scalars(select(Provider.nit)).all()
-    if provider.nit in provider_nit:
-      nitisalreadyexist()
+  provider_nit = session.scalars(select(Provider.nit)).all()
+  if provider.nit in provider_nit:
+    nitisalreadyexist()
   
+    
+  else:
     
     new_provider = Provider(nit=provider.nit, name=provider.name, company=provider.company, address=provider.address, phone=provider.phone, city=provider.city)
   
@@ -55,11 +53,8 @@ def AddProvider(provider: ProviderCreate):
     session.commit()
     session.refresh(new_provider)
     return new_provider
-  except PendingRollbackError as e:
-        session.rollback()
     
 def UpdateProvider(id: str, provider_update: ProviderUpdate):
-  try:
     provider_id_update = GetOneProvider(id)
     if not provider_id_update:
         requiredprovider()
@@ -79,13 +74,9 @@ def UpdateProvider(id: str, provider_update: ProviderUpdate):
     session.commit()
     session.refresh(provider_id_update)
     return provider_id_update
-  except PendingRollbackError as e:
-        session.rollback()
-      
 
     
 def DeleteProvider(id: str):
-  try:
     provider = session.query(Provider).filter(Provider.id == uuid.UUID(id)).first()
     
     statement = select(Purchase).where(Purchase.provider_id == id)
@@ -93,16 +84,16 @@ def DeleteProvider(id: str):
     if details:
       providerassociated()
       
+    if provider.nit and provider.nit.lower() == "general":
+      providerassociated()
+      
     if not provider:
       notdeleteprovider()
     session.delete(provider)
     session.commit()
     return provider
-  except PendingRollbackError as e:
-      session.rollback()
   
 def UpdateStatusProvider(id:str):
-  try:
     provider = session.get(Provider, uuid.UUID(id))
     if not provider:
         notupdateprovider()
@@ -110,5 +101,3 @@ def UpdateStatusProvider(id:str):
     session.add(provider)
     session.commit()
     return provider
-  except PendingRollbackError as e:
-      session.rollback()
