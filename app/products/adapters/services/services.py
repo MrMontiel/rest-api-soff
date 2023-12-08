@@ -10,6 +10,11 @@ from sqlalchemy.exc import PendingRollbackError
 
 session = SessionLocal()
 
+def format_price_and_subtotal(detail):
+    detail.supply.price = round(detail.supply.price, 2)
+    detail.subtotal = round(detail.subtotal, 2)
+    return detail
+
 def GetAllProducts(limit:int, offset:int, status:bool=True):
   try:
     products = session.scalars(select(Product).where(Product.status == status).offset(offset).limit(limit).order_by(desc(Product.register_date))).all()
@@ -86,7 +91,7 @@ def AddDetail(id_product:str, detail: RecipeDetailCreate):
           session.add(n)
           session.commit()
           session.refresh(n) 
-          return n 
+          return format_price_and_subtotal(n) 
 
       if supply.unit_measure == "Gramos" and detail.amount_supply < 20:
         AmountSupplyMax()
@@ -95,7 +100,7 @@ def AddDetail(id_product:str, detail: RecipeDetailCreate):
       session.add(new_detail)
       session.commit()
       session.refresh(new_detail)
-      return new_detail
+      return format_price_and_subtotal(new_detail)
 
     ProductNotUpdate()
   except PendingRollbackError as e:
@@ -158,7 +163,7 @@ def UpdateDetail(id_detail:str, amount_supply:int):
       session.add(detail)
       session.commit()
       session.refresh(detail)
-      return detail
+      return format_price_and_subtotal(detail)
     except PendingRollbackError as e:
       session.rollback()
 
