@@ -16,45 +16,60 @@ from app.providers.adapters.exceptions.exceptions import (
   providerassociated
 )
 # from app.providers.adapters.exceptions import noprovider, requiredprovider
+from sqlalchemy.exc import PendingRollbackError
 
 session = ConectDatabase.getInstance()
 
 def GetAllProviders(limit:int, offset: int, status:bool=True):
-  providers = session.scalars(select(Provider).where(Provider.status == status).offset(offset).limit(limit).order_by(desc(Provider.date_registration))).all()
-  if not providers:
-    # noprovider()
-    return []
-  return providers
+  try:
+    providers = session.scalars(select(Provider).where(Provider.status == status).offset(offset).limit(limit).order_by(desc(Provider.date_registration))).all()
+    if not providers:
+      # noprovider()
+      return []
+    return providers
+  except PendingRollbackError as e:
+      session.rollback()
+
 
 
 def GetOneProvider(id:str):
-  providers = session.get(Provider, uuid.UUID(id))
-  if not providers:
-    noprovider()
-  return providers
+  try:
+    providers = session.get(Provider, uuid.UUID(id))
+    if not providers:
+      noprovider()
+    return providers
+  except PendingRollbackError as e:
+      session.rollback()
+
 
 def AddProvider(provider: ProviderCreate):
-  if not provider:
-    # raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="provider not created")
-    notcreatedprovider()
-  if provider.nit == "" or provider.name == "" or provider.company == "" or provider.address == "" or provider.phone == "" or provider.city == "":
-    requiredprovider()
-    
-  provider_nit = session.scalars(select(Provider.nit)).all()
-  if provider.nit in provider_nit:
-    nitisalreadyexist()
+  try:
   
+    if not provider:
+      # raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="provider not created")
+      notcreatedprovider()
+    if provider.nit == "" or provider.name == "" or provider.company == "" or provider.address == "" or provider.phone == "" or provider.city == "":
+      requiredprovider()
+      
+    provider_nit = session.scalars(select(Provider.nit)).all()
+    if provider.nit in provider_nit:
+      nitisalreadyexist()
     
-  else:
+      
+    else:
+      
+      new_provider = Provider(nit=provider.nit, name=provider.name, company=provider.company, address=provider.address, phone=provider.phone, city=provider.city)
     
-    new_provider = Provider(nit=provider.nit, name=provider.name, company=provider.company, address=provider.address, phone=provider.phone, city=provider.city)
-  
-    session.add(new_provider)
-    session.commit()
-    session.refresh(new_provider)
-    return new_provider
+      session.add(new_provider)
+      session.commit()
+      session.refresh(new_provider)
+      return new_provider
+  except PendingRollbackError as e:
+      session.rollback()
+
     
 def UpdateProvider(id: str, provider_update: ProviderUpdate):
+  try:
     provider_id_update = GetOneProvider(id)
     if not provider_id_update:
         requiredprovider()
@@ -74,9 +89,12 @@ def UpdateProvider(id: str, provider_update: ProviderUpdate):
     session.commit()
     session.refresh(provider_id_update)
     return provider_id_update
+  except PendingRollbackError as e:
+      session.rollback()
 
     
 def DeleteProvider(id: str):
+  try:
     provider = session.query(Provider).filter(Provider.id == uuid.UUID(id)).first()
     
     statement = select(Purchase).where(Purchase.provider_id == id)
@@ -92,8 +110,12 @@ def DeleteProvider(id: str):
     session.delete(provider)
     session.commit()
     return provider
+  except PendingRollbackError as e:
+      session.rollback()
+
   
 def UpdateStatusProvider(id:str):
+  try:
     provider = session.get(Provider, uuid.UUID(id))
     if not provider:
         notupdateprovider()
@@ -101,3 +123,5 @@ def UpdateStatusProvider(id:str):
     session.add(provider)
     session.commit()
     return provider
+  except PendingRollbackError as e:
+      session.rollback()
