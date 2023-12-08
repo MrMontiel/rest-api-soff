@@ -14,8 +14,10 @@ def rolesSchema(roles: list[Role])->list:
 def permissionRolesSchema(permisisonsroles: PermissionsRoles)-> dict:
     return{
         "id_role":permisisonsroles.id_role,
+        "name_permission":permisisonsroles.Permission.name,
         "id_permission":permisisonsroles.id_permission
     }
+
 
 def permissionsRolesSchema(permissionsroles: list[PermissionsRoles])-> list:
     return[permissionRolesSchema(permissionsroles) for permissionsroles in permissionsroles]
