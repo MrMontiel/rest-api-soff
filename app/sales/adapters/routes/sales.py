@@ -2,7 +2,7 @@ import uuid
 from sqlalchemy import select
 from app.infrastructure.database import ConectDatabase
 from fastapi import APIRouter, HTTPException, status
-from app.sales.adapters.services.services import ( CreateSale,  GetAllSales,  ConfirmSale,  seeSalesOrders,  getGeneralClient, GetSaleById, UpdateAmountOrder, ConfirmOrder, CancelSale )
+from app.sales.adapters.services.services import ( GetAllSalesMonth, CreateSale,  GetAllSales,  ConfirmSale,  seeSalesOrders,  getGeneralClient, GetSaleById, UpdateAmountOrder, ConfirmOrder, CancelSale )
 from app.sales.adapters.services.services_order import AddOrder, OrderProcessing
 from app.sales.adapters.sqlalchemy.sale import Sale, SalesOrders, Client, StatusSale, VoucherSale
 from app.products.adapters.sqlalchemy.product import Product
@@ -28,6 +28,11 @@ async def get_client_by_id( user: User = Depends(getCurrentActivateUser)):
 @sales.get('/')
 async def get_all_sales(limit: int = 100, skip:int = 0, user: User = Depends(getCurrentActivateUser)):
   sales = GetAllSales(limit, skip)
+  return salesSchema(sales)
+
+@sales.get('/month')
+async def get_all_sales_month(limit: int = 100, offset:int=0, user: User = Depends(getCurrentActivateUser)):
+  sales = GetAllSalesMonth(limit, offset)
   return salesSchema(sales)
   
 

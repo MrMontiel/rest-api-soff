@@ -11,7 +11,8 @@ from app.purchases.adapters.services.services import (
   GetPurchaseById,
   UpdateAmountOrder,
   DeleteOrderById,
-  DeletePurchaseByid
+  DeletePurchaseByid,
+  GetAllPurchasesMonth
   )
 
 from app.purchases.adapters.sqlalchemy.purchase import Purchase, PurchasesOrders
@@ -34,7 +35,11 @@ purchases = APIRouter(
 async def get_all_purchases(limit: int = 100, offset:int=0, user: User = Depends(getCurrentActivateUser)):
   purchases = GetAllPurchases(limit, offset)
   return purchasesSchema(purchases)
-  
+
+@purchases.get('/month')
+async def get_all_purchases_month(limit: int = 100, offset:int=0, user: User = Depends(getCurrentActivateUser)):
+  purchases = GetAllPurchasesMonth(limit, offset)
+  return purchasesSchema(purchases)
 
 @purchases.get('/{id_purchase}')
 async def get_purchase_by_id(id_purchase: str, user: User = Depends(getCurrentActivateUser)):

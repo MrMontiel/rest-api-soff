@@ -9,6 +9,9 @@ from app.sales.domain.pydantic.sale_pydantic import (
 from app.sales.adapters.sqlalchemy.sale import Sale, Client, SalesOrders, StatusSale
 from app.products.adapters.sqlalchemy.product import Product
 from app.sales.adapters.exceptions.exceptions import OrderNotFound
+from datetime import datetime
+from sqlalchemy import extract
+
 session = ConectDatabase.getInstance()
 
 def getGeneralClient() -> Client:
@@ -22,6 +25,23 @@ def GetAllSales(limit:int, skip:int = 0):
   if not sales:
     return []
   return sales
+
+def GetAllSalesMonth(limit:int, offset:int=0):
+   current_month = datetime.now().month
+   current_year = datetime.now().year
+   sales = session.scalars(
+       select(Sale)
+       .where(
+           extract('month', Sale.sale_date) == current_month,
+           extract('year', Sale.sale_date) == current_year
+       )
+       .offset(offset)
+       .limit(limit)
+       .order_by(Sale.sale_date.desc())
+   ).all()
+   if not sales:
+     return []
+   return sales
 
 def GetSaleById(id:str) -> Sale:
   sale = session.get(Sale, id)
