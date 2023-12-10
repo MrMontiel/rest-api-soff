@@ -49,68 +49,70 @@ def GetOneSupply(id:str):
 
 
 def AddSupply(supply: SupplyCreate):
+  try:
+    if not supply:
+      notcreatedsupply()
 
-  if not supply:
-    notcreatedsupply()
-  
-  if supply.unit_measure == "Gramos":
-    convertor = (supply.quantity_stock/1000)
-    supply.price = (supply.price/1000)/convertor
+    if supply.unit_measure == "Gramos":
+      # Convertir la cantidad a kilogramos y redondear a 3 decimales
+      convertor = (supply.quantity_stock / 1000)
+      supply.price = round((supply.price / 1000) / convertor, 2)
 
-  if supply.unit_measure == "Kilogramos":
-    supply.unit_measure = "Gramos"
-    supply.quantity_stock = supply.quantity_stock * 1000
-    supply.price = (supply.price/1000)
+    if supply.unit_measure == "Kilogramos":
+      supply.unit_measure = "Gramos"
+      supply.quantity_stock = supply.quantity_stock * 1000
+      # Redondear el precio a 2 decimales
+      supply.price = round((supply.price / 1000), 2)
 
-  if supply.name == "" or supply.price == "" or supply.quantity_stock == "" or supply.unit_measure == "":
-    requiredsupply() 
+    if supply.name == "" or supply.price == "" or supply.quantity_stock == "" or supply.unit_measure == "":
+      requiredsupply()
 
-  supply_name = session.scalars(select(Supply.name)).all()
-  if supply.name in supply_name:
-    nameisalreadyexist()
+    supply_name = session.scalars(select(Supply.name)).all()
+    if supply.name in supply_name:
+      nameisalreadyexist()
+    else:
+      # Calcular el total y redondear a 2 decimales
+      total = round((supply.price * supply.quantity_stock), 2)
+      new_supply = Supply(name=supply.name, price=supply.price, quantity_stock=supply.quantity_stock, unit_measure=supply.unit_measure, total=total)
 
-  else:
+      session.add(new_supply)
+      session.commit()
+      session.refresh(new_supply)
+      return new_supply
+  except PendingRollbackError as e:
+      session.rollback()
 
-    total = (supply.price * supply.quantity_stock)
-    new_supply = Supply(name=supply.name, price=supply.price, quantity_stock=supply.quantity_stock, unit_measure=supply.unit_measure, total=total)
-  
-    
-    
-    session.add(new_supply)
-    session.commit()
-    session.refresh(new_supply)
-    return new_supply
-    
     
 def UpdateSupply(id: str, supply_update: SupplyUpdate):
   try:
-    supply_id_update = GetOneSupply(id)
-    if not supply_id_update:
-        requiredsupply()
+      supply_id_update = GetOneSupply(id)
+      if not supply_id_update:
+          requiredsupply()
 
-    existing_supply = session.query(Supply).filter(
-        Supply.name == supply_update.name, Supply.id != id).first()
+      existing_supply = session.query(Supply).filter(
+          Supply.name == supply_update.name, Supply.id != id).first()
 
-    if existing_supply:
-        nameisalreadyexist()
+      if existing_supply:
+          nameisalreadyexist()
 
-    if supply_id_update.unit_measure != supply_update.unit_measure:
-      if supply_id_update.total == supply_update.total:
-        if  supply_id_update.quantity_stock == supply_update.quantity_stock:
-          changeunitmeasure()
-      
+      if supply_id_update.unit_measure != supply_update.unit_measure:
+          if supply_id_update.total == supply_update.total:
+              if supply_id_update.quantity_stock == supply_update.quantity_stock:
+                  changeunitmeasure()
 
-    supply_id_update.name = supply_update.name
-    supply_id_update.total = supply_update.total
-    supply_id_update.quantity_stock = supply_update.quantity_stock
-    supply_id_update.price = supply_update.total / supply_update.quantity_stock
-    supply_id_update.unit_measure = supply_update.unit_measure
-    session.commit()
-    session.refresh(supply_id_update)
-    return supply_id_update
-  
+      supply_id_update.name = supply_update.name
+      supply_id_update.total = round(supply_update.total, 2)
+      supply_id_update.quantity_stock = round(
+          supply_update.quantity_stock, 0)  # Redondear a 0 decimales
+      supply_id_update.price = round(
+          supply_update.total / supply_update.quantity_stock, 2)
+      supply_id_update.unit_measure = supply_update.unit_measure
+      session.commit()
+      session.refresh(supply_id_update)
+      return supply_id_update
+
   except PendingRollbackError as e:
-        session.rollback()
+      session.rollback()
       
 def DeleteSupply(id: str):
   try:

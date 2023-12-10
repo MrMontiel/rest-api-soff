@@ -26,3 +26,9 @@ def NameProductExist():
 
 def DetailNotFound():
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DETAIL_NOT_FOUND")
+
+def LowSalePrice():
+    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="LOW_SALE_PRICE")
+
+def AmountSupplyMax():
+    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="AMOUNT_SUPPLY_MAX")
