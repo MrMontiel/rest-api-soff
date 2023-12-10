@@ -24,5 +24,3 @@ def supplyassociated():
 
 def changeunitmeasure():
     raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="SUPPLY_CHANGEUNIT")
-
-
