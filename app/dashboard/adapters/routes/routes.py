@@ -24,7 +24,7 @@ async def get_grafic_payment():
   graficpaymnet= getPyment()
   return graficpaymnet
 
-@dashboard.get('/grafic_payment')
+@dashboard.get('/grafic_payment2')
 async def get_top_products():
   top_products = get_topproducts()
   return top_products
