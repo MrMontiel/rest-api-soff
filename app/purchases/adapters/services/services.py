@@ -11,6 +11,9 @@ from app.purchases.adapters.sqlalchemy.purchase import Purchase, PurchasesOrders
 from app.supplies.adapters.sqlalchemy.supply import Supply
 from app.providers.adapters.sqlachemy.provider import Provider
 from app.purchases.adapters.exceptions.exceptions import PurchaseNotFound,NotConfirmPurchaseInvoiceExist,NotConfirmPurchase,NotDeletePurchaseConfirm,OrderNotFound,IdPurchaseRequired,OrderRequiredForConfirm,PurchaseConfirm,SupplyNotFound,PurchasesNotFound,ProviderNotFound
+from datetime import datetime
+from sqlalchemy import extract
+
 
 session = ConectDatabase.getInstance()
 
@@ -25,6 +28,23 @@ def GetAllPurchases(limit:int, offset:int=0):
   if not purchases:
     PurchasesNotFound()
   return purchases
+
+def GetAllPurchasesMonth(limit:int, offset:int=0):
+   current_month = datetime.now().month
+   current_year = datetime.now().year
+   purchases = session.scalars(
+       select(Purchase)
+       .where(
+           extract('month', Purchase.purchase_date) == current_month,
+           extract('year', Purchase.purchase_date) == current_year
+       )
+       .offset(offset)
+       .limit(limit)
+       .order_by(desc(Purchase.purchase_date))
+   ).all()
+   if not purchases:
+     PurchasesNotFound()
+   return purchases
 
 def GetPurchaseById(id:str) -> Purchase:
   purchase = session.get(Purchase, id)
