@@ -15,8 +15,8 @@ from app.providers.adapters.exceptions.exceptions import (
   nitisalreadyexist,
   providerassociated
 )
-from sqlalchemy.exc import PendingRollbackError
 # from app.providers.adapters.exceptions import noprovider, requiredprovider
+from sqlalchemy.exc import PendingRollbackError
 
 session = ConectDatabase.getInstance()
 
@@ -24,39 +24,49 @@ def GetAllProviders(limit:int, offset: int, status:bool=True):
   try:
     providers = session.scalars(select(Provider).where(Provider.status == status).offset(offset).limit(limit).order_by(desc(Provider.date_registration))).all()
     if not providers:
-        []
+      # noprovider()
+      return []
     return providers
   except PendingRollbackError as e:
-        session.rollback()
+      session.rollback()
+
 
 
 def GetOneProvider(id:str):
-  providers = session.get(Provider, uuid.UUID(id))
-  if not providers:
-    noprovider()
-  return providers
+  try:
+    providers = session.get(Provider, uuid.UUID(id))
+    if not providers:
+      noprovider()
+    return providers
+  except PendingRollbackError as e:
+      session.rollback()
+
 
 def AddProvider(provider: ProviderCreate):
-  if not provider:
-    # raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="provider not created")
-    notcreatedprovider()
-  if provider.nit == "" or provider.name == "" or provider.company == "" or provider.address == "" or provider.phone == "" or provider.city == "":
-    requiredprovider()
-    
   try:
+  
+    if not provider:
+      # raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="provider not created")
+      notcreatedprovider()
+    if provider.nit == "" or provider.name == "" or provider.company == "" or provider.address == "" or provider.phone == "" or provider.city == "":
+      requiredprovider()
+      
     provider_nit = session.scalars(select(Provider.nit)).all()
     if provider.nit in provider_nit:
       nitisalreadyexist()
-  
     
-    new_provider = Provider(nit=provider.nit, name=provider.name, company=provider.company, address=provider.address, phone=provider.phone, city=provider.city)
-  
-    session.add(new_provider)
-    session.commit()
-    session.refresh(new_provider)
-    return new_provider
+      
+    else:
+      
+      new_provider = Provider(nit=provider.nit, name=provider.name, company=provider.company, address=provider.address, phone=provider.phone, city=provider.city)
+    
+      session.add(new_provider)
+      session.commit()
+      session.refresh(new_provider)
+      return new_provider
   except PendingRollbackError as e:
-        session.rollback()
+      session.rollback()
+
     
 def UpdateProvider(id: str, provider_update: ProviderUpdate):
   try:
@@ -80,8 +90,7 @@ def UpdateProvider(id: str, provider_update: ProviderUpdate):
     session.refresh(provider_id_update)
     return provider_id_update
   except PendingRollbackError as e:
-        session.rollback()
-      
+      session.rollback()
 
     
 def DeleteProvider(id: str):
@@ -93,6 +102,9 @@ def DeleteProvider(id: str):
     if details:
       providerassociated()
       
+    if provider.nit and provider.nit.lower() == "general":
+      providerassociated()
+      
     if not provider:
       notdeleteprovider()
     session.delete(provider)
@@ -100,6 +112,7 @@ def DeleteProvider(id: str):
     return provider
   except PendingRollbackError as e:
       session.rollback()
+
   
 def UpdateStatusProvider(id:str):
   try:
