@@ -8,7 +8,7 @@ SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://postgres:letmain@localhost/sof
 POSTGRES_RENDER_URL = f"postgresql+psycopg2://evelyn:kXNpCO6LrjNZZj6W4c6J2FHJhkWTQaMU@dpg-cl7f5cavokcc73allfm0-a.oregon-postgres.render.com/soff_database_xzqf"
 
 engine = create_engine(
-        SQLALCHEMY_DATABASE_URL,
+        POSTGRES_RENDER_URL,
         pool_size=10,
         max_overflow=20,
         pool_pre_ping=True,
