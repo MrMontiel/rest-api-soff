@@ -10,8 +10,6 @@ from app.sales.adapters.sqlalchemy.sale import SalesOrders
 from app.sales.adapters.exceptions.exceptions import NoContentInOrder, OrderNotAvailability
 
 
-
-
 session = ConectDatabase.getInstance()
 
 def SupplyAvailability(supply:Supply, detail:RecipeDatail) -> bool:

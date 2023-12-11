@@ -50,13 +50,24 @@ associationfive= PermissionsRoles(id=str(uuid.uuid4()), id_role='06bf9dfe-1244-4
 associationsix= PermissionsRoles(id=str(uuid.uuid4()), id_role='06bf9dfe-1244-44a6-9f93-3fb79e8f82dc', id_permission='0db47368-891d-4e22-9f12-aa5ae235694e')
 associationseven= PermissionsRoles(id=str(uuid.uuid4()), id_role='06bf9dfe-1244-44a6-9f93-3fb79e8f82dc', id_permission='de24d27b-885f-47e9-adbc-2682779f6397')
 associationeight= PermissionsRoles(id=str(uuid.uuid4()), id_role='06bf9dfe-1244-44a6-9f93-3fb79e8f82dc', id_permission='3b8d4b94-68ff-4779-9c83-78ae2fbf7e8f')
-
-
 try:
     session.add_all([ associationone, associationtwo, associationthree, associationfour,associationfive, associationsix, associationseven, associationeight  ])
     session.commit()
 except Exception as a:
     print(f"Error al insertar registros: {a}")
     session.rollback()
+finally:
+    session.close()
+
+
+
+
+#Se crea el usuario administrador
+user = User(name="Xiomara", document_type="CC", document="1020431543", phone="3045705678", email="leidyxiomara19@hotmail.com", password="Leidy1234", status=True, id_role="06bf9dfe-1244-44a6-9f93-3fb79e8f82dc")
+try:
+    session.add(user)
+    session.commit()
+except Exception as e:
+    print(f"Error al insertar registros {e}")
 finally:
     session.close()
