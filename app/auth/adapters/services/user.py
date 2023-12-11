@@ -65,6 +65,7 @@ def getUser(email: str):
             permissions=permissions,
             hashed_password=user.password
         )
+        
     except PendingRollbackError as e:
         session.rollback()
     

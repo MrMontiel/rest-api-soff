@@ -30,7 +30,7 @@ def GetAllPurchases(limit:int, offset:int=0):
   try:
     purchases = session.scalars(select(Purchase).offset(offset).limit(limit).order_by(desc(Purchase.purchase_date))).all()
     if not purchases:
-      PurchasesNotFound()
+      return []
     return purchases
   except PendingRollbackError as e:
     session.rollback()

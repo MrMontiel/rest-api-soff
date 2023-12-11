@@ -53,7 +53,7 @@ def getBestSellingDay():
     response = {
         "category": 'Día más vendido',
         "target": day,
-        "percentage": '20%',
+        "percentage": '',
         "message": f'¿Sabías que los {day} hay un aumento de ventas?'
     }
     return response
@@ -68,13 +68,13 @@ def moneyWin():
     money = 0
     for n in sales:
         money += n.total
-    valor_formateado = format_currency(money, 'EUR', locale=locale)
+    valor_formateado = format_currency(money, 'USD', locale='en_US')
     value = valor_formateado.rstrip('0').rstrip('.') if '.' in valor_formateado else valor_formateado.rstrip('0')
     response = {
         "category": 'Dinero ganado',
         "target": value,
         "percentage": '08%',
-        "message": 'Realizamos un 08% más de dinero que la semana pasada'
+        "message": f'Hemos generado {value} en ingresos esta semana. ¡Excelente trabajo!'
     }
     
     
@@ -94,9 +94,9 @@ def getAmountSales():
     
     response = {
         "category": "Ventas",
-        "target": f"+{len(sales)}",
-        "percentage": f"+{percentage}%",
-        "message": f"Realizamos un {percentage}% más de ventas que la semana pasada"
+        "target": f"{len(sales)}",
+        "percentage": f"{round(percentage, 2)}%",
+        "message": f"Realizamos un {round(percentage, 2)}% más de ventas que la semana pasada"
     }
     
     return response

@@ -1,12 +1,14 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-# SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://postgres:1054542694@localhost/soff_database"
+
+
+SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://postgres:letmain@localhost/soff_database"
 
 POSTGRES_RENDER_URL = f"postgresql+psycopg2://evelyn:kXNpCO6LrjNZZj6W4c6J2FHJhkWTQaMU@dpg-cl7f5cavokcc73allfm0-a.oregon-postgres.render.com/soff_database_xzqf"
 
 engine = create_engine(
-        POSTGRES_RENDER_URL,
+        SQLALCHEMY_DATABASE_URL,
         pool_size=10,
         max_overflow=20,
         pool_pre_ping=True,
