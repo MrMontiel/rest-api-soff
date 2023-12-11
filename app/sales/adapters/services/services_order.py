@@ -12,14 +12,14 @@ from app.sales.adapters.exceptions.exceptions import NoContentInOrder, OrderNotA
 
 session = ConectDatabase.getInstance()
 
-def SupplyAvailability(supply:Supply, detail:RecipeDatail) -> bool:
-  if supply.quantity_stock < detail.amount_supply:
+def SupplyAvailability(supply:Supply, detail:RecipeDatail, amount_product: int) -> bool:
+  if supply.quantity_stock < (detail.amount_supply * amount_product):
     return False
   return True
 
-def UpdateStockSupply(supply: Supply, detail:RecipeDatail):
+def UpdateStockSupply(supply: Supply, detail:RecipeDatail, amount_product: int):
   supply_obt = session.get(SupplySQLAlchemy, supply.id)
-  supply_obt.quantity_stock = supply_obt.quantity_stock - detail.amount_supply
+  supply_obt.quantity_stock = supply_obt.quantity_stock - (detail.amount_supply * amount_product)
   session.add(supply_obt)
   session.commit()
   session.refresh(supply_obt)
@@ -32,14 +32,13 @@ def OrderProcessing(order: SalesOrdersCreate):
     NoContentInOrder()
   product = GetProductById(order.product_id)
   details = GetDetailsProduct(product.id)
-  counterOrder = 0
+
   for detail in details:
     supply = GetOneSupply(detail.supply_id)
-    availability = SupplyAvailability(supply, detail)
+    availability = SupplyAvailability(supply, detail, order.amount_product)
     if availability == False:
       OrderNotAvailability()
-    UpdateStockSupply(supply, detail)
-    counterOrder += 1
+
   return order
 
 def AddOrder(order: SalesOrdersCreate):

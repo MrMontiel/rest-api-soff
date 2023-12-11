@@ -2,7 +2,9 @@ import uuid
 from sqlalchemy import select
 from fastapi import status, HTTPException
 from app.infrastructure.database import ConectDatabase
+from app.products.adapters.services.services import GetDetailsProduct, GetProductById
 from app.sales.adapters.serializers.sale_schema import ordersSchema, orderSchema
+from app.sales.adapters.services.services_order import OrderProcessing, UpdateStockSupply
 from app.sales.domain.pydantic.sale_pydantic import (
   ClientCreate, SaleCreate, SalesOrdersCreate, SalesOrders as SalesOrderPy
 )
@@ -11,6 +13,8 @@ from app.products.adapters.sqlalchemy.product import Product
 from app.sales.adapters.exceptions.exceptions import OrderNotFound
 from datetime import datetime
 from sqlalchemy import extract
+
+from app.supplies.adapters.services.services import GetOneSupply
 
 session = ConectDatabase.getInstance()
 
@@ -84,6 +88,11 @@ def ConfirmSale(id_sale: str, saleCreate: SaleCreate):
   
   total:float = 0.0
   for order in listOrders:
+    product = GetProductById(order.product_id)
+    details = GetDetailsProduct(product.id)
+    for detail in details:
+      supply = GetOneSupply(detail.supply_id)
+      UpdateStockSupply(supply, detail, order.amount_product)
     total += order.total
   
   sale.amount_order = len(listOrders)
@@ -124,6 +133,8 @@ def UpdateAmountOrder(id_order: str, amount_product: int):
   order = session.get(SalesOrders, uuid.UUID(id_order))
   if not order:
     OrderNotFound()
+  orderProcessed = OrderProcessing(order)
+  
   order.amount_product = amount_product
   # Validar insumo.
   order.total = order.product.sale_price * amount_product
