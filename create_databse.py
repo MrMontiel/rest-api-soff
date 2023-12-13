@@ -63,7 +63,7 @@ finally:
 
 
 #Se crea el usuario administrador
-user = User(name="Xiomara", document_type="CC", document="1020431543", phone="3045705678", email="leidyxiomara19@hotmail.com", password="Leidy1234", status=True, id_role="06bf9dfe-1244-44a6-9f93-3fb79e8f82dc")
+user = User(name="Xiomara", document_type="CC", document="1020431543", phone="3045705678", email="leidyxiomara19@hotmail.com", password="$2b$12$NJ4M1LYzbkYmWUj6Hfka4ulXz56cR7vTbWhoQ97AzZo1Gg0whxGM2", status=True, id_role="06bf9dfe-1244-44a6-9f93-3fb79e8f82dc")
 try:
     session.add(user)
     session.commit()

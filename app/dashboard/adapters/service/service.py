@@ -54,7 +54,8 @@ def getBestSellingDay():
         "category": 'Día más vendido',
         "target": day,
         "percentage": '',
-        "message": f'¿Sabías que los {day} hay un aumento de ventas?'
+        "message": f'¿Sabías que los {day} hay un aumento de ventas?',
+        "color": "violet"
     }
     return response
 
@@ -74,7 +75,8 @@ def moneyWin():
         "category": 'Dinero ganado',
         "target": value,
         "percentage": '08%',
-        "message": f'Hemos generado {value} en ingresos esta semana. ¡Excelente trabajo!'
+        "message": f'Hemos generado {value} en ingresos esta semana. ¡Excelente trabajo!',
+        "color": "blue"
     }
     
     
@@ -96,7 +98,8 @@ def getAmountSales():
         "category": "Ventas",
         "target": f"{len(sales)}",
         "percentage": f"{round(percentage, 2)}%",
-        "message": f"Realizamos un {round(percentage, 2)}% más de ventas que la semana pasada"
+        "message": f"Realizamos un {round(percentage, 2)}% más de ventas que la semana pasada",
+        "color": "cyan"
     }
     
     return response
@@ -121,7 +124,8 @@ def ProductMoreSale():
             "category": "Producto más vendido",
             "target": product.name,
             "percentage": product.name,
-            "message": f"{product.name} es el producto más vendido con {total_sold} unidades vendidas."
+            "message": f"{product.name} es el producto más vendido con {total_sold} unidades vendidas.",
+            "color" : "#04BF8A"
         }
         return response
     else:
@@ -129,10 +133,10 @@ def ProductMoreSale():
             "category": "Producto más vendido",
             "target": "No hay",
             "percentage": "No hay",
-            "message": f"Inicia las ventas para poder identificar el producto más vendido."
+            "message": f"Inicia las ventas para poder identificar el producto más vendido.",
+            "color" : "emerald"
         }
         
-
 def getTargetsDashboard():
     today = datetime.now()
     monday = today - timedelta(days=today.weekday())
@@ -234,7 +238,7 @@ def getPyment():
             "Porcentaje_Transferencia": transfer_percentage
         })
 
-    return (result)
+    return result[0]
 
 
 def get_topproducts():
