@@ -238,7 +238,19 @@ def getPyment():
             "Porcentaje_Transferencia": transfer_percentage
         })
 
-    return result[0]
+    if(len(result) != 0):
+        return result[0]
+    else:
+        now = datetime.now()
+        return {
+            "Año": now.year,
+            "Mes": now.month,
+            "Ventas_Totales": 0,
+            "Ventas_Efectivo": 0,
+            "Ventas_Transferencia": 0,
+            "Porcentaje_Efectivo": 0,
+            "Porcentaje_Transferencia": 0
+        }
 
 
 def get_topproducts():
